@@ -41,7 +41,7 @@ LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 
 LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
 
-EXECNAME	= $(BIN)/main.o
+EXECNAME	= $(BIN)/main
 
 lib_cfiles = $(wildcard $(INCLUDE)/*.c)
 LIBS = $(patsubst $(INCLUDE)/%.c, $(INC_BIN)/%.o, $(lib_cfiles))
@@ -52,6 +52,7 @@ ALL_OBJ = $(LIBS) $(O_FILES)
 
 $(BIN)/%.o: $(SRC)/%.c
 	$(MKDIR_P) $(BIN)
+	@echo $@
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
 
 $(INC_BIN)/%.o: $(INCLUDE)/%.c
@@ -64,6 +65,7 @@ all: 	program
 
 .phony: program
 program: $(ALL_OBJ)
+	$(CC) $(CFLAGS) -o $(EXECNAME) $(ALL_OBJ) $(LDFLAGS)
 	$(OBJCOPY) -I elf32-little -O binary $(EXECNAME) $(EXECNAME).bin
 
 # clean out the source tree ready to re-build
