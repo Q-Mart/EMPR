@@ -41,7 +41,7 @@ LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 
 LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
 
-EXECNAME	= $(BIN)/main
+EXECNAME	= $(BIN)/main.o
 
 lib_cfiles = $(wildcard $(INCLUDE)/*.c)
 LIBS = $(patsubst $(INCLUDE)/%.c, $(INC_BIN)/%.o, $(lib_cfiles))
