@@ -4,7 +4,7 @@ PKG=/usr/local/pkg
 SRC = ./src
 BIN = ./bin
 INCLUDE = ./include
-INC_BIN = $(BIN)
+INC_BIN = $(BIN)/include
 
 # Safe mkdir
 MKDIR_P = mkdir -p
@@ -32,7 +32,7 @@ LDSCRIPT = $(CMSIS)/lib/ldscript_rom_gnu.ld
 CFLAGS=-mcpu=cortex-m3  -mthumb  -Wall  -O0  -mapcs-frame  -D__thumb2__=1 \
   -msoft-float  -gdwarf-2  -mno-sched-prolog  -fno-hosted  -mtune=cortex-m3 \
   -march=armv7-m  -mfix-cortex-m3-ldrd   -ffunction-sections  -fdata-sections \
-          -D__RAM_MODE__=0 $(CMSISINCLUDES) -I. -I$(INCLUDE)/
+          -D__RAM_MODE__=0 $(CMSISINCLUDES) -I$(SRC) -I$(INCLUDE)/
 
 LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 	   -Wl,--start-group -L$(THUMB2GNULIB) -L$(THUMB2GNULIB2) \
@@ -41,7 +41,7 @@ LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 
 LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
 
-EXECNAME	= $(BIN)/build
+EXECNAME	= $(BIN)/main
 
 lib_cfiles = $(wildcard $(INCLUDE)/*.c)
 LIBS = $(patsubst $(INCLUDE)/%.c, $(INC_BIN)/%.o, $(lib_cfiles))
@@ -51,7 +51,7 @@ O_FILES = $(patsubst $(SRC)/%.c, $(BIN)/%.o, $(C_FILES))
 ALL_OBJ = $(LIBS) $(O_FILES)
 
 $(BIN)/%.o: $(SRC)/%.c
-	$(MKDIR_P) $(BIN)/
+	$(MKDIR_P) $(BIN)
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
 
 $(INC_BIN)/%.o: $(INCLUDE)/%.c
@@ -64,8 +64,6 @@ all: 	program
 
 .phony: program
 program: $(ALL_OBJ)
-	rm -rf bin/
-	mkdir bin/
 	$(OBJCOPY) -I elf32-little -O binary $(EXECNAME) $(EXECNAME).bin
 
 # clean out the source tree ready to re-build
@@ -76,9 +74,10 @@ clean:
 	rm -f *.swp *.o */*.o */*/*.o  *.log
 	rm -f *.d */*.d *.srec */*.a bin/*.map
 	rm -f *.elf *.wrn bin/*.bin log *.hex
-	rm -f $(EXECNAME)
-# install software to board, remember to sync the file systems
+	rm -f $(INC_BIN)
+	rm -f $(BIN)
 
+# install software to board, remember to sync the file systems
 .phony: install
 install:
 	@echo "Copying " $(EXECNAME) "to the MBED file system"
