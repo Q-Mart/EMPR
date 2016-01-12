@@ -40,3 +40,18 @@ int debug_sendfc(char* fmt, char arg)
     debug_send(buf);
     free(buf);
 }
+
+/* 
+ * send formatted string
+ *  analogous to printf/sprintf
+ */
+void debug_sendf(char* fmt, ...)
+{
+   va_list ap; 
+   va_start(ap, fmt);
+
+    char* buf = (char *)malloc(strlen(fmt));
+    vsprintf(buf, fmt, ap);
+    debug_send(buf);
+    free(buf);
+}

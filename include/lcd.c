@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include "i2c.h"
@@ -81,6 +82,22 @@ void lcd_send_str(char ddram_addr, char* s)
     }
 }
 
+void lcd_send_strf(char ddram_addr, char* fmt, ...)
+{
+   va_list ap; 
+   va_start(ap, fmt);
+
+    char* buf = (char *)malloc(strlen(fmt));
+    vsprintf(buf, fmt, ap);
+    int i;
+
+    for (i = 0; i < strlen(s); ++i) {
+        lcd_send_char(ddram_addr+i, buf[i]);  
+    }
+
+    free(buf);
+}
+
 void lcd_send_pat(char ddram_addr, int b)
 {
     ddram_addr = ddram_addr | 0x80;
@@ -91,6 +108,7 @@ void lcd_send_pat(char ddram_addr, int b)
     i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2, data);
     lcd_wait_while_busy();
 }
+
 
 /* TODO: Make this faster */
 void lcd_send_lines(char* top, char* bottom)
