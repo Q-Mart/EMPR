@@ -1,5 +1,6 @@
 #include "lpc17xx_systick.h"
 #include "lpc17xx_rit.h"
+#include "lpc17xx_timer.h"
 #include "timer.h"
 
 /* Timer values */
@@ -66,4 +67,34 @@ void timer_delay(int n)
     timer_enable_systick(n);
     wait_for_timer = n;
     while (!wait_for_timer);
+}
+
+/* Initialise general purpose timer (2). */
+void timer_initialise_TIM(void)
+{
+    TIM_TIMERCFG_Type TIM_ConfigStruct;
+    TIM_ConfigStruct.PrescaleOption = TIM_PRESCALE_USVAL;
+    TIM_ConfigStruct.PrescaleValue  = 1000;
+    TIM_Init(LPC_TIM2, TIM_TIMER_MODE, &TIM_ConfigStruct);
+
+    //Now call timer_configure_TIM_capture to configure and enable timer 2.
+}
+
+/* Config the capturing of timer (2). */
+void timer_configure_TIM_capture(int channel, int rising, int falling, int interrupt)
+{
+    TIM_CAPTURECFG_Type TIM_CaptureConfigStruct;
+    TIM_CaptureConfigStruct.CaptureChannel = channel;
+    TIM_CaptureConfigStruct.RisingEdge = rising;
+    TIM_CaptureConfigStruct.FallingEdge = falling;
+    TIM_CaptureConfigStruct.IntOnCaption = interrupt;
+
+    TIM_ConfigCapture(LPC_TIM2, &TIM_CaptureConfigStruct);
+    TIM_ResetCounter(LPC_TIM2);
+
+    if (interrupt == 1) {
+        NVIC_EnableIRQ(TIMER2_IRQn);
+    }
+
+    TIM_Cmd(LPC_TIM2, ENABLE);
 }

@@ -8,3 +8,6 @@ void timer_disable_systick(void);
 void timer_disable_rit(void);
 
 void timer_delay(int);
+
+void timer_initialise_TIM(void);
+void timer_configure_TIM_capture(int, int, int, int);
