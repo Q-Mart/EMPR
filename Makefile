@@ -52,7 +52,6 @@ ALL_OBJ = $(LIBS) $(O_FILES)
 
 $(BIN)/%.o: $(SRC)/%.c
 	$(MKDIR_P) $(BIN)
-	@echo $@
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
 
 $(INC_BIN)/%.o: $(INCLUDE)/%.c
