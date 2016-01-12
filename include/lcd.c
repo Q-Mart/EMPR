@@ -91,7 +91,7 @@ void lcd_send_strf(char ddram_addr, char* fmt, ...)
     vsprintf(buf, fmt, ap);
     int i;
 
-    for (i = 0; i < strlen(s); ++i) {
+    for (i = 0; i < strlen(buf); ++i) {
         lcd_send_char(ddram_addr+i, buf[i]);  
     }
 

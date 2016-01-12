@@ -11,4 +11,4 @@ void lcd_send_char(char, char);
 void lcd_send_str(char, char*);
 void lcd_send_pat(char, int);
 void lcd_send_lines(char*, char*);
-void lcd_send_strf(char*, char*, ...);
+void lcd_send_strf(char, char*, ...);
