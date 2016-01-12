@@ -1,14 +1,20 @@
 #include "keypad.h"
 #include "lcd.h"
 #include "lpc17xx_gpio.h"
+#include "debug.h"
+#include "ultrasound.h"
 
 int main(void)
 {
+    debug_init();
+    debug_send("main!\r\n");
     lcd_init();
     lcd_clear_display();
-
+    
     keypad_init();
     keypad_enable_int();
+    
+    initialise_pwm();
 
     while (1);
 }
