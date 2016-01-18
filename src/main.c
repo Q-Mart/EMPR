@@ -2,6 +2,10 @@
 #include "lcd.h"
 #include "lpc17xx_gpio.h"
 #include "test.h"
+#include "calibration_mode.h"
+#include "multi.h"
+#include "scan.h"
+#include "measure.h"
 
 typedef enum {
     CALIBRATE,
@@ -29,39 +33,35 @@ typedef enum {
     MULTI_DO_STAGE_2,
     MULTI_DO_STAGE_3,
     MULTI_DO_STAGE_4,
-    MULTI_DONE
+    MULTI_DONE,
+    ANY
 } state_t;
 
 static int current_state_input = 0;
 static state_t current_state = CALIBRATE;
-
+void state_transition(char key);
 int main(void)
 {
     lcd_init();
     lcd_clear_display();
-    lcd_send_str(0x00, "state 0");
     keypad_init();
     keypad_enable_int();
-
+    lcd_send_lines("Calibration Mode","Place at 15cm");
 
     while (1)
     {
         switch (current_state) {
             case CALIBRATE:
-                lcd_send_str(0x00, "Calibrating");
                 break;
             case SCAN:
-                lcd_send_str(0x00, "Scanning");
                 break;
             case MEASURE:
-                lcd_send_str(0x00, "Measuring");
                 break;
             case MULTI:
-                lcd_send_str(0x00, "Multi-scan");
                 break;
-
             default:
-                lcd_send_strf(0x00, "Unknown Mode, %d", current_state);
+		break;
+                //lcd_send_strf(0x00, "Unknown Mode, %d", current_state);
         }
     }
 }
@@ -97,22 +97,30 @@ typedef struct
 } transition_t;
 
 const transition_t lut[] = {
-    {calibrate_done, '#', calibrate, null},
-    {scan, '#', scan_do, null},
-    {measure, '#', measure_do, null},
-    {multi, '#', multi_do_stage_1, null},
-    /* maybe do this automatically or have a wait? */
-    {multi_do_stage_1, '#', multi_do_stage_2, null},
-    {multi_do_stage_2, '#', multi_do_stage_3, null},
-    {multi_do_stage_3, '#', multi_do_stage_4, null},
+    {CALIBRATE_DONE, '#', CALIBRATE, NULL},
+    {CALIBRATE, '#', CALIBRATE_NEAR_DONE, &calib_to_near_calib},
+    {CALIBRATE_NEAR_DONE, '#', CALIBRATE_DONE, &near_calib_to_done},
+    {SCAN, '#', SCAN_DO, NULL},
+    {MEASURE, '#', MEASURE_DO, NULL},
+    {MULTI, '#', MULTI_DO_STAGE_1, NULL},
+    /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
+    {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2, NULL},
+    {MULTI_DO_STAGE_2, '#', MULTI_DO_STAGE_3, NULL},
+    {MULTI_DO_STAGE_3, '#', MULTI_DO_STAGE_4, NULL},
+    {ANY, 'A', CALIBRATE, &any_to_calib},
+    {ANY, 'B', SCAN, &any_to_scan},
+    {ANY, 'C', MEASURE, &any_to_measure},
+    {ANY, 'D', MULTI, &any_to_multi}
 };
 void state_transition(char key){
     /* global transitions from any state back to top-level ones */
     int i;
 	for(i = 0; i < sizeof(lut)/sizeof(lut[0]); i++){
-			if (lut[i].current = current_state && lut[i].symbol == key){
-					if(lut[i].effect !=null) (*(lut[i].effect))(void);
-					current_state = lut[i].next;
-			}
+	    if ((lut[i].current == current_state || lut[i].current == ANY) && lut[i].symbol == key){
+		lcd_clear_display();
+		if(lut[i].effect !=NULL) (*(lut[i].effect))();
+		current_state = lut[i].next;
+		return;
+	    }
 	}
 }
