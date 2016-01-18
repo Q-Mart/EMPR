@@ -85,53 +85,34 @@ void EINT3_IRQHandler(void)
 }
 
 /* Transition function */
+
+typedef void (*side_func)(void);
+
 typedef struct
 {
     state_t current;
     char symbol;
     state_t next;
+    side_func effect;
 } transition_t;
 
-void state_transition(char key) {
-
+const transition_t lut[] = {
+    {calibrate_done, '#', calibrate, null},
+    {scan, '#', scan_do, null},
+    {measure, '#', measure_do, null},
+    {multi, '#', multi_do_stage_1, null},
+    /* maybe do this automatically or have a wait? */
+    {multi_do_stage_1, '#', multi_do_stage_2, null},
+    {multi_do_stage_2, '#', multi_do_stage_3, null},
+    {multi_do_stage_3, '#', multi_do_stage_4, null},
+};
+void state_transition(char key){
     /* global transitions from any state back to top-level ones */
-    switch (key)
-    {
-        case 'A':
-            current_state = CALIBRATE; break;
-        case 'B':
-            current_state = SCAN; break;
-        case 'C':
-            current_state = MEASURE; break;
-        case 'D':
-            current_state = MULTI; break;
-    }
-
-    /* special data-input states that require building some int */
-    if (current_state == CALIBRATE && key == '#') {
-        dist_1 = get_distance_somehow();
-    } else if (current_state == SCAN_PARAMATER_1)
-    {
-        /* example */
-        if (key >= '0' && key <= '9') {
-            scan_param_1 *= 10;
-            scan_param_1 += (key - '0');
-        }
-    }
-
-    transition_t lut[] = {
-        {CALIBRATE_DONE, '#', CALIBRATE},
-
-        {SCAN, '#', SCAN_DO},
-        {MEASURE, '#', MEASURE_DO},
-
-        {MULTI, '#', MULTI_DO_STAGE_1},
-        /* maybe do this automatically or have a wait? */
-        {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2},
-        {MULTI_DO_STAGE_2, '#', MULTI_DO_STAGE_3},
-        {MULTI_DO_STAGE_3, '#', MULTI_DO_STAGE_4},
-    };
-
-
-    /* look up in transitions? */
+    int i;
+	for(i = 0; i < sizeof(lut)/sizeof(lut[0]); i++){
+			if (lut[i].current = current_state && lut[i].symbol == key){
+					if(lut[i].effect !=null) (*(lut[i].effect))(void);
+					current_state = lut[i].next;
+			}
+	}
 }
