@@ -1,10 +1,14 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "i2c.h"
 #include "lcd.h"
 
+/* buffer commands
+ * for performance */
 static char* buf;
+void lcd_send_buf(uint8_t ddram_addr);
 
 void lcd_init(void)
 {
@@ -17,17 +21,16 @@ void lcd_init(void)
     buf = (char* )malloc(80);
 }
 
-
 void lcd_clear_display(void)
 {
     char data1[] = { 0x00, 0x01 };
     i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, sizeof(data1), data1);
     lcd_wait_while_busy();
 
+
     int i;
-    for (i = 0; i < 16; ++i) {
+    for (i = 0; i < 80; ++i) {
         lcd_send_char(LINE1 + i, ' '); 
-        lcd_send_char(LINE2 + i, ' '); 
     }
 
     lcd_send_buf(0x00);
@@ -80,8 +83,8 @@ void lcd_send_char(uint8_t ddram_addr, char c)
             case ')':
                 c = 0xA9;
                 break;
-            case ':
-                c = ', 0xAC;
+            case ',':
+                c = 0xAC;
                 break;
             case '.':
                 c = 0xAE;
@@ -131,35 +134,28 @@ void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
     free(buf);
 }
 
-void lcd_send_pat(uint8_t ddram_addr, uint8_t b)
+void lcd_send_pat(uint8_t ddram_addr, char b)
 {
     buf[ddram_addr] = b;
-
-/* do not remove- possible requirement to re-introduce
-    ddram_addr = ddram_addr | 0x80;
-    char instr[] = {0x00, ddram_addr};
-    i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2, instr);
-
-    char data[] = {0x40, b};
-    i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2, data);
-    lcd_wait_while_busy(); */
 }
 
+/* Draw the buffer to the lcd screen
+ */
 void lcd_send_buf(uint8_t ddram_addr)
 {
     ddram_addr = ddram_addr | 0x80;
 
-    char data[2 + 2*80] = { 0 };
-    data[0] = 0x00;
+    char data[2 + 1 + 80] = { 0 };
+    data[0] = 0x80;
     data[1] = ddram_addr;
+    data[2] = 0x40;
 
     int i;
     for (i = 0; i < 80; ++i) {
-        data[2 + 2*i] = 0x40;
-        data[2 + 1 + 2*i] = buf[i];
+        data[2 + 1 + i] = buf[i];
     }
 
-    i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2 + 2*80, data);
+    i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2 + 1 + 80, data);
     lcd_wait_while_busy();
 }
 
