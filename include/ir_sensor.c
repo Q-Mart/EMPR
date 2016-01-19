@@ -23,12 +23,15 @@ void ir_sensor_set_far_point(float x){
 
 void ir_sensor_calibrate(){
   
-  ir_sensor_m = (ir_near_point - ir_far_point) / ((1.0f/10.0f) - (1.0f/20.0f));
-  ir_sensor_c = ir_far_point - (ir_sensor_m/20.0f);
+  ir_sensor_m = (ir_near_point - ir_far_point) / ((1.0f/15.0f) - (1.0f/30.0f));
+  ir_sensor_c = ir_far_point - (ir_sensor_m/30.0f);
 }
 
 float ir_sensor_get_distance(){
   /* returns the distance in cm */
   float val = adc_get_channel_data(ir_sensor_adc_channel);
   return ir_sensor_m/(val - ir_sensor_c);
+}
+float ir_sensor_get_raw_data(){
+    return adc_get_channel_data(ir_sensor_adc_channel);
 }
