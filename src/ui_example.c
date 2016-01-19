@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "keypad.h"
 #include "lcd.h"
 #include "lpc17xx_gpio.h"
@@ -6,6 +7,7 @@
 #include "multi.h"
 #include "scan.h"
 #include "measure.h"
+#include "adc.h"
 
 typedef enum {
     CALIBRATE,
@@ -42,11 +44,17 @@ static state_t current_state = CALIBRATE;
 void state_transition(char key);
 int main(void)
 {
+    /*
+      The order of initialisation matters!
+     */
+    adc_enable();
+    debug_init();
     lcd_init();
     lcd_clear_display();
     keypad_init();
     keypad_enable_int();
-    lcd_send_lines("Calibration Mode","Place at 15cm");
+    ir_sensorInit();
+    any_to_calib();
 
     while (1)
     {
@@ -56,12 +64,12 @@ int main(void)
             case SCAN:
                 break;
             case MEASURE:
+		measure_loop();
                 break;
             case MULTI:
                 break;
             default:
 		break;
-                //lcd_send_strf(0x00, "Unknown Mode, %d", current_state);
         }
     }
 }
