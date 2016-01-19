@@ -3,10 +3,10 @@
 #include "timer.h"
 
 /* Timer values */
-static int SysTick_on = 0;
+volatile unsigned long SysTick_on = 0;
 static int RIT_dt = 0;
 
-/* Enable the SysTick timer with some 
+/* Enable the SysTick timer with some
  * period `dt` */
 void timer_enable_systick()
 {
@@ -40,7 +40,7 @@ void timer_disable_systick(void)
     SYSTICK_IntCmd(DISABLE);
 }
 
-void SysTick_Handler(void) 
+void SysTick_Handler(void)
 {
     SysTick_on++;
 }
@@ -52,7 +52,7 @@ IntStatus timer_get_rit_status(void)
 }
 
 /* wait for `n` ms before returning control */
-void timer_delay(int n) 
+void timer_delay(int n)
 {
     unsigned long SysTick_count;
     SysTick_count = SysTick_on;
