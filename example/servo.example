@@ -1,0 +1,31 @@
+#include "debug.h"
+#include "servo.h"
+#include "timer.h"
+#include <stdio.h>
+
+int main(void){
+    char debug_string[50];
+
+    servo_init();
+    debug_init();
+    timer_enable_systick();
+
+    servo_set_pos(270);
+    sprintf(debug_string,"The current position is %d\r\n", servo_get_pos());
+    debug_send(debug_string);
+
+    timer_delay(2000);
+    servo_set_pos(160);
+    sprintf(debug_string,"The current position is %d\r\n", servo_get_pos());
+    debug_send(debug_string);
+
+    timer_delay(2000);
+    servo_set_pos(0);
+    sprintf(debug_string,"The current position is %d\r\n", servo_get_pos());
+    debug_send(debug_string);
+
+    timer_delay(2000);
+    servo_set_pos(160);
+    sprintf(debug_string,"The current position is %d\r\n", servo_get_pos());
+    debug_send(debug_string);
+}
