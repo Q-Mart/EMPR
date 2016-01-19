@@ -3,7 +3,7 @@
 #include "adc.h"
 #include "pinsel.h"
 
-#define ADC_CLOCKRATE 100e3
+#define ADC_CLOCKRATE 200000
 
 void adc_enable(void) {
     /* enable the ADC, initilising with a clockrate of ADC_CLOCKRATE */

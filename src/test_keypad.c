@@ -5,7 +5,7 @@
 
 int c = 0;
 
-int main(void)
+int main1(void)
 {
     keypad_init();
     lcd_init();
