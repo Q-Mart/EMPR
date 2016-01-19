@@ -32,6 +32,9 @@ float ir_sensor_get_distance(){
   float val = adc_get_channel_data(ir_sensor_adc_channel);
   return ir_sensor_m/(val - ir_sensor_c);
 }
-float ir_sensor_get_raw_data(){
+int ir_sensor_get_raw_data(){
     return adc_get_channel_data(ir_sensor_adc_channel);
+}
+float ir_convert_to_distance(int raw){
+    return ir_sensor_m/(raw - ir_sensor_c);
 }
