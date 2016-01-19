@@ -1,4 +1,4 @@
-void timer_enable_systick(int);
+void timer_enable_systick();
 void timer_enable_rit(int);
 
 void timer_set_rit(int);

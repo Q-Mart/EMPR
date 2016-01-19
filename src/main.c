@@ -1,32 +1,25 @@
-#include "keypad.h"
-#include "lcd.h"
-#include "lpc17xx_gpio.h"
+#include "debug.h"
+#include "servo.h"
+#include "timer.h"
 
-int main(void)
-{
-    lcd_init();
-    lcd_clear_display();
+int main(void){
+    /* debug_init(); */
+    /* pwm_init(); */
 
-    keypad_init();
-    keypad_enable_int();
+    /* pwm_set_match(0,500000); */
 
-    while (1);
-}
+    /* pwm_config_match(2,PWM_ENABLE_NONE); */
+    /* int i; */
 
-void EINT3_IRQHandler(void) 
-{
-    static int state = 0;
+    /* pwm_set_match(2,18750); */
+    /* pwm_enable(); */
 
-    if (GPIO_GetIntStatus(0, 23, 1))
-    { 
-        keypad_clear_int();
-        
-        if (state == 0) {
-            lcd_send_str(0x00, "Interrupt!");
-            state = 1;
-        } else {
-            lcd_send_str(0x00, "Reset!");
-            state = 0;
-        }
-    }
+    servo_init();
+    servo_set_pos(270);
+
+    timer_delay(500);
+    servo_set_pos(160);
+
+    timer_delay(500);
+    servo_set_pos(0);
 }
