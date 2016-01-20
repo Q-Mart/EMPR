@@ -3,6 +3,7 @@
 #include "keypad.h"
 #include "lcd.h"
 #include "debug.h"
+#include "gpio.h"
 #include "timer.h"
 #include "ultrasound.h"
 
@@ -21,7 +22,16 @@ int main(void)
 
     initialise_timer_measurement();
 
-    while (1);
+    init_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, GPIO_OUTPUT);
+    set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
+    int n = 0;
+    while (1) {
+        debug_sendfc("Send pulse... %d\r\n", n++);
+        set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
+        timer_delay(1);
+        set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
+        timer_delay(1000);
+    }
 }
 
 /*
@@ -50,15 +60,22 @@ void TIMER2_IRQHandler(void)
 {
     static uint32_t timer_value;
     static char debug_string[80];
-    static double duration;
+   
     if (TIM_GetIntCaptureStatus(LPC_TIM2, 0))
     {
         TIM_ClearIntCapturePending(LPC_TIM2, 0);
         timer_value = TIM_GetCaptureValue(LPC_TIM2, 0);
-
-        current_timer_diff = timer_value - previous_timer_value;
-        previous_timer_value = timer_value;
-        sprintf(debug_string, "Timer duration: %G\r\n\r\n", current_timer_diff);
+        
+        //overflow?
+        if (timer_value < previous_timer_value) {
+            debug_send("Error: timer value inconsistent. Resetting timer.");
+            current_timer_diff = 0;
+            previous_timer_value = 0;
+        } else {
+            current_timer_diff = timer_value - previous_timer_value;
+            previous_timer_value = timer_value;
+        }
+        sprintf(debug_string, "Timer Value: %lu \r\nTimer duration: %lu\r\n\r\n", (unsigned long)previous_timer_value, (unsigned long)current_timer_diff);
         debug_send(debug_string);
     }
 }
