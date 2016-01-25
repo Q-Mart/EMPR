@@ -66,8 +66,8 @@ void timer_initialise_TIM(void)
 {
     TIM_TIMERCFG_Type TIM_ConfigStruct;
     TIM_ConfigStruct.PrescaleOption = TIM_PRESCALE_USVAL;
-    TIM_ConfigStruct.PrescaleValue  = 1000;
-    TIM_Init(LPC_TIM2, TIM_TIMER_MODE, &TIM_ConfigStruct);
+    TIM_ConfigStruct.PrescaleValue  = 100;
+    TIM_Init(LPC_TIM3, TIM_TIMER_MODE, &TIM_ConfigStruct);
 
     //Now call timer_configure_TIM_capture to configure and enable timer 2.
 }
@@ -81,12 +81,13 @@ void timer_configure_TIM_capture(int channel, int rising, int falling, int inter
     TIM_CaptureConfigStruct.FallingEdge = falling;
     TIM_CaptureConfigStruct.IntOnCaption = interrupt;
 
-    TIM_ConfigCapture(LPC_TIM2, &TIM_CaptureConfigStruct);
-    TIM_ResetCounter(LPC_TIM2);
+    TIM_ConfigCapture(LPC_TIM3, &TIM_CaptureConfigStruct);
+    TIM_ResetCounter(LPC_TIM3);
 
     if (interrupt == 1) {
-        NVIC_EnableIRQ(TIMER2_IRQn);
+        NVIC_SetPriority(TIMER3_IRQn, ((0x01<<3)|0x01));
+        NVIC_EnableIRQ(TIMER3_IRQn);
     }
 
-    TIM_Cmd(LPC_TIM2, ENABLE);
+    TIM_Cmd(LPC_TIM3, ENABLE);
 }
