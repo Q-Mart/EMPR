@@ -10,6 +10,7 @@ class PlotCanvas(tkinter.Canvas):
         self.width = width
         self.height = height
         self.plotter = None
+        self.lines = []
 
     def plot(self, xs, ys):
         '''Plot some graph 
@@ -25,6 +26,9 @@ class PlotCanvas(tkinter.Canvas):
         if len(xs) != 0:
             self.draw_graph(w, h, xs, ys)
 
+    def line(self, *args, **kwargs):
+        self.lines.append(self.create_line(*args, **kwargs))
+
     def draw_graph(self, w, h, xs, ys):
         tx = w / max(xs)
         ty = h / max(ys)
@@ -33,19 +37,20 @@ class PlotCanvas(tkinter.Canvas):
         x0, y0 = 0, 0
         for x, y in zip(xs, ys):
             x, y = int(tx * x), h - int(ty * y)
-            #self.create_line(x0, y0, x, y)
+            self.line(x0, y0, x, y)
 
-            self.create_line(x-s, y-s, x+s, y+s, fill='red')
-            self.create_line(x+s, y-s, x-s, y+s, fill='red')
+            self.line(x-s, y-s, x+s, y+s, fill='red')
+            self.line(x+s, y-s, x-s, y+s, fill='red')
             x0, y0 = x, y
-        
-
 
     def draw_border(self, w, h):
-        self.create_line(1, h, w, h, fill='black')
-        self.create_line(1, 1, 1, h, fill='black')
+        self.line(1, h, w, h, fill='black')
+        self.line(1, 1, 1, h, fill='black')
 
-        
+    def clear(self):
+        self.delete(*self.lines)
+        self.lines = []
+
 class Mode:
     SCAN_DO = 1
 
@@ -58,8 +63,9 @@ def monitor(frame):
             if mode == Mode.SCAN_DO:
                 angle = r.read_int()
                 value = r.read_int()
+
                 frame.plotter.update(angle, value)
-                frame.update()
+                frame.draw()
 
 class AppFrame(tkinter.Frame):
     def __init__(self, parent):
@@ -76,11 +82,15 @@ class AppFrame(tkinter.Frame):
         self.graph_canvas = PlotCanvas(self, 400, 600)
         self.graph_canvas.pack(side='top')
 
-        x, y = self.plotter.x, self.plotter.y
-        self.graph_canvas.plot(x, y)
-
         quit = tkinter.Button(text='Quit', command=tk.destroy)
         quit.pack(side='bottom')
+
+        self.draw()
+
+    def draw(self):
+        x, y = self.plotter.x, self.plotter.y
+        self.graph_canvas.clear()
+        self.graph_canvas.plot(x, y)
 
 if __name__ == '__main__':
     tk = tkinter.Tk()

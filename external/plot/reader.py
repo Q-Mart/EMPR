@@ -36,18 +36,25 @@ class Reader:
     def close(self):
         raise NotImplementedError
     
-BYTE_STR = b'\x01\x01\x02\x03\x04\x01\x02\x03\x04'
+# b-mode i-angle i-value 
+MODE = lambda x, y, z: struct.pack('b', x) + struct.pack('i', y) + struct.pack('i', z)
+BYTE_STR = MODE(1, 5, 10) + MODE(1, 10, 15) + MODE(1, 15, 20)
+
 class MockReader(Reader):
     def __init__(self, data=None):
         self._data = data or BYTE_STR
         self._data_iter = iter(self._data)
 
     def read(self, n):
-        try:
-            return bytes([next(self._data_iter)] * n)
-        except StopIteration:
-            self._data_iter = iter(self._data)
-            return self.read(n)
+        l = []
+        for i in range(n):
+            try:
+                b = next(self._data_iter)
+            except StopIteration:
+                self._data_iter = iter(self._data)
+                b = next(self._data_iter)
+            l.append(b)
+        return bytes(l)
 
     def close(self):
         pass
