@@ -64,7 +64,7 @@ int main(void)
             case SCAN:
                 break;
             case MEASURE:
-		measure_loop();
+                measure_loop();
                 break;
             case MULTI:
                 break;
