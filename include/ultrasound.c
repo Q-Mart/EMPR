@@ -56,11 +56,11 @@ void TIMER2_IRQHandler(void)
         ultrasound_previous_timer_value = timer_value;
     }
     
-    //Two transition sets will be detected by the input channel,
-    //one of them is the width of the output pulse, and the other
-    //is the duration between two output pulses. The duration always
-    //come first, so it is safe to ignore and only record the
-    //valid results.
+    /*Two transition sets will be detected by the input channel,
+     one of them is the width of the output pulse, and the other
+     is the duration between two output pulses. The duration always
+     come first, so it is safe to ignore and only record the
+     valid results.*/
     if (ultrasound_false_edge_expected == 1) {
         ultrasound_false_edge_expected = 0;
     } else {
