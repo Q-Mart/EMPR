@@ -61,18 +61,18 @@ void timer_delay(int time)
     timer_systemticks = 0;
 }
 
-/* Initialise general purpose timer (2). */
+/* Initialise general purpose timer 2 (TIM2). */
 void timer_initialise_TIM(void)
 {
     TIM_TIMERCFG_Type TIM_ConfigStruct;
     TIM_ConfigStruct.PrescaleOption = TIM_PRESCALE_USVAL;
-    TIM_ConfigStruct.PrescaleValue  = 100;
+    TIM_ConfigStruct.PrescaleValue  = 10;
     TIM_Init(LPC_TIM2, TIM_TIMER_MODE, &TIM_ConfigStruct);
 
     //Now call timer_configure_TIM_capture to configure and enable timer 2.
 }
 
-/* Config the capturing of timer (2). */
+/* Config the capturing of TIM2, capture channel 1 (CAP2.1). */
 void timer_configure_TIM_capture(int channel, int rising, int falling, int interrupt)
 {
     TIM_CAPTURECFG_Type TIM_CaptureConfigStruct;

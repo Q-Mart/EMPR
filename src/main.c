@@ -7,8 +7,19 @@
 #include "timer.h"
 #include "ultrasound.h"
 
-static uint32_t current_timer_diff = 0; //Use this value for current interval.
-static uint32_t previous_timer_value = 0;
+/* Instructions to use ultrasound module:
+    Connect Echo pin of the sensor to P29 on IO Board;
+    Connect Trigger pin of the sensor to P8 on IO Board;
+    Call initialise_timer_measurement() at start;
+    Now calibrate the sensor, calculated the speed of sound
+     as it appears with the calibration object, in m/s, save
+     in calibrated_gradient;
+    Call send_test_pulse() to send a pulse, then immediately:
+    call process_ultrasound_value(calibrated_gradient,\
+        (int)ultrasound_valid_response_time) 
+     to obtain object distance in cm.
+*/
+
 
 int main(void)
 {
@@ -19,18 +30,16 @@ int main(void)
 
     //keypad_init();
     //keypad_enable_int();
-
     initialise_timer_measurement();
 
-    init_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, GPIO_OUTPUT);
-    set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
-    int n = 0;
+    //Not calibrated in example.
+    double measured_distance = 0;
+    char print_distance[64];
     while (1) {
-        debug_sendfc("Send pulse... %d\r\n", n++);
-        set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
-        timer_delay(1);
-        set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
-        timer_delay(1000);
+        send_test_pulse();
+        measured_distance = process_ultrasound_value(340, (int)ultrasound_valid_response_time);
+        sprintf(print_distance, "Distance: %0.7f cm\r\n\r\n", measured_distance);
+        debug_send(print_distance);
     }
 }
 
@@ -42,43 +51,21 @@ void EINT3_IRQHandler(void)
     static int state = 0;
     keypad_clear_int();
 
-    /* if (GPIO_GetIntStatus(0, 23, 1)) */
-    /* { */
-    /*     keypad_clear_int(); */
+    /*
+    if (GPIO_GetIntStatus(0, 23, 1))
+    { 
+        keypad_clear_int();
         
-    /*     if (state == 0) { */
-    /*         lcd_send_str(0x00, "Interrupt!"); */
-    /*         state = 1; */
-    /*     } else { */
-    /*         lcd_send_str(0x00, "Reset!"); */
-    /*         state = 0; */
-    /*     } */
-    /*     } */
-}
-
-
-/*Using General Purpose Timer 3.1 to capture
-rising and falling edges on ultrasound output. */
-void TIMER2_IRQHandler(void)
-{
-    static uint32_t timer_value;
-    static char debug_string[80];
-    if (TIM_GetIntCaptureStatus(LPC_TIM2, TIM_CR1_INT) == SET){
-        debug_send("INTERRUPT");
-    }
-        TIM_ClearIntCapturePending(LPC_TIM2,TIM_CR1_INT );
-        timer_value = TIM_GetCaptureValue(LPC_TIM2, TIM_COUNTER_INCAP1);
-        
-        //overflow?
-        if (timer_value < previous_timer_value) {
-            debug_send("Error: timer value inconsistent. Resetting timer.");
-            current_timer_diff = 0;
-            previous_timer_value = 0;
+        if (state == 0) {
+            lcd_send_str(0x00, "Interrupt!");
+            state = 1;
         } else {
-            current_timer_diff = timer_value - previous_timer_value;
-            previous_timer_value = timer_value;
+            lcd_send_str(0x00, "Reset!");
+            state = 0;
         }
-        sprintf(debug_string, "Timer Value: %lu \r\nTimer duration: %lu\r\n\r\n", (unsigned long)previous_timer_value, (unsigned long)current_timer_diff);
-        debug_send(debug_string);
+    }*/
 }
+
+
+
 
