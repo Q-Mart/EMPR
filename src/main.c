@@ -17,8 +17,8 @@ int main(void)
     lcd_init();
     lcd_clear_display();
 
-    keypad_init();
-    keypad_enable_int();
+    //keypad_init();
+    //keypad_enable_int();
 
     initialise_timer_measurement();
 
@@ -30,7 +30,7 @@ int main(void)
         set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
         timer_delay(1);
         set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
-        //timer_delay(1000);
+        timer_delay(1000);
     }
 }
 
@@ -59,15 +59,15 @@ void EINT3_IRQHandler(void)
 
 /*Using General Purpose Timer 3.1 to capture
 rising and falling edges on ultrasound output. */
-void TIMER3_IRQHandler(void)
+void TIMER2_IRQHandler(void)
 {
     static uint32_t timer_value;
     static char debug_string[80];
-    debug_send("INTERRUPT BITCHES");
-    if (TIM_GetIntCaptureStatus(LPC_TIM3, TIM_CR1_INT))
-    {
-        TIM_ClearIntCapturePending(LPC_TIM3,TIM_CR1_INT );
-        timer_value = TIM_GetCaptureValue(LPC_TIM3, TIM_COUNTER_INCAP1);
+    if (TIM_GetIntCaptureStatus(LPC_TIM2, TIM_CR1_INT) == SET){
+        debug_send("INTERRUPT");
+    }
+        TIM_ClearIntCapturePending(LPC_TIM2,TIM_CR1_INT );
+        timer_value = TIM_GetCaptureValue(LPC_TIM2, TIM_COUNTER_INCAP1);
         
         //overflow?
         if (timer_value < previous_timer_value) {
@@ -80,6 +80,5 @@ void TIMER3_IRQHandler(void)
         }
         sprintf(debug_string, "Timer Value: %lu \r\nTimer duration: %lu\r\n\r\n", (unsigned long)previous_timer_value, (unsigned long)current_timer_diff);
         debug_send(debug_string);
-    }
 }
 

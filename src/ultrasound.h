@@ -4,7 +4,7 @@
 #include "debug.h"
 
 #define HCSR_TIMER_PORT 0
-#define HCSR_TIMER_PIN 24
+#define HCSR_TIMER_PIN 5
 #define HCSR_TIMER_FUNC 3
 #define HCSR_SIGNAL_PORT 0
 #define HCSR_SIGNAL_PIN (1 << 6)
