@@ -119,8 +119,6 @@ void lcd_send_str(uint8_t ddram_addr, char* s)
     for (i = 0; i < strlen(s); ++i) {
         lcd_send_char(ddram_addr + i, s[i]);
     }
-
-    lcd_send_buf();
 }
 
 void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
@@ -136,7 +134,6 @@ void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
         lcd_send_char(ddram_addr+i, buf[i]);
     }
 
-    lcd_send_buf();
     free(buf);
 }
 
@@ -176,7 +173,6 @@ void lcd_send_buf(void)
     }
 
     i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2 + 1 + 32, data);
-    //lcd_wait_while_busy();
 
     /* send next line */
     char data2[2 + 1 + 32] = { 0 };
@@ -192,42 +188,29 @@ void lcd_send_buf(void)
 }
 
 /* Send a string of 16 characters to either LINE1 or LINE2
+ * uses formatting and varargs
  */
-void lcd_send_line(uint8_t line, char* s)
+void lcd_send_line(uint8_t line, char* fmt, ...)
 {
-    char out[17] = { 0 };
-    strcpy(out, s);
+    va_list ap;
+    va_start(ap, fmt);
 
-    int i;
-    for (i = strlen(s); i < 16; ++i)
-        out[i] = ' ';
+    char* buf = malloc(strlen(fmt));
+    vsprintf(buf, fmt, ap);
+
+    char* out[17] = { ' ' };
+    strcpy(out, buf);
 
     /* add NUL to end so it can be used as a string */
     out[16] = '\0';
     lcd_send_str(line, out);
+    lcd_send_buf();
+
+    free(buf);
 }
 
-/* TODO: Make this faster */
 void lcd_send_lines(char* top, char* bottom)
 {
-    char topstr[17] = { 0 };
-    char botstr[17] = { 0 };
-    int i;
-
-    strcpy(topstr, top);
-    for (i = strlen(top); i < 16; ++i)
-    {
-        topstr[i] = ' ';
-    }
-    topstr[16] = '\0';
-
-    strcpy(botstr, bottom);
-    for (i = strlen(bottom); i < 16; ++i)
-    {
-        botstr[i] = ' ';
-    }
-    botstr[16] = '\0';
-
-    lcd_send_str(LINE1, topstr);
-    lcd_send_str(LINE2, botstr);
+    lcd_send_line(LINE1, top);
+    lcd_send_line(LINE2, bottom);
 }
