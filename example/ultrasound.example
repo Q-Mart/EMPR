@@ -43,7 +43,7 @@ int main(void)
     }
 }
 
-
+/*
 void EINT3_IRQHandler(void)
 {
 
@@ -51,7 +51,7 @@ void EINT3_IRQHandler(void)
     static int state = 0;
     keypad_clear_int();
 
-    /*
+    
     if (GPIO_GetIntStatus(0, 23, 1))
     { 
         keypad_clear_int();
@@ -63,9 +63,9 @@ void EINT3_IRQHandler(void)
             lcd_send_str(0x00, "Reset!");
             state = 0;
         }
-    }*/
+    }
 }
-
+*/
 
 
 
