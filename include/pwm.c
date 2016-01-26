@@ -62,7 +62,7 @@ void pwm_config_match(int channel, int options) {
 
 void pwm_enable(void) {
     /* Enable PWM output */
-    
+
     PWM_ResetCounter(LPC_PWM1);
     PWM_CounterCmd(LPC_PWM1, ENABLE);
 

@@ -20,7 +20,7 @@ void initialise_timer_measurement(void)
     pinsel_enable_pin(HCSR_TIMER_PORT, HCSR_TIMER_PIN, HCSR_TIMER_FUNC);
     timer_initialise_TIM();
     timer_configure_TIM_capture(1, 1, 1, 1);
-    timer_enable_systick(1000);
+    timer_enable_systick();
     init_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, GPIO_OUTPUT);
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
 }

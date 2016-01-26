@@ -4,15 +4,15 @@
 #include "timer.h"
 
 /* Timer values */
+volatile unsigned long SysTick_on = 0;
 static int RIT_dt = 0;
-static int wait_for_timer = 0;
-static int timer_systemticks = 0;
 
-/* Enable the SysTick timer with some 
+/* Enable the SysTick timer with some
  * period `dt` */
-void timer_enable_systick(int dt) 
+
+void timer_enable_systick()
 {
-    SysTick_Config(SystemCoreClock / dt);
+    SysTick_Config(SystemCoreClock/1000);
 }
 
 /* Enable the RIT with some period `dt` */
@@ -42,9 +42,9 @@ void timer_disable_systick(void)
     SYSTICK_IntCmd(DISABLE);
 }
 
-void SysTick_Handler(void) 
+void SysTick_Handler(void)
 {
-    timer_systemticks++;
+    SysTick_on++;
 }
 
 /* Get RIT Interrupt Status */
@@ -54,11 +54,11 @@ IntStatus timer_get_rit_status(void)
 }
 
 /* wait for `n` ms before returning control */
-void timer_delay(int time) 
+void timer_delay(int n)
 {
-    timer_systemticks = 0;
-    while (timer_systemticks < time);
-    timer_systemticks = 0;
+    unsigned long SysTick_count;
+    SysTick_count = SysTick_on;
+    while((SysTick_on - SysTick_count) < n);
 }
 
 /* Initialise general purpose timer 2 (TIM2). */
