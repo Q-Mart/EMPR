@@ -2,6 +2,7 @@
 #include <string.h>
 #include "lpc17xx_uart.h"
 #include "lpc17xx_pinsel.h"
+#include <stdio.h>
 
 void debug_init(void)
 {
