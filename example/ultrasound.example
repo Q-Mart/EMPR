@@ -28,44 +28,15 @@ int main(void)
     lcd_init();
     lcd_clear_display();
 
-    //keypad_init();
-    //keypad_enable_int();
-    initialise_timer_measurement();
+    ultrasound_initialise_timer_measurement();
 
     //Not calibrated in example.
     double measured_distance = 0;
     char print_distance[64];
     while (1) {
-        send_test_pulse();
-        measured_distance = process_ultrasound_value(340, (int)ultrasound_valid_response_time);
+        ultrasound_send_test_pulse();
+        measured_distance = ultrasound_process_value(340, (int)ultrasound_valid_response_time);
         sprintf(print_distance, "Distance: %0.7f cm\r\n\r\n", measured_distance);
         debug_send(print_distance);
     }
 }
-
-/*
-void EINT3_IRQHandler(void)
-{
-
-    debug_send("EINT 3\r\n");
-    static int state = 0;
-    keypad_clear_int();
-
-    
-    if (GPIO_GetIntStatus(0, 23, 1))
-    { 
-        keypad_clear_int();
-        
-        if (state == 0) {
-            lcd_send_str(0x00, "Interrupt!");
-            state = 1;
-        } else {
-            lcd_send_str(0x00, "Reset!");
-            state = 0;
-        }
-    }
-}
-*/
-
-
-

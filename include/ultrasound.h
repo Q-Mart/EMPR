@@ -11,8 +11,8 @@
 #define HCSR_SIGNAL_PORT 0
 #define HCSR_SIGNAL_PIN (1 << 6)
 
-void initialise_timer_measurement(void);
-void send_test_pulse(void);
-double process_ultrasound_value(int, int);
+void ultrasound_initialise_timer_measurement(void);
+void ultrasound_send_test_pulse(void);
+double ultrasound_process_value(int, int);
 
 extern uint32_t ultrasound_valid_response_time;

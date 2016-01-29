@@ -9,5 +9,5 @@ void timer_disable_rit(void);
 
 void timer_delay(int);
 
-void timer_initialise_TIM(void);
-void timer_configure_TIM_capture(int, int, int, int);
+void timer_initialise_tim(void);
+void timer_configure_tim_capture(int, int, int, int);

@@ -15,18 +15,18 @@ uint32_t ultrasound_valid_response_time = 0;
   raw response time value to get a processed value in centimeters */
 
 /* Initialise CAP2.1 and the pulse sending pin for ultrasonic measurements */
-void initialise_timer_measurement(void) 
+void ultrasound_initialise_timer_measurement(void) 
 {
     pinsel_enable_pin(HCSR_TIMER_PORT, HCSR_TIMER_PIN, HCSR_TIMER_FUNC);
-    timer_initialise_TIM();
-    timer_configure_TIM_capture(1, 1, 1, 1);
+    timer_initialise_tim();
+    timer_configure_tim_capture(1, 1, 1, 1);
     timer_enable_systick();
     init_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, GPIO_OUTPUT);
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
 }
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
-void send_test_pulse(void){
+void ultrasound_send_test_pulse(void){
     debug_sendfc("Send pulse... %d\r\n", ultrasound_pulse_count++);
     ultrasound_false_edge_expected = 1;
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
@@ -71,7 +71,7 @@ void TIMER2_IRQHandler(void)
 }
 
 /* Return a double with value of distance in centimeters of the object */
-double process_ultrasound_value(int calibration_gradient, int input_value)
+double ultrasound_process_value(int calibration_gradient, int input_value)
 {
     double ultrasound_prescale = 10.0; 
     //Value of TIM_ConfigStruct.PrescaleValue in timer.c
