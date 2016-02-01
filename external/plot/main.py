@@ -1,4 +1,18 @@
+DEBUG = True
+
 import reader
+
+try:
+    from serial_reader import SerialReader
+except ImportError:
+    print('Warning: missing module `pyserial`')
+    print('... defauling to MockReader for testing')
+    SerialReader = reader.MockReader
+
+if DEBUG:
+    print('Running in DEBUG mode, defauling to MockReader for testing')
+    SerialReader = reader.MockReader
+
 import time
 import threading
 import plotter
@@ -55,9 +69,8 @@ class Mode:
     SCAN_DO = 1
 
 def monitor(frame):
-    with reader.MockReader() as r:
+    with SerialReader() as r:
         while True:
-            time.sleep(1)
             mode = r.read_byte()
 
             if mode == Mode.SCAN_DO:

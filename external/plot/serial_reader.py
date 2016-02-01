@@ -1,9 +1,9 @@
 from reader import Reader
 import serial
 
-class DataReader(Reader):
+class SerialReader(Reader):
     def __init__(self):
-        '''Initialise a new :class:`DataReader` which reads incoming data
+        '''Initialise a new :class:`SerialReader` which reads incoming data
         on the serial USB line from the mbed.
         '''
 
