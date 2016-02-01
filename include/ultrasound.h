@@ -13,6 +13,6 @@
 
 void ultrasound_initialise_timer_measurement(void);
 void ultrasound_send_test_pulse(void);
-double ultrasound_process_value(int, int);
+uint32_t ultrasound_process_value(int, int, int);
 
 extern uint32_t ultrasound_valid_response_time;

@@ -35,8 +35,8 @@ int main(void)
     char print_distance[64];
     while (1) {
         ultrasound_send_test_pulse();
-        measured_distance = ultrasound_process_value(340, (int)ultrasound_valid_response_time);
-        sprintf(print_distance, "Distance: %0.7f cm\r\n\r\n", measured_distance);
+        measured_distance = ultrasound_process_value(340, 0, ultrasound_valid_response_time);
+        sprintf(print_distance, "Distance: %d um\r\n\r\n", measured_distance);
         debug_send(print_distance);
     }
 }
