@@ -32,7 +32,7 @@ void ultrasound_send_test_pulse(void){
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
     timer_delay(1);
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
-    timer_delay(1000);
+    timer_delay(75);
 }
 
 /*Using General Purpose Timer 2.1 to capture
