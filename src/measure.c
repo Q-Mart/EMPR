@@ -6,7 +6,7 @@ void any_to_measure(){
     lcd_send_line(LINE1, "Measure Mode");
 }
 void measure_loop(){
-    int measure_byte = 0x02;
+    uint8_t measure_byte = 0x02;
     uint32_t raw = ir_sensor_get_raw_data();
     debug_send_arb((char*) &measure_byte, 1);
     debug_send_arb((char*) &raw, 4);
