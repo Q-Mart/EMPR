@@ -22,7 +22,7 @@ class SerialReader(Reader):
         '''
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args):
         '''Cleanup on exiting of `with` statement
         '''
         self.close()

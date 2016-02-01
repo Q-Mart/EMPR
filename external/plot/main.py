@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 
 import reader
 
@@ -16,18 +16,22 @@ if DEBUG:
 import time
 import threading
 import plotter
-import tkinter
+
+try:
+    import tkinter
+except ImportError:
+    import Tkinter as tkinter
 
 class PlotCanvas(tkinter.Canvas):
     def __init__(self, parent, width, height):
-        super().__init__(parent, width=width, height=height)
+        tkinter.Canvas.__init__(self, parent, width=width, height=height)
         self.width = width
         self.height = height
-        self.plotter = None
         self.lines = []
+        self.parent = parent
 
     def plot(self, xs, ys):
-        '''Plot some graph 
+        '''Plot some graph
         '''
         if len(xs) != len(ys):
             raise ValueError('Mismatch of argc')
@@ -44,17 +48,19 @@ class PlotCanvas(tkinter.Canvas):
         self.lines.append(self.create_line(*args, **kwargs))
 
     def draw_graph(self, w, h, xs, ys):
-        tx = w / max(xs)
-        ty = h / max(ys)
+        max_x = self.parent.plotter.max_x or max(xs)
+        max_y = self.parent.plotter.max_y or max(ys)
 
-        s = 2
+        tx = w / float(max_x)
+        ty = h / float(max_y)
+
         x0, y0 = 0, 0
         for x, y in zip(xs, ys):
             x, y = int(tx * x), h - int(ty * y)
             self.line(x0, y0, x, y)
 
-            self.line(x-s, y-s, x+s, y+s, fill='red')
-            self.line(x+s, y-s, x-s, y+s, fill='red')
+            #self.line(x-s, y-s, x+s, y+s, fill='red')
+            #self.line(x+s, y-s, x-s, y+s, fill='red')
             x0, y0 = x, y
 
     def draw_border(self, w, h):
@@ -95,6 +101,7 @@ class Mode:
 
 def monitor(frame):
     with SerialReader() as r:
+        t = 1
         while True:
             mode = r.read_byte()
 
@@ -106,19 +113,20 @@ def monitor(frame):
                 frame.draw()
             elif mode == Mode.MEASURE_DO:
                 value = r.read_int()
-
-                frame.plotter.update(angle, value)
+                t += 1
+                frame.plotter.update(t, value)
                 frame.draw()
 
 class AppFrame(tkinter.Frame):
     def __init__(self, parent):
-        super().__init__(parent)
+        tkinter.Frame.__init__(self, parent)
         self.plotter = plotter.DefaultPlotter()
 
         self.pack()
         self.init()
-        
-        self.monitor_t = threading.Thread(target=monitor, args=(self,), daemon=True)
+
+        self.monitor_t = threading.Thread(target=monitor, args=(self,))
+        self.monitor_t.daemon = True
         self.monitor_t.start()
 
     def init(self):
@@ -131,9 +139,10 @@ class AppFrame(tkinter.Frame):
         self.draw()
 
     def draw(self):
-        x, y = self.plotter.x, self.plotter.y
+        xs, ys = self.plotter.x, self.plotter.y
+
         self.graph_canvas.clear()
-        self.graph_canvas.plot(x, y)
+        self.graph_canvas.plot(xs, ys)
 
 if __name__ == '__main__':
     tk = tkinter.Tk()
