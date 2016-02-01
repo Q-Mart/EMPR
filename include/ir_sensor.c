@@ -35,5 +35,9 @@ int ir_sensor_get_raw_data(){
     return adc_get_channel_data(ir_sensor_adc_channel);
 }
 float ir_convert_to_distance(int raw){
+  if (raw != ir_sensor_c){
     return ir_sensor_m/(raw - ir_sensor_c);
+  } else {
+    return ir_sensor_m;
+  }
 }

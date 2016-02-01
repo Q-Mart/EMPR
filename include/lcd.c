@@ -8,7 +8,12 @@
 /* buffer commands
  * for performance */
 static char* buf;
-void lcd_send_buf(uint8_t ddram_addr);
+#define sz 80
+
+void lcd_send_buf(void);
+void lcd_send_char(uint8_t, char);
+void lcd_send_str(uint8_t, char*);
+void lcd_send_pat(uint8_t, char);
 
 void lcd_init(void)
 {
@@ -18,7 +23,7 @@ void lcd_init(void)
     char data0[] = { 0x00, 0x34, 0x0c, 0x06, 0x35, 0x04, 0x10, 0x42, 0x9f, 0x34, 0x02 };
     i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, sizeof(data0), data0);
 
-    buf = (char* )malloc(80);
+    buf = (char* )malloc(sz);
 }
 
 void lcd_clear_display(void)
@@ -29,11 +34,11 @@ void lcd_clear_display(void)
 
 
     int i;
-    for (i = 0; i < 80; ++i) {
-        lcd_send_char(LINE1 + i, ' '); 
+    for (i = 0; i < sz; ++i) {
+        lcd_send_char(LINE1 + i, ' ');
     }
 
-    lcd_send_buf(0x00);
+    lcd_send_buf();
 }
 
 void lcd_wait_while_busy(void)
@@ -104,6 +109,7 @@ void lcd_send_char(uint8_t ddram_addr, char c)
         };
     }
 
+
     lcd_send_pat(ddram_addr, c);
 }
 
@@ -111,15 +117,13 @@ void lcd_send_str(uint8_t ddram_addr, char* s)
 {
     int i;
     for (i = 0; i < strlen(s); ++i) {
-        lcd_send_char(ddram_addr+i, s[i]);  
+        lcd_send_char(ddram_addr + i, s[i]);
     }
-
-    lcd_send_buf(0x00);
 }
 
 void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
 {
-   va_list ap; 
+   va_list ap;
    va_start(ap, fmt);
 
     char* buf = (char *)malloc(strlen(fmt));
@@ -127,59 +131,86 @@ void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
     int i;
 
     for (i = 0; i < strlen(buf); ++i) {
-        lcd_send_char(ddram_addr+i, buf[i]);  
+        lcd_send_char(ddram_addr+i, buf[i]);
     }
 
-    lcd_send_buf(0x00);
     free(buf);
 }
 
+/* Send a char to the lcd ddram
+ * ddram_addr has properties for this:
+ *  0x00 -> 0x27 = LINE1
+ *  0x40 -> 0x50 = LINE2
+ */
 void lcd_send_pat(uint8_t ddram_addr, char b)
 {
-    buf[ddram_addr] = b;
+    /* adjust ddram_addr to buffer index */
+    uint8_t buf_i;
+    buf_i = ddram_addr;
+
+    if (ddram_addr >= LINE2) {
+        buf_i = 0x28 + (ddram_addr - LINE2);
+    }
+
+    buf[buf_i] = b;
 }
 
 /* Draw the buffer to the lcd screen
  */
-void lcd_send_buf(uint8_t ddram_addr)
+void lcd_send_buf(void)
 {
-    ddram_addr = ddram_addr | 0x80;
+    uint8_t ddram_addr = 0x80;
 
-    char data[2 + 1 + 80] = { 0 };
+    char data[2 + 1 + 32] = { 0 };
     data[0] = 0x80;
     data[1] = ddram_addr;
     data[2] = 0x40;
 
     int i;
-    for (i = 0; i < 80; ++i) {
+    /* send first line */
+    for (i = 0; i < 32; ++i) {
         data[2 + 1 + i] = buf[i];
     }
 
-    i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2 + 1 + 80, data);
+    i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2 + 1 + 32, data);
+
+    /* send next line */
+    char data2[2 + 1 + 32] = { 0 };
+    data2[0] = 0x80;
+    data2[1] = 0x40 | 0x80;
+    data2[2] = 0x40;
+    for (i = 0; i < 32; ++i) {
+        data2[2 + 1 + i] = buf[i + 0x28];
+    }
+
+    i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, 2 + 1 + 32, data2);
     lcd_wait_while_busy();
 }
 
-/* TODO: Make this faster */
+/* Send a string of 16 characters to either LINE1 or LINE2
+ * uses formatting and varargs
+ */
+void lcd_send_line(uint8_t line, char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    char* buf = malloc(strlen(fmt));
+    vsprintf(buf, fmt, ap);
+
+    char* out[17] = { ' ' };
+    strcpy(out, buf);
+
+    /* add NUL to end so it can be used as a string */
+    out[16] = '\0';
+    lcd_send_str(line, out);
+    lcd_send_buf();
+
+    free(buf);
+}
+
 void lcd_send_lines(char* top, char* bottom)
 {
-    char topstr[17] = { 0 };
-    char botstr[17] = { 0 };
-    int i;
-
-    strcpy(topstr, top);
-    for (i = strlen(top); i < 16; ++i)
-    {
-        topstr[i] = ' ';
-    }
-    topstr[16] = '\0';
-
-    strcpy(botstr, bottom);
-    for (i = strlen(bottom); i < 16; ++i)
-    {
-        botstr[i] = ' ';
-    }
-    botstr[16] = '\0';
-
-    lcd_send_str(LINE1, topstr);
-    lcd_send_str(LINE2, botstr);
+    lcd_send_line(LINE1, top);
+    lcd_send_line(LINE2, bottom);
 }

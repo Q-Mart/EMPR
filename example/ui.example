@@ -47,6 +47,7 @@ int main(void)
     /*
       The order of initialisation matters!
      */
+    timer_enable_systick();
     adc_enable();
     debug_init();
     lcd_init();
@@ -54,6 +55,7 @@ int main(void)
     keypad_init();
     keypad_enable_int();
     ir_sensorInit();
+    servo_init();
     any_to_calib();
 
     while (1)
@@ -62,9 +64,10 @@ int main(void)
             case CALIBRATE:
                 break;
             case SCAN:
+                scan_loop();
                 break;
             case MEASURE:
-		measure_loop();
+                measure_loop();
                 break;
             case MULTI:
                 break;
