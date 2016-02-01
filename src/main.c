@@ -1,74 +1,108 @@
-#include <stdio.h>
-#include "lpc17xx_timer.h"
+#include "debug.h"
 #include "keypad.h"
 #include "lcd.h"
-#include "debug.h"
-#include "gpio.h"
-#include "timer.h"
-#include "ultrasound.h"
-#include "servo.h"
+#include "lpc17xx_gpio.h"
+#include "test.h"
+#include "calibration_mode.h"
+#include "multi.h"
+#include "scan.h"
+#include "measure.h"
+#include "adc.h"
+#include "state.h"
 
-/* Instructions to use ultrasound module:
-    Connect Echo pin of the sensor to P29 on IO Board;
-    Connect Trigger pin of the sensor to P8 on IO Board;
-    Call initialise_timer_measurement() at start;
-    Now calibrate the sensor, calculated the speed of sound
-     as it appears with the calibration object, in m/s, save
-     in calibrated_gradient;
-    Call send_test_pulse() to send a pulse, then immediately:
-    call process_ultrasound_value(calibrated_gradient,\
-        (int)ultrasound_valid_response_time) 
-     to obtain object distance in cm.
-*/
-
-int tracker_find_smallest_index(double darray[], int length)
-{
-    /* Ignore first two values, due to motor still moving at the times of measurements. */
-    int smallest_index = 2;
-    double smallest = darray[0];
-    int i = 2;
-    for (i = 2; i < length; i++) {
-        if ((darray[i] < smallest) && (darray[i] < 5)) {
-            /* Ignore values smaller than 5, due to unreliable values under the measurable range.*/
-            smallest_index = i;
-            smallest = darray[i];
-        }
-    }
-    return smallest_index;
-}
-
+static int current_state_input = 0;
+static state_t current_state = CALIBRATE;
+void state_transition(char key);
 int main(void)
 {
+    /*
+      The order of initialisation matters!
+     */
+    timer_enable_systick();
+    adc_enable();
     debug_init();
-
     lcd_init();
     lcd_clear_display();
-    
-    ultrasound_initialise_timer_measurement();
+    keypad_init();
+    keypad_enable_int();
+    ir_sensorInit();
     servo_init();
+    any_to_calib();
 
-    //Not calibrated in example.
-    double measured_distance = 0;
-    char print_distance[64];
-    double range_table[28];
-    int range_index = 0;
-    int sensor_position = 0;
-    servo_set_pos(sensor_position);
-    timer_delay(1000);
-    for (sensor_position = 0; sensor_position <= 250; sensor_position += 10)
+    while (1)
     {
-        servo_set_pos(sensor_position);
-        timer_delay(375);
-        ultrasound_send_test_pulse();
-        measured_distance = ultrasound_process_value(340, (int)ultrasound_valid_response_time);
-        sprintf(print_distance, "Distance: %0.7f cm\r\n\r\n", measured_distance);
-        debug_send(print_distance);
-        range_table[range_index] = measured_distance;
-        range_index++;
+        switch (current_state) {
+            case CALIBRATE:
+                break;
+            case SCAN:
+                scan_loop();
+                break;
+            case MEASURE:
+                measure_loop();
+                break;
+            case MULTI:
+                break;
+            default:
+        break;
+        }
     }
-    int closest_index = 0;
-    closest_index = tracker_find_smallest_index(range_table, range_index);
-    debug_sendfc("Closest Index: %d\r\n", closest_index);
-    servo_set_pos(closest_index * 10);
+}
 
+void EINT3_IRQHandler(void) 
+{
+    if (GPIO_GetIntStatus(0, 23, 1))
+    { 
+        keypad_clear_int();
+
+        char r[16] = {0};
+        get_keyboard_presses(r);
+
+        int i;
+        for(i = 0; i < 16; ++i){
+            if(r[i] == 1) {
+                state_transition(KEYS[i]);
+            }
+        }
+    }
+}
+
+/* Transition function */
+
+typedef void (*side_func)(void);
+
+typedef struct
+{
+    state_t current;
+    char symbol;
+    state_t next;
+    side_func effect;
+} transition_t;
+
+const transition_t lut[] = {
+    {CALIBRATE_DONE, '#', CALIBRATE, NULL},
+    {CALIBRATE, '#', CALIBRATE_NEAR_DONE, &calib_to_near_calib},
+    {CALIBRATE_NEAR_DONE, '#', CALIBRATE_DONE, &near_calib_to_done},
+    {SCAN, '#', SCAN_DO, NULL},
+    {MEASURE, '#', MEASURE_DO, NULL},
+    {MULTI, '#', MULTI_DO_STAGE_1, NULL},
+    /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
+    {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2, NULL},
+    {MULTI_DO_STAGE_2, '#', MULTI_DO_STAGE_3, NULL},
+    {MULTI_DO_STAGE_3, '#', MULTI_DO_STAGE_4, NULL},
+    {ANY, 'A', CALIBRATE, &any_to_calib},
+    {ANY, 'B', SCAN, &any_to_scan},
+    {ANY, 'C', MEASURE, &any_to_measure},
+    {ANY, 'D', MULTI, &any_to_multi}
+};
+void state_transition(char key){
+    /* global transitions from any state back to top-level ones */
+    int i;
+    for(i = 0; i < sizeof(lut)/sizeof(lut[0]); i++){
+        if ((lut[i].current == current_state || lut[i].current == ANY) && lut[i].symbol == key){
+        lcd_clear_display();
+        if(lut[i].effect !=NULL) (*(lut[i].effect))();
+        current_state = lut[i].next;
+        return;
+        }
+    }
 }
