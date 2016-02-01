@@ -70,20 +70,20 @@ void TIMER2_IRQHandler(void)
     }
 }
 
-/* Return a double with value of distance in centimeters of the object */
-double ultrasound_process_value(int calibration_gradient, int input_value)
+/* Return a uint32_t with value of distance in micrometers of the object */
+uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offset, int input_value)
 {
-    double ultrasound_prescale = 10.0; 
+    uint32_t ultrasound_prescale = 10; 
     //Value of TIM_ConfigStruct.PrescaleValue in timer.c
 
     //Account for both inbound and outbound trip.
-    double travel_time = (int)input_value / 2;
-    double seconds = travel_time * ultrasound_prescale / 10000.0;
+    uint32_t travel_time = (int)input_value / 2;
+    uint32_t microseconds = travel_time * ultrasound_prescale;
 
     /*calibration_gradient would be the calculated speed of sound that 
      travelled betweenthe calibration object and the sensor, likely 
-     different from 340m/s. Unit is m/s. */
-    double distance = seconds * (double)calibration_gradient;
+     different from 340m/s. Unit is microsecond/s with offset. */
+    uint32_t distance = (microseconds * calibration_gradient + calibration_offset);
 
     return distance;
 }
