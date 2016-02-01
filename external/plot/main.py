@@ -66,7 +66,32 @@ class PlotCanvas(tkinter.Canvas):
         self.lines = []
 
 class Mode:
-    SCAN_DO = 1
+    '''These mode values come from the `state_t` enum
+    in the C source
+    '''
+    CALIBRATE = 0
+    SCAN = 1
+    MEASURE = 2
+    MULTI = 3
+    CALIBRATE_NEAR_DONE = 4
+    CALIBRATE_DONE = 5
+    SCAN_PARAMETERS = 6
+    SCAN_PARAMATER_1 = 7
+    SCAN_PARAMATER_2 = 8
+    SCAN_PARAMATER_3 = 9
+    SCAN_DO = 10
+    MEASURE_PARAMETERS = 11
+    MEASURE_PARAMATER_1 = 12
+    MEASURE_PARAMATER_2 = 13
+    MEASURE_PARAMATER_3 = 14
+    MEASURE_DO = 15
+    MULTI_PARAMETERS = 16
+    MULTI_DO_STAGE_1 = 17
+    MULTI_DO_STAGE_2 = 18
+    MULTI_DO_STAGE_3 = 19
+    MULTI_DO_STAGE_4 = 20
+    MULTI_DONE = 21
+    ANY = 22
 
 def monitor(frame):
     with SerialReader() as r:
@@ -75,6 +100,11 @@ def monitor(frame):
 
             if mode == Mode.SCAN_DO:
                 angle = r.read_int()
+                value = r.read_int()
+
+                frame.plotter.update(angle, value)
+                frame.draw()
+            elif mode == Mode.MEASURE_DO:
                 value = r.read_int()
 
                 frame.plotter.update(angle, value)
