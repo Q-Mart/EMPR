@@ -2,6 +2,7 @@
 #include <string.h>
 #include "lpc17xx_uart.h"
 #include "lpc17xx_pinsel.h"
+#include <stdio.h>
 
 void debug_init(void)
 {
@@ -30,7 +31,11 @@ void debug_init(void)
 
 int debug_send(char* s)
 {
-    int b = UART_Send(LPC_UART0, s, strlen(s), BLOCKING);
+    return UART_Send(LPC_UART0, s, strlen(s), BLOCKING);
+}
+
+int debug_send_arb(char* s, int len){
+    return UART_Send(LPC_UART0, s, len, BLOCKING);
 }
 
 int debug_sendfc(char* fmt, char arg)
