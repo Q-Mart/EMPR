@@ -15,6 +15,27 @@ class Plotter:
 
 class DefaultPlotter(Plotter):
     def __init__(self):
+        super(DefaultPlotter, self).__init__()
+        self.xs = []
+        self.ys = []
+
+    @property
+    def x(self):
+        return self.xs
+
+    @property
+    def y(self):
+        return self.ys
+
+    def update(self, *data):
+        x, y = data
+
+        self.xs.append(x)
+        self.ys.append(y)
+
+class MeasurePlotter(Plotter):
+    def __init__(self):
+        super(DefaultPlotter, self).__init__()
         self.max_x = None
         self.max_y = 4096
         self.xs = []
@@ -40,3 +61,23 @@ class DefaultPlotter(Plotter):
 
         self.xs.append(x)
         self.ys.append(y)
+
+class ScanPlotter(Plotter):
+    def __init__(self):
+        super(DefaultPlotter, self).__init__()
+        self.max_x = 270
+        self.max_y = 4096
+        self.values = {}
+
+    @property
+    def x(self):
+        return map(lambda x: x[1], sorted(self.values.values(), key=lambda x: x[0]))
+
+    @property
+    def y(self):
+        return map(lambda x: x[0], sorted(self.values.values(), key=lambda x: x[0]))
+
+    def update(self, *data):
+        x, y = data
+
+        self.values[x] = y

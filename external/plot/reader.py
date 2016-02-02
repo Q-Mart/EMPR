@@ -37,8 +37,9 @@ class Reader:
         raise NotImplementedError
     
 # b-mode i-angle i-value 
+SCAN_DO = 10
 MODE = lambda x, y, z: struct.pack('b', x) + struct.pack('i', y) + struct.pack('i', z)
-BYTE_STR = MODE(1, 5, 10) + MODE(1, 10, 15) + MODE(1, 15, 20)
+BYTE_STR = MODE(SCAN_DO, 5, 10) + MODE(SCAN_DO, 10, 15) + MODE(SCAN_DO, 15, 20)
 
 class MockReader(Reader):
     def __init__(self, data=None):

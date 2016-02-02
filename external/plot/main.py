@@ -1,4 +1,14 @@
-DEBUG = False
+'''Main program
+
+Usage:
+    main
+    main -d | --debug
+    main -h | --help
+
+Options:
+    --debug  Debug Mode
+    -h --help   Show this text
+'''
 
 import reader
 
@@ -9,10 +19,6 @@ except ImportError:
     print('... defauling to MockReader for testing')
     SerialReader = reader.MockReader
 
-if DEBUG:
-    print('Running in DEBUG mode, defauling to MockReader for testing')
-    SerialReader = reader.MockReader
-
 import time
 import threading
 import plotter
@@ -20,11 +26,13 @@ import plotter
 try:
     import tkinter
 except ImportError:
-    import Tkinter as tkinter
+   import Tkinter as tkinter
+
+from docopt import docopt
 
 class PlotCanvas(tkinter.Canvas):
     def __init__(self, parent, width, height):
-        tkinter.Canvas.__init__(self, parent, width=width, height=height)
+        super(PlotCanvas, self).__init__(parent, width=width, height=height)
         self.width = width
         self.height = height
         self.lines = []
@@ -116,10 +124,16 @@ def monitor(frame):
                 t += 1
                 frame.plotter.update(t, value)
                 frame.draw()
+            elif mode == Mode.MEASURE:
+                frame.plotter = plotter.MeasurePlotter()
+            elif mode == Mode.SCAN:
+                frame.plotter = plotter.ScanPlotter()
+            elif mode == Mode.MULTI:
+                pass
 
 class AppFrame(tkinter.Frame):
     def __init__(self, parent):
-        tkinter.Frame.__init__(self, parent)
+        super(AppFrame, self).__init__(parent)
         self.plotter = plotter.DefaultPlotter()
 
         self.pack()
@@ -145,6 +159,17 @@ class AppFrame(tkinter.Frame):
         self.graph_canvas.plot(xs, ys)
 
 if __name__ == '__main__':
+    args = docopt(__doc__)
+    if args['--debug']:
+        DEBUG = True
+    else:
+        DEBUG = False
+
+    if DEBUG:
+        print('Running in DEBUG mode, defauling to MockReader for testing')
+        SerialReader = reader.MockReader
+
+
     tk = tkinter.Tk()
     app = AppFrame(parent=tk)
     app.mainloop()
