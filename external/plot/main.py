@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''Main program
 
 Usage:
@@ -6,7 +7,7 @@ Usage:
     main -h | --help
 
 Options:
-    --debug  Debug Mode
+    -d --debug  Debug Mode
     -h --help   Show this text
 '''
 
@@ -159,8 +160,10 @@ class AppFrame(tkinter.Frame):
         self.graph_canvas.plot(xs, ys)
 
 if __name__ == '__main__':
+    global DEBUG
     args = docopt(__doc__)
-    if args['--debug']:
+
+    if args['-d'] or args['--debug']:
         DEBUG = True
     else:
         DEBUG = False
