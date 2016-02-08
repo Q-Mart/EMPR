@@ -27,7 +27,7 @@ void ultrasound_initialise_timer_measurement(void)
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
 void ultrasound_send_test_pulse(void){
-    debug_sendfc("Send pulse... %d\r\n", ultrasound_pulse_count++);
+    //debug_sendfc("Send pulse... %d\r\n", ultrasound_pulse_count++);
     ultrasound_false_edge_expected = 1;
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
     timer_delay(1);
@@ -65,8 +65,8 @@ void TIMER2_IRQHandler(void)
         ultrasound_false_edge_expected = 0;
     } else {
         ultrasound_valid_response_time = ultrasound_current_timer_diff;
-        sprintf(debug_string, "Timer Value: %lu \r\nTimer duration: %lu\r\n\r\n", (unsigned long)ultrasound_previous_timer_value, (unsigned long)ultrasound_valid_response_time);
-        debug_send(debug_string);
+        //sprintf(debug_string, "Timer Value: %lu \r\nTimer duration: %lu\r\n\r\n", (unsigned long)ultrasound_previous_timer_value, (unsigned long)ultrasound_valid_response_time);
+        //debug_send(debug_string);
     }
 }
 
