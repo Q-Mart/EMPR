@@ -32,7 +32,10 @@ void lcd_clear_display(void)
     i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, sizeof(data1), data1);
     lcd_wait_while_busy();
 
-    char empty[16] = { ' ' };
+    char empty[16]; /* todo: learn C syntax */
+    int i;
+    for (i = 0; i < 16; ++i)
+        empty[i] = ' ';
     lcd_send_strn(LINE1, 16, empty);
     lcd_send_strn(LINE2, 16, empty);
 }
@@ -185,6 +188,7 @@ void lcd_send_buf(void)
 
 /* Send a string of 16 characters to either LINE1 or LINE2
  * uses formatting and varargs
+ * `fmt` must be NUL-terminated
  */
 void lcd_send_line(uint8_t line, char* fmt, ...)
 {
@@ -194,14 +198,12 @@ void lcd_send_line(uint8_t line, char* fmt, ...)
     char buf[strlen(fmt)];
     vsprintf(buf, fmt, ap);
 
-    char out[16] = { ' ' };
-    strcpy(out, buf);
+    char out[16];
     int i;
-    for (i = 0; i < 16; i++) {
-        if (out[i] == 0) {
-            out[i] = ' ';
-        }
-    }
+    for (i = 0; i < 16; i++)
+        out[i] = ' ';
+
+    strncpy(out, buf, strlen(buf));
 
     lcd_send_strn(line, 16, out);
     lcd_send_buf();
