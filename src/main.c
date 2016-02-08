@@ -29,6 +29,8 @@ int main(void)
     servo_init();
     any_to_calib();
 
+    //lcd_clear_display();
+
     while (1)
     {
         switch (current_state) {
