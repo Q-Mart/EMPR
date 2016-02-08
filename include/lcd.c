@@ -126,7 +126,7 @@ void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
    va_list ap;
    va_start(ap, fmt);
 
-    char* buf = (char *)malloc(strlen(fmt));
+   char buf[strlen(fmt)];
     vsprintf(buf, fmt, ap);
     int i;
 
@@ -134,7 +134,7 @@ void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
         lcd_send_char(ddram_addr+i, buf[i]);
     }
 
-    free(buf);
+    va_end(ap);
 }
 
 /* Send a char to the lcd ddram
@@ -195,7 +195,7 @@ void lcd_send_line(uint8_t line, char* fmt, ...)
     va_list ap;
     va_start(ap, fmt);
 
-    char* buf = malloc(strlen(fmt));
+    char buf[strlen(fmt)];
     vsprintf(buf, fmt, ap);
 
     char* out[17] = { ' ' };
@@ -206,7 +206,7 @@ void lcd_send_line(uint8_t line, char* fmt, ...)
     lcd_send_str(line, out);
     lcd_send_buf();
 
-    free(buf);
+    va_end(ap);
 }
 
 void lcd_send_lines(char* top, char* bottom)
