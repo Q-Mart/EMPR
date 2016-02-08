@@ -32,13 +32,9 @@ void lcd_clear_display(void)
     i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, sizeof(data1), data1);
     lcd_wait_while_busy();
 
-
-    int i;
-    for (i = 0; i < sz; ++i) {
-        lcd_send_char(LINE1 + i, ' ');
-    }
-
-    lcd_send_buf();
+    char empty[16] = { ' ' };
+    lcd_send_strn(LINE1, 16, empty);
+    lcd_send_strn(LINE2, 16, empty);
 }
 
 void lcd_wait_while_busy(void)
@@ -113,10 +109,10 @@ void lcd_send_char(uint8_t ddram_addr, char c)
     lcd_send_pat(ddram_addr, c);
 }
 
-void lcd_send_str(uint8_t ddram_addr, char* s)
+void lcd_send_strn(uint8_t ddram_addr, uint8_t length, char* s)
 {
     int i;
-    for (i = 0; i < strlen(s); ++i) {
+    for (i = 0; i < length; ++i) {
         lcd_send_char(ddram_addr + i, s[i]);
     }
 }
@@ -198,12 +194,16 @@ void lcd_send_line(uint8_t line, char* fmt, ...)
     char buf[strlen(fmt)];
     vsprintf(buf, fmt, ap);
 
-    char* out[17] = { ' ' };
+    char out[16] = { ' ' };
     strcpy(out, buf);
+    int i;
+    for (i = 0; i < 16; i++) {
+        if (out[i] == 0) {
+            out[i] = ' ';
+        }
+    }
 
-    /* add NUL to end so it can be used as a string */
-    out[16] = '\0';
-    lcd_send_str(line, out);
+    lcd_send_strn(line, 16, out);
     lcd_send_buf();
 
     va_end(ap);
