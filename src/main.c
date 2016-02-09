@@ -13,6 +13,7 @@
 static int current_state_input = 0;
 static state_t current_state = CALIBRATE;
 void state_transition(char key);
+
 int main(void)
 {
     /*
@@ -43,7 +44,7 @@ int main(void)
             case MULTI:
                 break;
             default:
-		break;
+                break;
         }
     }
 }
@@ -94,15 +95,16 @@ const transition_t lut[] = {
     {ANY, 'C', MEASURE, &any_to_measure},
     {ANY, 'D', MULTI, &any_to_multi}
 };
+
 void state_transition(char key){
     /* global transitions from any state back to top-level ones */
     int i;
-	for(i = 0; i < sizeof(lut)/sizeof(lut[0]); i++){
-	    if ((lut[i].current == current_state || lut[i].current == ANY) && lut[i].symbol == key){
-		lcd_clear_display();
-		if(lut[i].effect !=NULL) (*(lut[i].effect))();
-		current_state = lut[i].next;
-		return;
-	    }
-	}
+    for(i = 0; i < sizeof(lut)/sizeof(lut[0]); i++){
+        if ((lut[i].current == current_state || lut[i].current == ANY) && lut[i].symbol == key){
+            lcd_clear_display();
+            if(lut[i].effect !=NULL) (*(lut[i].effect))();
+            current_state = lut[i].next;
+            return;
+        }
+    }
 }

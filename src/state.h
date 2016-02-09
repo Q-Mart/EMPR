@@ -1,29 +1,37 @@
 typedef enum {
-        CALIBRATE,
-        SCAN,
-        MEASURE,
-        MULTI,
+    CALIBRATE,
+    SCAN,
+    MEASURE,
+    MULTI,
 
-        CALIBRATE_NEAR_DONE,
-        CALIBRATE_DONE,
+    CALIBRATE_NEAR,
+    CALIBRATE_NEAR_DONE,
+    CALIBRATE_DONE,
 
-        SCAN_PARAMETERS,
-        SCAN_PARAMATER_1,
-        SCAN_PARAMATER_2,
-        SCAN_PARAMATER_3,
-        SCAN_DO,
+    /* SCAN_PARAMETERS 
+     *  sent when going between SCAN and selecting
+     *  which paramater to be chosen
+     */
+    SCAN_PARAMETERS,
+    SCAN_PARAMETER_1, /* sweep 'speed' */
+    SCAN_PARAMETER_2, /* no of samples per sweep */
+    SCAN_PARAMETER_3, /* start position */
+    SCAN_PARAMETER_4, /* stop position */
+    SCAN_DO,
 
-        MEASURE_PARAMETERS,
-        MEASURE_PARAMATER_1,
-        MEASURE_PARAMATER_2,
-        MEASURE_PARAMATER_3,
-        MEASURE_DO,
+    MEASURE_DO,
 
-        MULTI_PARAMETERS,
-        MULTI_DO_STAGE_1,
-        MULTI_DO_STAGE_2,
-        MULTI_DO_STAGE_3,
-        MULTI_DO_STAGE_4,
-        MULTI_DONE,
-        ANY
+    MULTI_PARAMETERS,
+    /* MULTI_PARAMETERS goes to a copy of SCAN_PARAMETERS
+     * with return to MULTI_DO
+     */
+
+    MULTI_DO,
+    MULTI_DO_STAGE_1, /* First Sweep */
+    MULTI_DO_STAGE_2, /* Second Sweep */
+    MULTI_DO_STAGE_3, /* Third Sweep */
+    MULTI_DO_STAGE_4, /* Fourth Sweep */
+
+    MULTI_DONE, /* Finished Scan so, idle */
+    /* Special Ignore State */ ANY
 } state_t;
