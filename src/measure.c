@@ -12,7 +12,6 @@ void any_to_measure() {
 void measure_loop() {
     uint8_t measure_byte = MEASURE_DO;
     uint32_t raw = ir_sensor_get_raw_data();
-
     network_send(MEASURE_DO, 4, (uint8_t *)&raw);
-    lcd_send_line(LINE2, "%f", ir_convert_to_distance(raw));
+    lcd_send_line(LINE2, "%d", ir_convert_to_distance(raw));
 }

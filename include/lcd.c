@@ -32,13 +32,12 @@ void lcd_clear_display(void)
     i2c_send_mbed_polling(LPC_I2C1, LCD_ADDR, sizeof(data1), data1);
     lcd_wait_while_busy();
 
-
+    char empty[16]; /* todo: learn C syntax */
     int i;
-    for (i = 0; i < sz; ++i) {
-        lcd_send_char(LINE1 + i, ' ');
-    }
-
-    lcd_send_buf();
+    for (i = 0; i < 16; ++i)
+        empty[i] = ' ';
+    lcd_send_strn(LINE1, 16, empty);
+    lcd_send_strn(LINE2, 16, empty);
 }
 
 void lcd_wait_while_busy(void)
@@ -113,10 +112,10 @@ void lcd_send_char(uint8_t ddram_addr, char c)
     lcd_send_pat(ddram_addr, c);
 }
 
-void lcd_send_str(uint8_t ddram_addr, char* s)
+void lcd_send_strn(uint8_t ddram_addr, uint8_t length, char* s)
 {
     int i;
-    for (i = 0; i < strlen(s); ++i) {
+    for (i = 0; i < length; ++i) {
         lcd_send_char(ddram_addr + i, s[i]);
     }
 }
@@ -126,7 +125,7 @@ void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
    va_list ap;
    va_start(ap, fmt);
 
-    char* buf = (char *)malloc(strlen(fmt));
+   char buf[strlen(fmt)];
     vsprintf(buf, fmt, ap);
     int i;
 
@@ -134,7 +133,7 @@ void lcd_send_strf(uint8_t ddram_addr, char* fmt, ...)
         lcd_send_char(ddram_addr+i, buf[i]);
     }
 
-    free(buf);
+    va_end(ap);
 }
 
 /* Send a char to the lcd ddram
@@ -189,24 +188,27 @@ void lcd_send_buf(void)
 
 /* Send a string of 16 characters to either LINE1 or LINE2
  * uses formatting and varargs
+ * `fmt` must be NUL-terminated
  */
 void lcd_send_line(uint8_t line, char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
 
-    char* buf = malloc(strlen(fmt));
+    char buf[strlen(fmt)];
     vsprintf(buf, fmt, ap);
 
-    char* out[17] = { ' ' };
-    strcpy(out, buf);
+    char out[16];
+    int i;
+    for (i = 0; i < 16; i++)
+        out[i] = ' ';
 
-    /* add NUL to end so it can be used as a string */
-    out[16] = '\0';
-    lcd_send_str(line, out);
+    strncpy(out, buf, strlen(buf));
+
+    lcd_send_strn(line, 16, out);
     lcd_send_buf();
 
-    free(buf);
+    va_end(ap);
 }
 
 void lcd_send_lines(char* top, char* bottom)

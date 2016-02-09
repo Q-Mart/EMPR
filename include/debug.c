@@ -40,23 +40,22 @@ int debug_send_arb(char* s, int len){
 
 int debug_sendfc(char* fmt, char arg)
 {
-    char* buf = (char *)malloc(strlen(fmt));
+    char buf[strlen(fmt)];
     sprintf(buf, fmt, arg);
     debug_send(buf);
-    free(buf);
 }
 
-/* 
+/*
  * send formatted string
  *  analogous to printf/sprintf
  */
 void debug_sendf(char* fmt, ...)
 {
-   va_list ap; 
+   va_list ap;
    va_start(ap, fmt);
 
-    char* buf = (char *)malloc(strlen(fmt));
-    vsprintf(buf, fmt, ap);
-    debug_send(buf);
-    free(buf);
+   char buf[strlen(fmt)];
+   vsprintf(buf, fmt, ap);
+   debug_send(buf);
+   va_end(ap);
 }
