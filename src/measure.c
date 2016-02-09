@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "measure.h"
 #include "lcd.h"
 #include "ir_sensor.h"
@@ -10,8 +11,8 @@ void any_to_measure() {
 }
 
 void measure_loop() {
-    uint8_t measure_byte = MEASURE_DO;
     uint32_t raw = ir_sensor_get_raw_data();
-    network_send(MEASURE_DO, 4, (uint8_t *)&raw);
-    lcd_send_line(LINE2, "%d", ir_convert_to_distance(raw));
+    uint32_t dist = ir_convert_to_distance(raw);
+    network_send(MEASURE_DO, (uint8_t *)&dist, 4, NULL);
+    lcd_send_line(LINE2, "%d", dist);
 }

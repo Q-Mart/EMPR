@@ -1,3 +1,6 @@
+#ifndef STATE_H
+#define STATE_H
+
 typedef enum {
     CALIBRATE,
     SCAN,
@@ -35,3 +38,5 @@ typedef enum {
     MULTI_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY
 } state_t;
+
+#endif
