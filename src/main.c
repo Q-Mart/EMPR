@@ -31,7 +31,6 @@ int main(void)
     servo_init();
     any_to_calib();
 
-
     while (1)
     {
         input_poll();
