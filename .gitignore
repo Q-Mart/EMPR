@@ -33,3 +33,6 @@
 
 #Entire bin directory
 bin/*
+
+#Vim
+*.swp

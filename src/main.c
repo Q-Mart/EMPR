@@ -7,6 +7,7 @@
 #include "multi.h"
 #include "scan.h"
 #include "measure.h"
+#include "platform.h"
 #include "adc.h"
 #include "state.h"
 
@@ -42,13 +43,16 @@ int main(void)
                 break;
             case MULTI:
                 break;
+            case PLATFORM:
+                platform_loop();
+                break;
             default:
 		break;
         }
     }
 }
 
-void EINT3_IRQHandler(void) 
+void EINT3_IRQHandler(void)
 {
     if (GPIO_GetIntStatus(0, 23, 1))
     { 
@@ -92,7 +96,8 @@ const transition_t lut[] = {
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},
     {ANY, 'C', MEASURE, &any_to_measure},
-    {ANY, 'D', MULTI, &any_to_multi}
+    {ANY, 'D', MULTI, &any_to_multi},
+    {ANY, '*', PLATFORM, &any_to_platform}
 };
 void state_transition(char key){
     /* global transitions from any state back to top-level ones */

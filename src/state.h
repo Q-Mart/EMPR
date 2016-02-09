@@ -3,6 +3,7 @@ typedef enum {
         SCAN,
         MEASURE,
         MULTI,
+        PLATFORM,
 
         CALIBRATE_NEAR_DONE,
         CALIBRATE_DONE,
