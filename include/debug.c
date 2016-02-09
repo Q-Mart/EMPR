@@ -51,8 +51,8 @@ int debug_sendfc(char* fmt, char arg)
  */
 void debug_sendf(char* fmt, ...)
 {
-   va_list ap;
-   va_start(ap, fmt);
+    va_list ap;
+    va_start(ap, fmt);
 
    char buf[strlen(fmt)];
    vsprintf(buf, fmt, ap);
