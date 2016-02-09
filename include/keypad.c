@@ -3,7 +3,10 @@
 #include "lpc17xx_gpio.h"
 #include "pinsel.h"
 
-/* init mbed i2c 
+#define EDGE 1
+static const char CLEAR = 0xf0;
+
+/* init mbed i2c
  * todo: don't make these overlap*/
 void keypad_init(void)
 {
@@ -16,12 +19,11 @@ void keypad_enable_int(void)
     pinsel_enable_pin(PINSEL_PORT_0, PINSEL_PIN_23, PINSEL_FUNC_0);
 
     /* enable interrupts by sending 1's to quasi-bidirectional pins */
-    char clear = 0x0f;
-    i2c_send_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &clear);
+    i2c_send_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &CLEAR);
 
     // Enable GPIO interrupts on P0.23
     // on falling edge
-    GPIO_IntCmd(0, 1 << 23, 1);
+    GPIO_IntCmd(0, 1 << 23, EDGE);
 
     // Enable the EINT3 Handler
     NVIC_EnableIRQ(EINT3_IRQn);
@@ -32,18 +34,16 @@ void keypad_clear_int(void)
     GPIO_ClearInt(0, 1 << 23);
 }
 
+int keypad_get_int(void) {
+    return GPIO_GetIntStatus(0, 23, EDGE);
+}
+
 /* given a 1x16 array, it places 1 in the positions where
  * the key is pressed
  * where r[row*4 + col] = bool */
-void get_keyboard_presses(char * r) 
+void get_keyboard_presses(char * r)
 {
     char cols[] = {COLUMN1, COLUMN2, COLUMN3, COLUMN4};
-
-    /* zero the array */
-    int i;
-    for (i = 0; i < 16; ++i) {
-        r[i] = 0; 
-    }
 
     int col;
     for (col = 0; col < 4; ++col) {
@@ -55,6 +55,8 @@ void get_keyboard_presses(char * r)
             for (row = 0; row < 4; ++row) {
                 if (((j >> row) & 0x01) == 1)
                     r[(3 - row)*4 + col] = 1;
+                else
+                    r[(3 - row)*4 + col] = 0;
             }
         }
     }
@@ -67,12 +69,11 @@ char poll_keyboard(char column)
 
     data = 0;
     i2c_recv_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &data);
-
-    
-    char clear = 0x0f;
-    i2c_send_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &clear);
+    i2c_send_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &CLEAR);
 
     data = ~data;
     data = data & 0x0f;
     return data;
 }
+
+/* 00001111 */
