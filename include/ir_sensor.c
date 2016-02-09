@@ -7,7 +7,7 @@ static uint32_t ir_sensor_c;
 static uint32_t ir_near_point;
 static uint32_t ir_far_point;
 static int ir_sensor_adc_channel = 1;
-void ir_sensorInit(){
+void ir_sensor_init(){
     adc_enable_channel(ir_sensor_adc_channel);
     ir_sensor_m = 0.0f;
     ir_sensor_c = 0.0f;
