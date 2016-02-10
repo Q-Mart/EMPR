@@ -6,6 +6,7 @@
 /* Timer values */
 volatile unsigned long SysTick_on = 0;
 static int RIT_dt = 0;
+static systick_func systick_function = NULL;
 
 /* Enable the SysTick timer with some
  * period `dt` */
@@ -13,6 +14,10 @@ static int RIT_dt = 0;
 void timer_enable_systick()
 {
     SysTick_Config(SystemCoreClock/1000);
+}
+
+void set_systick_function(systick_func sfunc){
+    systick_function = sfunc;
 }
 
 /* Enable the RIT with some period `dt` */
@@ -45,6 +50,8 @@ void timer_disable_systick(void)
 void SysTick_Handler(void)
 {
     SysTick_on++;
+    if(systick_function != NULL)
+        systick_function();
 }
 
 /* Get RIT Interrupt Status */
