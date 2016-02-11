@@ -16,7 +16,7 @@ void timer_enable_systick()
     SysTick_Config(SystemCoreClock/1000);
 }
 
-void set_systick_function(systick_func sfunc){
+void timer_set_systick_function(systick_func sfunc){
     systick_function = sfunc;
 }
 
@@ -51,7 +51,7 @@ void SysTick_Handler(void)
 {
     SysTick_on++;
     if(systick_function != NULL)
-        systick_function();
+        (*systick_function)();
 }
 
 /* Get RIT Interrupt Status */

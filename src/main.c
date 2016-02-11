@@ -12,6 +12,7 @@
 #include "ir_sensor.h"
 #include "timer.h"
 #include "servo.h"
+#include "sound.h"
 
 static state_t current_state = CALIBRATE;
 void state_transition(char key);
@@ -30,6 +31,7 @@ int main(void)
     ir_sensor_init();
     servo_init();
     any_to_calib();
+    sound_init();
 
     while (1)
     {
