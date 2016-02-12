@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "debug.h"
 
 void debug_init(void) {}

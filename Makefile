@@ -72,6 +72,9 @@ $(INC_BIN)/%.o: $(INCLUDE_LIVE)/%.c
 $(INC_BIN_DBG)/%.o: $(INCLUDE_DBG)/%.c
 	$(MKDIR_P) $(INC_BIN_DBG)
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
+.phony: all
+all:	program
+	@echo "Build finished"
 
 .phony: debug
 debug:	INCLUDE_C=$(INCLUDE)/dbg/
@@ -80,9 +83,6 @@ debug:	INCLUDE_C=$(INCLUDE)/dbg/
 	LDFLAGS=
 debug:	program_debug
 	@echo "Debug build finished"
-.phony: all
-all:	program
-	@echo "Build finished"
 
 .phony: program
 program: $(LIVE_OBJS)
