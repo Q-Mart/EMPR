@@ -1,3 +1,6 @@
+#include "lpc17xx_gpio.h"
+#include "lpc17xx_timer.h"
+
 #include "ultrasound.h"
 
 /* Timer global variables, do not read from them. */

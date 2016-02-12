@@ -1,8 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "lpc17xx_i2c.h"
 #include "lpc_types.h"
+
 #include "i2c.h"
 #include "pinsel.h"
+
 
 void i2c_enable_mbed(LPC_I2C_TypeDef* lpc)
 {

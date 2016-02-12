@@ -1,5 +1,3 @@
-#include "lpc17xx_gpio.h"
-#include "lpc17xx_timer.h"
 #include "pinsel.h"
 #include "timer.h"
 #include "debug.h"
