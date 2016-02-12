@@ -5,13 +5,17 @@ SRC = ./src
 BIN = ./bin
 INCLUDE = ./include
 INC_BIN = $(BIN)/include
+INC_BIN_DBG = $(BIN)/dbg_include
+
+INCLUDE_LIVE=$(INCLUDE)/live/
+INCLUDE_DBG=$(INCLUDE)/dbg/
 
 # Safe mkdir
 MKDIR_P = mkdir -p
 
 ARCH=arm-none-eabi
 CC=$(ARCH)-gcc
-HCC	= /usr/bin/gcc
+HCC= /usr/bin/gcc
 OBJCOPY=$(ARCH)-objcopy
 
 USER:=$(shell whoami)
@@ -29,43 +33,65 @@ CMSISFL=$(CMSIS)/lib/core_cm3.o \
 	$(CMSIS)/lib/startup_LPC17xx.o
 LDSCRIPT = $(CMSIS)/lib/ldscript_rom_gnu.ld
 
-CFLAGS=-mcpu=cortex-m3  -mthumb  -Wall  -O0  -mapcs-frame  -D__thumb2__=1 \
+ARCH_FLAGS=-mcpu=cortex-m3  -mthumb  -Wall  -O0  -mapcs-frame  -D__thumb2__=1 \
   -msoft-float  -gdwarf-2  -mno-sched-prolog  -fno-hosted  -mtune=cortex-m3 \
   -march=armv7-m  -mfix-cortex-m3-ldrd   -ffunction-sections  -fdata-sections \
-          -D__RAM_MODE__=0 $(CMSISINCLUDES) -I$(SRC) -I$(INCLUDE)/
+          -D__RAM_MODE__=0 $(CMSISINCLUDES)
+
+C_FLAGS=$(ARCH_FLAGS) -I$(SRC) -I$(INCLUDE)/
 
 LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
-	   -Wl,--start-group -L$(THUMB2GNULIB) -L$(THUMB2GNULIB2) \
-           -lc -lg -lstdc++ -lsupc++  -lgcc -lm  -Wl,--end-group \
-	   -Xlinker -Map -Xlinker bin/lpc1700.map -Xlinker -T $(LDSCRIPT)
+	-Wl,--start-group -L$(THUMB2GNULIB) -L$(THUMB2GNULIB2) \
+	-lc -lg -lstdc++ -lsupc++  -lgcc -lm  -Wl,--end-group \
+	-Xlinker -Map -Xlinker bin/lpc1700.map -Xlinker -T $(LDSCRIPT)
 
 LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
 
-EXECNAME	= $(BIN)/main
+EXECNAME= $(BIN)/main
 
-lib_cfiles = $(wildcard $(INCLUDE)/*.c)
-LIBS = $(patsubst $(INCLUDE)/%.c, $(INC_BIN)/%.o, $(lib_cfiles))
+LIBS_C_FILES = $(wildcard $(INCLUDE_LIVE)/*.c)
+LIBS_O_FILES = $(patsubst $(INCLUDE_LIVE)/%.c, $(INC_BIN)/%.o, $(LIBS_C_FILES))
+
+LIBS_C_FILES_DBG = $(wildcard $(INCLUDE_DBG)/*.c)
+LIBS_O_FILES_DBG = $(patsubst $(INCLUDE_DBG)/%.c, $(INC_BIN_DBG)/%.o, $(LIBS_C_FILES_DBG))
 
 C_FILES = $(wildcard $(SRC)/*.c)
 O_FILES = $(patsubst $(SRC)/%.c, $(BIN)/%.o, $(C_FILES))
-ALL_OBJ = $(LIBS) $(O_FILES)
+
+LIVE_OBJS = $(O_FILES) $(LIBS_O_FILES)
+DBG_OBJS = $(O_FILES) $(LIBS_O_FILES_DBG)
 
 $(BIN)/%.o: $(SRC)/%.c
 	$(MKDIR_P) $(BIN)
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
 
-$(INC_BIN)/%.o: $(INCLUDE)/%.c
+$(INC_BIN)/%.o: $(INCLUDE_LIVE)/%.c
 	$(MKDIR_P) $(INC_BIN)
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
 
+$(INC_BIN_DBG)/%.o: $(INCLUDE_DBG)/%.c
+	$(MKDIR_P) $(INC_BIN_DBG)
+	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
+
+.phony: debug
+debug:	INCLUDE_C=$(INCLUDE)/dbg/
+	CC=gcc	
+	CFLAGS=-I$(INCLUDE) -I$(INCLUDE_DBG)
+	LDFLAGS=
+debug:	program_debug
+	@echo "Debug build finished"
 .phony: all
-all: 	program
+all:	program
 	@echo "Build finished"
 
 .phony: program
-program: $(ALL_OBJ)
-	$(CC) $(CFLAGS) -o $(EXECNAME) $(ALL_OBJ) $(LDFLAGS)
+program: $(LIVE_OBJS)
+	$(CC) $(CFLAGS) -o $(EXECNAME) $(LIVE_OBJS) $(LDFLAGS)
 	$(OBJCOPY) -I elf32-little -O binary $(EXECNAME) $(EXECNAME).bin
+
+.phony: program_debug
+program_debug: $(DBG_OBJS)
+	$(CC) $(CFLAGS) -o $(EXECNAME) $(DBG_OBJS) $(LDFLAGS)
 
 # clean out the source tree ready to re-build
 .phony: clean
@@ -85,4 +111,3 @@ install:
 	cp $(EXECNAME).bin /media/$(USER)/MBED &
 	sync
 	@echo "Now press the reset button on all MBED file systems"
-

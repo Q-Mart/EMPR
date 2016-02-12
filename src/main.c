@@ -1,3 +1,4 @@
+#include "empr.h"
 #include "debug.h"
 #include "keypad.h"
 #include "lcd.h"
