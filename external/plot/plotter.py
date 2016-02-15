@@ -15,7 +15,7 @@ class Plotter:
 
 class DefaultPlotter(Plotter):
     def __init__(self):
-        super(DefaultPlotter, self).__init__()
+        Plotter.__init__(self)
         self.xs = []
         self.ys = []
 
@@ -35,7 +35,7 @@ class DefaultPlotter(Plotter):
 
 class MeasurePlotter(Plotter):
     def __init__(self):
-        super(DefaultPlotter, self).__init__()
+        Plotter.__init__(self)
         self.max_x = None
         self.max_y = 4096
         self.xs = []
@@ -64,7 +64,7 @@ class MeasurePlotter(Plotter):
 
 class ScanPlotter(Plotter):
     def __init__(self):
-        super(DefaultPlotter, self).__init__()
+        Plotter.__init__(self)
         self.max_x = 270
         self.max_y = 4096
         self.values = {}

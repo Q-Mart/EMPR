@@ -4,6 +4,7 @@
 Usage:
     main
     main -d | --debug
+    main -r | --record
     main -h | --help
 
 Options:
@@ -33,7 +34,7 @@ from docopt import docopt
 
 class PlotCanvas(tkinter.Canvas):
     def __init__(self, parent, width, height):
-        super(PlotCanvas, self).__init__(parent, width=width, height=height)
+        tkinter.Canvas.__init__(self, parent, width=width, height=height)
         self.width = width
         self.height = height
         self.lines = []
@@ -110,31 +111,42 @@ class Mode:
 
 def monitor(frame):
     with SerialReader() as r:
-        t = 1
-        while True:
-            mode = r.read_byte()
+        if RECORD: 
+            read_record(r)
+        else:
+            read_live(r)
 
-            if mode == Mode.SCAN_DO:
-                angle = r.read_int()
-                value = r.read_int()
+def read_record(r):
+    while True:
+        header = r.read_byte()
+        print(header)
 
-                frame.plotter.update(angle, value)
-                frame.draw()
-            elif mode == Mode.MEASURE_DO:
-                value = r.read_int()
-                t += 1
-                frame.plotter.update(t, value)
-                frame.draw()
-            elif mode == Mode.MEASURE:
-                frame.plotter = plotter.MeasurePlotter()
-            elif mode == Mode.SCAN:
-                frame.plotter = plotter.ScanPlotter()
-            elif mode == Mode.MULTI:
-                pass
+def read_live(r):
+    t = 1
+    while True:
+        mode = r.read_byte()
+
+        if mode == Mode.SCAN_DO:
+            angle = r.read_int()
+            value = r.read_int()
+    
+            frame.plotter.update(angle, value)
+            frame.draw()
+        elif mode == Mode.MEASURE_DO:
+            value = r.read_int()
+            t += 1
+            frame.plotter.update(t, value)
+            frame.draw()
+        elif mode == Mode.MEASURE:
+            frame.plotter = plotter.MeasurePlotter()
+        elif mode == Mode.SCAN:
+            frame.plotter = plotter.ScanPlotter()
+        elif mode == Mode.MULTI:
+            pass
 
 class AppFrame(tkinter.Frame):
     def __init__(self, parent):
-        super(AppFrame, self).__init__(parent)
+        tkinter.Frame.__init__(self, parent)
         self.plotter = plotter.DefaultPlotter()
 
         self.pack()
@@ -161,12 +173,20 @@ class AppFrame(tkinter.Frame):
 
 if __name__ == '__main__':
     global DEBUG
+    global RECORD
     args = docopt(__doc__)
 
-    if args['-d'] or args['--debug']:
+    RECORD = False
+    if args['--record']:
+        RECORD = True
+
+    DEBUG = False
+    if args['--debug']:
         DEBUG = True
-    else:
-        DEBUG = False
+
+    if DEBUG and RECORD:
+        print('Error: Cannot run with both --debug and --record')
+        exit(0)
 
     if DEBUG:
         print('Running in DEBUG mode, defauling to MockReader for testing')
