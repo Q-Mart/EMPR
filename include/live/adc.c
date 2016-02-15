@@ -1,7 +1,10 @@
 #include "lpc17xx_adc.h"
+#include "lpc17xx_pinsel.h"
 #include "lpc_types.h"
+
 #include "adc.h"
 #include "pinsel.h"
+#include "network.h"
 
 #define ADC_CLOCKRATE 200000
 
@@ -35,5 +38,11 @@ int adc_get_channel_data(int channel) {
     while (!ADC_ChannelGetStatus(LPC_ADC, channel, ADC_DATA_DONE));
 
     int data = ADC_ChannelGetData(LPC_ADC, channel);
+
+#ifdef RECORD
+	/* Send `data' to PC */
+	network_send(ADC_HEADER, &data, sizeof(int), NULL);
+#endif
+
     return data;
 }

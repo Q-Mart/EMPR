@@ -1,4 +1,5 @@
 #include "lpc17xx_dac.h"
+#include "lpc17xx_pinsel.h"
 
 #include "dac.h"
 #include "pinsel.h"
