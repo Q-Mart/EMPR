@@ -116,10 +116,29 @@ def monitor(frame):
         else:
             read_live(r)
 
+def append_record(b):
+    with open('./record', 'ab') as f:
+        f.write(b)
+
 def read_record(r):
     while True:
         header = r.read_byte()
-        print(header)
+
+        if header == 0x03:
+            vals = [r.read_byte() for _ in range(16)]
+            print('keypad:', vals)
+            append_record(bytearray([header]))
+            append_record(bytearray(map(lambda x: 0 if x < 0 else x, vals)))
+        elif header == 0x04:
+            val = r.read(4)  
+            print('ir:', val)
+            append_record(bytearray([header]))
+            append_record(bytearray(val))
+        elif header == 0x06:
+            val = r.read(4)
+            print('ultra:', val)
+            append_record(bytearray([header]))
+            append_record(bytearray(val))
 
 def read_live(r):
     t = 1
