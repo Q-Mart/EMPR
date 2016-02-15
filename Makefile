@@ -38,7 +38,7 @@ ARCH_FLAGS=-mcpu=cortex-m3  -mthumb  -Wall  -O0  -mapcs-frame  -D__thumb2__=1 \
   -march=armv7-m  -mfix-cortex-m3-ldrd   -ffunction-sections  -fdata-sections \
           -D__RAM_MODE__=0 $(CMSISINCLUDES)
 
-C_FLAGS=$(ARCH_FLAGS) -I$(SRC) -I$(INCLUDE)/
+CFLAGS=$(ARCH_FLAGS) -I$(SRC) -I$(INCLUDE)/
 
 LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 	-Wl,--start-group -L$(THUMB2GNULIB) -L$(THUMB2GNULIB2) \
@@ -81,7 +81,7 @@ debug:	INCLUDE_C=$(INCLUDE)/dbg/
 	CC=gcc	
 	CFLAGS=-I$(INCLUDE) -I$(INCLUDE_DBG)
 	LDFLAGS=
-debug:	program_debug
+debug:	programDebug
 	@echo "Debug build finished"
 
 .phony: program
@@ -89,8 +89,8 @@ program: $(LIVE_OBJS)
 	$(CC) $(CFLAGS) -o $(EXECNAME) $(LIVE_OBJS) $(LDFLAGS)
 	$(OBJCOPY) -I elf32-little -O binary $(EXECNAME) $(EXECNAME).bin
 
-.phony: program_debug
-program_debug: $(DBG_OBJS)
+.phony: programDebug
+programDebug: $(DBG_OBJS)
 	$(CC) $(CFLAGS) -o $(EXECNAME) $(DBG_OBJS) $(LDFLAGS)
 
 # clean out the source tree ready to re-build
