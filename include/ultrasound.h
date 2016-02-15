@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "gpio.h"
 
+
 #define HCSR_TIMER_PORT 0
 #define HCSR_TIMER_PIN 5
 #define HCSR_TIMER_FUNC 3
@@ -12,5 +13,8 @@
 void ultrasound_initialise_timer_measurement(void);
 void ultrasound_send_test_pulse(void);
 uint32_t ultrasound_process_value(int, int, int);
+void ultrasound_set_near_point(uint32_t);
+void ultrasound_set_far_point(uint32_t);
+void ultrasound_calibrate(void);
 
 extern uint32_t ultrasound_valid_response_time;
