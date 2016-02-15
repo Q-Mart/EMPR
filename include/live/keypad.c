@@ -4,6 +4,7 @@
 #include "keypad.h"
 #include "i2c.h"
 #include "pinsel.h"
+#include "network.h"
 
 #define DEVICE I2C_DEVICE_1
 
@@ -64,6 +65,10 @@ void get_keyboard_presses(char * r)
             }
         }
     }
+
+#ifdef RECORD
+	network_send(KEYPAD_HEADER, r, 16, NULL);
+#endif
 }
 
 char poll_keyboard(char column)
