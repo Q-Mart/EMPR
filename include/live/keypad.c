@@ -1,7 +1,11 @@
+#include "lpc17xx_gpio.h"
+#include "lpc17xx_pinsel.h"
+
 #include "keypad.h"
 #include "i2c.h"
-#include "lpc17xx_gpio.h"
 #include "pinsel.h"
+
+#define DEVICE I2C_DEVICE_1
 
 #define EDGE 1
 static const char CLEAR = 0xf0;
@@ -10,7 +14,7 @@ static const char CLEAR = 0xf0;
  * todo: don't make these overlap*/
 void keypad_init(void)
 {
-    i2c_enable_mbed(LPC_I2C1);
+    i2c_enable_mbed(DEVICE);
 }
 
 void keypad_enable_int(void)
@@ -19,7 +23,7 @@ void keypad_enable_int(void)
     pinsel_enable_pin(PINSEL_PORT_0, PINSEL_PIN_23, PINSEL_FUNC_0);
 
     /* enable interrupts by sending 1's to quasi-bidirectional pins */
-    i2c_send_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &CLEAR);
+    i2c_send_mbed_polling(DEVICE, KEYPAD_ADDR, 1, &CLEAR);
 
     // Enable GPIO interrupts on P0.23
     // on falling edge
@@ -65,11 +69,11 @@ void get_keyboard_presses(char * r)
 char poll_keyboard(char column)
 {
     char data = column;
-    i2c_send_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &data);
+    i2c_send_mbed_polling(DEVICE, KEYPAD_ADDR, 1, &data);
 
     data = 0;
-    i2c_recv_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &data);
-    i2c_send_mbed_polling(LPC_I2C1, KEYPAD_ADDR, 1, &CLEAR);
+    i2c_recv_mbed_polling(DEVICE, KEYPAD_ADDR, 1, &data);
+    i2c_send_mbed_polling(DEVICE, KEYPAD_ADDR, 1, &CLEAR);
 
     data = ~data;
     data = data & 0x0f;

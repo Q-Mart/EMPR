@@ -1,4 +1,5 @@
 #include "lpc17xx_adc.h"
+#include "lpc17xx_pinsel.h"
 #include "lpc_types.h"
 #include "adc.h"
 #include "pinsel.h"

@@ -14,8 +14,10 @@ INCLUDE_DBG=$(INCLUDE)/dbg/
 MKDIR_P = mkdir -p
 
 ARCH=arm-none-eabi
-CC=$(ARCH)-gcc
+CC_LIVE=$(ARCH)-gcc
+CC_DBG=gcc
 HCC= /usr/bin/gcc
+
 OBJCOPY=$(ARCH)-objcopy
 
 USER:=$(shell whoami)
@@ -38,14 +40,13 @@ ARCH_FLAGS=-mcpu=cortex-m3  -mthumb  -Wall  -O0  -mapcs-frame  -D__thumb2__=1 \
   -march=armv7-m  -mfix-cortex-m3-ldrd   -ffunction-sections  -fdata-sections \
           -D__RAM_MODE__=0 $(CMSISINCLUDES)
 
-CFLAGS=$(ARCH_FLAGS) -I$(SRC) -I$(INCLUDE)/
-
-LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
+LDFLAGS_LIVE=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 	-Wl,--start-group -L$(THUMB2GNULIB) -L$(THUMB2GNULIB2) \
 	-lc -lg -lstdc++ -lsupc++  -lgcc -lm  -Wl,--end-group \
 	-Xlinker -Map -Xlinker bin/lpc1700.map -Xlinker -T $(LDSCRIPT)
 
-LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
+LDFLAGS_LIVE+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
+CFLAGS_LIVE=$(ARCH_FLAGS) -I$(SRC) -I$(INCLUDE)
 
 EXECNAME= $(BIN)/main
 
@@ -72,15 +73,18 @@ $(INC_BIN)/%.o: $(INCLUDE_LIVE)/%.c
 $(INC_BIN_DBG)/%.o: $(INCLUDE_DBG)/%.c
 	$(MKDIR_P) $(INC_BIN_DBG)
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
+
 .phony: all
+all:	CC=$(CC_LIVE)	
+all:	CFLAGS=$(CFLAGS_LIVE)
+all:	LDFLAGS=$(LDFLAGS_LIVE)
 all:	program
 	@echo "Build finished"
 
 .phony: debug
-debug:	INCLUDE_C=$(INCLUDE)/dbg/
-	CC=gcc	
-	CFLAGS=-I$(INCLUDE) -I$(INCLUDE_DBG)
-	LDFLAGS=
+debug:	CC=gcc	
+debug:	CFLAGS=-I$(INCLUDE) -I$(INCLUDE_DBG) -I$(SRC)
+debug:	LDFLAGS=
 debug:	programDebug
 	@echo "Debug build finished"
 

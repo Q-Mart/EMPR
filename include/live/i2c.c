@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "lpc17xx_i2c.h"
+#include "lpc17xx_pinsel.h"
 #include "lpc_types.h"
 
 #include "i2c.h"
