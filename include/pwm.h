@@ -1,6 +1,3 @@
-#include "lpc17xx_pwm.h"
-#include "lpc_types.h"
-
 #define PWM_CHANNEL_0 0
 #define PWM_CHANNEL_1 1
 #define PWM_CHANNEL_2 2
