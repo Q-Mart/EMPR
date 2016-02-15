@@ -103,6 +103,9 @@ void TIMER2_IRQHandler(void)
         debug_send(debug_string);
     }
 }
+uint32_t ultrasound_get_distance(void){
+	return ultrasound_process_value(ultrasound_calibration_m, ultrasound_calibration_c, ultrasound_valid_response_time);
+}
 
 /* Return a uint32_t with value of distance in micrometers of the object */
 uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offset, int input_value)

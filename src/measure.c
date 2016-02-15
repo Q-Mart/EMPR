@@ -11,8 +11,10 @@ void any_to_measure() {
 }
 
 void measure_loop() {
-    uint32_t raw = ir_sensor_get_raw_data();
-    uint32_t dist = ir_convert_to_distance(raw);
-    network_send(MEASURE_DO, (uint8_t *)&dist, 4, NULL);
-    lcd_send_line(LINE2, "%d", dist);
+    uint32_t raw_ir = ir_sensor_get_raw_data();
+	ultrasound_send_test_pulse();
+    uint32_t dist_ir = ir_convert_to_distance(raw_ir);
+	uint32_t dist_us = ultrasound_get_distance(); 
+    network_send(MEASURE_DO, (uint8_t *)&dist_ir, 4, NULL);
+    lcd_send_line(LINE2, "%d", dist_ir);
 }
