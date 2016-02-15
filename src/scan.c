@@ -20,5 +20,5 @@ void scan_loop(){
     uint32_t raw = ir_sensor_get_raw_data();
     debug_send_arb((char*) &pos, 4);
     debug_send_arb((char*) &raw, 4);
-    lcd_send_line(LINE2, "%f", ir_convert_to_distance(raw));
+    lcd_send_line(LINE2, "%d", ir_convert_to_distance(raw));
 }

@@ -9,10 +9,13 @@
 #include "measure.h"
 #include "adc.h"
 #include "state.h"
+#include "ir_sensor.h"
+#include "timer.h"
+#include "servo.h"
 
-static int current_state_input = 0;
 static state_t current_state = CALIBRATE;
 void state_transition(char key);
+void input_poll();
 int main(void)
 {
     /*
@@ -24,13 +27,13 @@ int main(void)
     lcd_init();
     lcd_clear_display();
     keypad_init();
-    keypad_enable_int();
-    ir_sensorInit();
+    ir_sensor_init();
     servo_init();
     any_to_calib();
 
     while (1)
     {
+        input_poll();
         switch (current_state) {
             case CALIBRATE:
                 break;
@@ -43,31 +46,25 @@ int main(void)
             case MULTI:
                 break;
             default:
-        break;
+                break;
         }
     }
+
+    debug_send("PROGRAM END\n\r");
 }
 
-void EINT3_IRQHandler(void) 
-{
-    if (GPIO_GetIntStatus(0, 23, 1))
-    { 
-        keypad_clear_int();
-
-        char r[16] = {0};
-        get_keyboard_presses(r);
-
-        int i;
-        for(i = 0; i < 16; ++i){
-            if(r[i] == 1) {
-                state_transition(KEYS[i]);
-            }
+void input_poll(void){
+    char r[16] = {0};
+    get_keyboard_presses(r);
+    int i;
+    for(i = 0; i < 16; ++i){
+        if(r[i] == 1) {
+            state_transition(KEYS[i]);
         }
     }
 }
 
 /* Transition function */
-
 typedef void (*side_func)(void);
 
 typedef struct
@@ -94,15 +91,17 @@ const transition_t lut[] = {
     {ANY, 'C', MEASURE, &any_to_measure},
     {ANY, 'D', MULTI, &any_to_multi}
 };
+
 void state_transition(char key){
     /* global transitions from any state back to top-level ones */
     int i;
-    for(i = 0; i < sizeof(lut)/sizeof(lut[0]); i++){
+     for(i = 0; i < sizeof(lut)/sizeof(lut[0]); i++){
         if ((lut[i].current == current_state || lut[i].current == ANY) && lut[i].symbol == key){
-        lcd_clear_display();
-        if(lut[i].effect !=NULL) (*(lut[i].effect))();
-        current_state = lut[i].next;
-        return;
+            if(current_state == lut[i].next) return;
+            lcd_clear_display();
+            if(lut[i].effect !=NULL) (*(lut[i].effect))();
+            current_state = lut[i].next;
+            return;
         }
     }
 }

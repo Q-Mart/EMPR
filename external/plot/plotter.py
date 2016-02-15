@@ -14,9 +14,12 @@ class Plotter:
         raise NotImplemenetedError
 
 class DefaultPlotter(Plotter):
+    '''
+    A BoundedPlot by default
+    '''
     def __init__(self):
         self.max_x = None
-        self.max_y = 4096
+        self.max_y = int(8e4)
         self.xs = []
         self.ys = []
         self.bound = 100
@@ -32,6 +35,7 @@ class DefaultPlotter(Plotter):
 
     def update(self, *data):
         x, y = data
+        #print('got (x, y) = (%d, %d)' % (x,y))
 
         if len(self.xs) >= self.bound:
             self.xs = self.xs[1:]
