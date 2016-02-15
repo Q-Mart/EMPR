@@ -25,8 +25,8 @@ void ir_sensor_set_far_point(uint32_t x){
 }
 
 void ir_sensor_calibrate(){
-    ir_sensor_m = (ir_near_point - ir_far_point) / ((1/15000.0f) - (1/30000.0f));
-    ir_sensor_c = ir_far_point - (ir_sensor_m/30000.0f);
+    ir_sensor_m = (ir_near_point - ir_far_point) / ((1/150000.0f) - (1/300000.0f));
+    ir_sensor_c = ir_far_point - (ir_sensor_m/300000.0f);
 }
 
 uint32_t ir_sensor_get_distance(){
