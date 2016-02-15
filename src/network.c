@@ -9,7 +9,7 @@ void network_send(state_t state_header, ...) {
        with header state_t type 'state_header' and varargs for
        each data packet
 
-       for instance `network_send(MEASURE_DO, 4, &data)`
+       for instance `network_send(MEASURE_DO, &data, 4)`
        sends the MEASURE_DO byte followed by 4 bytes of the
        *uint8_t 'data' (even if data was of type uint32_t)
 
