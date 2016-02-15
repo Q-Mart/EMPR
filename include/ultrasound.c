@@ -1,5 +1,11 @@
 #include "ultrasound.h"
 
+/* Ultrasound calibration variables. */
+static uint32_t ultrasound_calibration_m;
+static uint32_t ultrasound_calibration_c;
+static uint32_t ultrasound_near_point;
+static uint32_t ultrasound_far_point;
+
 /* Timer global variables, do not read from them. */
 static uint32_t ultrasound_current_timer_diff = 0;
 static uint32_t ultrasound_previous_timer_value = 0;
@@ -23,6 +29,31 @@ void ultrasound_initialise_timer_measurement(void)
     timer_enable_systick();
     init_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, GPIO_OUTPUT);
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
+
+    //Initialise ultrasound calibration values as well.
+    ultrasound_calibration_m = 0;
+    ultrasound_calibration_c = 0;
+}
+
+/* Ultrasound calibration functions. Except for sending test pulse,
+    is nearly identical to the ultrasound calibration. */
+
+void ultrasound_set_near_point(uint32_t x){
+    ultrasound_send_test_pulse();
+    timer_delay(50);
+    ultrasound_near_point = x;
+}
+
+void ultrasound_set_far_point(uint32_t x){
+    ultrasound_send_test_pulse();
+    timer_delay(50);
+    ultrasound_far_point = x;
+    ultrasound_calibrate();
+}
+
+void ultrasound_calibrate(){
+    ultrasound_calibration_m = (ultrasound_near_point - ultrasound_far_point) / ((1/150000.0f) - (1/300000.0f));
+    ultrasound_calibration_c = ultrasound_far_point - (ultrasound_calibration_m/300000.0f);
 }
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
@@ -32,7 +63,6 @@ void ultrasound_send_test_pulse(void){
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
     timer_delay(1);
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 0);
-    timer_delay(1000);
 }
 
 /*Using General Purpose Timer 2.1 to capture
