@@ -1,8 +1,8 @@
 #include "ultrasound.h"
 
 /* Ultrasound calibration variables. */
-static uint32_t ultrasound_calibration_m;
-static uint32_t ultrasound_calibration_c;
+uint32_t ultrasound_calibration_m;
+uint32_t ultrasound_calibration_c;
 static uint32_t ultrasound_near_point;
 static uint32_t ultrasound_far_point;
 

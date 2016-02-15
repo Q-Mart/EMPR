@@ -21,3 +21,5 @@ void ultrasound_set_far_point(uint32_t);
 void ultrasound_calibrate(void);
 
 extern uint32_t ultrasound_valid_response_time;
+extern uint32_t ultrasound_calibration_m;
+extern uint32_t ultrasound_calibration_c;

@@ -12,6 +12,7 @@
 #include "ir_sensor.h"
 #include "timer.h"
 #include "servo.h"
+#include "tracker.h"
 
 static state_t current_state = CALIBRATE;
 void state_transition(char key);
@@ -42,6 +43,9 @@ int main(void)
                 break;
             case MEASURE:
                 measure_loop();
+                break;
+            case TRACK:
+                tracker();
                 break;
             case MULTI:
                 break;
@@ -89,7 +93,8 @@ const transition_t lut[] = {
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},
     {ANY, 'C', MEASURE, &any_to_measure},
-    {ANY, 'D', MULTI, &any_to_multi}
+    {ANY, 'D', MULTI, &any_to_multi},
+    {ANY, '5', TRACK, NULL}
 };
 
 void state_transition(char key){

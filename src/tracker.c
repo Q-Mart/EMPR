@@ -8,30 +8,13 @@
 #include "timer.h"
 #include "ultrasound.h"
 #include "servo.h"
-
-/* Instructions to use ultrasound module:
-    Connect Echo pin of the sensor to P29 on IO Board;
-    Connect Trigger pin of the sensor to P8 on IO Board;
-    Call initialise_timer_measurement() at start;
-    Now calibrate the sensor, calculated the speed of sound
-     as it appears with the calibration object, in m/s, save
-     in calibrated_gradient;
-    Call send_test_pulse() to send a pulse, then immediately:
-    call process_ultrasound_value(calibrated_gradient,\
-        (int)ultrasound_valid_response_time) 
-     to obtain object distance in cm.
-*/
-int tracker_full_scan(int, int, int, uint32_t*);
-void tracker_narrow_sweep();
-int tracker_find_smallest_index(uint32_t*, int, int);
-void tracker_set_bound();
-int tracker_compare_indices(int, int);
+#include "tracker.h"
 
 int tracker_upper_bound = 0;
 int tracker_lower_bound = 0;
 int tracker_current_center = 0;
 
-int main(void)
+void tracker(void)
 {
     debug_init();
 
@@ -77,9 +60,9 @@ int tracker_full_scan(int start, int end, int increment, uint32_t * tracker_ultr
     for (sensor_position = start; sensor_position <= end; sensor_position += increment)
     {
         servo_set_pos(sensor_position);
-        timer_delay(375);
+        timer_delay(175);
         ultrasound_send_test_pulse();
-        measured_distance = ultrasound_process_value(340, 0, ultrasound_valid_response_time);
+        measured_distance = ultrasound_process_value(ultrasound_calibration_m, ultrasound_calibration_c, ultrasound_valid_response_time);
         sprintf(print_distance, "Distance: %lu um\r\n\r\n", measured_distance);
         debug_send(print_distance);
         tracker_ultrasound_range_table[range_index] = measured_distance;
@@ -114,7 +97,7 @@ void tracker_narrow_sweep()
             servo_set_pos(sensor_position);
             timer_delay(75);
             ultrasound_send_test_pulse();
-            timer_delay(75);
+            timer_delay(15);
             measured_distance = ultrasound_process_value(340, 0, ultrasound_valid_response_time);
             tracker_ultrasound_range_table[range_index] = measured_distance;
             tracker_ultrasound_index_table[range_index] = range_index - 6;
@@ -127,7 +110,7 @@ void tracker_narrow_sweep()
             servo_set_pos(sensor_position);
             timer_delay(75);
             ultrasound_send_test_pulse();
-            timer_delay(75);
+            timer_delay(15);
             measured_distance = ultrasound_process_value(340, 0, ultrasound_valid_response_time);
             tracker_ultrasound_range_table[range_index] = measured_distance;
             tracker_ultrasound_index_table[range_index] = -1 * (range_index - 6);
@@ -137,7 +120,8 @@ void tracker_narrow_sweep()
     
     new_index = tracker_find_smallest_index(tracker_ultrasound_range_table, range_index, 0);
     tracker_current_center = (tracker_upper_bound + tracker_lower_bound) / 2 + 5 * tracker_ultrasound_index_table[new_index];
-    debug_sendf("The sensor thinks that the object is at %d degrees.\r\n", tracker_current_center);
+    debug_sendf("Ultrasound: the object is at %d degrees.\r\n", tracker_current_center);
+    debug_sendf("Ultrasound: value: %d\r\n", tracker_ultrasound_range_table[new_index]);
 }
 
 void tracker_set_bound()

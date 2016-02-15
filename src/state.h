@@ -6,6 +6,7 @@ typedef enum {
     SCAN,
     MEASURE,
     MULTI,
+    TRACK,
 
     CALIBRATE_NEAR,
     CALIBRATE_NEAR_DONE,
