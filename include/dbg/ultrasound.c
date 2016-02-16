@@ -14,3 +14,6 @@ uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offs
 {
     return 0;
 }
+uint32_t ultrasound_get_distance(void){
+	return 0;
+}
