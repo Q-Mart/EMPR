@@ -111,10 +111,7 @@ class Mode:
 
 def monitor(frame):
     with SerialReader() as r:
-        if RECORD: 
-            read_record(r)
-        else:
-            read_live(r)
+        read_live(frame, r)
 
 def append_record(b):
     with open('./record', 'ab') as f:
@@ -140,7 +137,7 @@ def read_record(r):
             append_record(bytearray([header]))
             append_record(bytearray(val))
 
-def read_live(r):
+def read_live(frame, r):
     t = 1
     while True:
         mode = r.read_byte()
@@ -192,26 +189,21 @@ class AppFrame(tkinter.Frame):
 
 if __name__ == '__main__':
     global DEBUG
-    global RECORD
     args = docopt(__doc__)
 
-    RECORD = False
     if args['--record']:
-        RECORD = True
+        with SerialReader() as r:
+            read_record(r)
+    else:
+        DEBUG = False
+        if args['--debug']:
+            DEBUG = True
 
-    DEBUG = False
-    if args['--debug']:
-        DEBUG = True
-
-    if DEBUG and RECORD:
-        print('Error: Cannot run with both --debug and --record')
-        exit(0)
-
-    if DEBUG:
-        print('Running in DEBUG mode, defauling to MockReader for testing')
-        SerialReader = reader.MockReader
+        if DEBUG:
+            print('Running in DEBUG mode, defauling to MockReader for testing')
+            SerialReader = reader.MockReader
 
 
-    tk = tkinter.Tk()
-    app = AppFrame(parent=tk)
-    app.mainloop()
+        tk = tkinter.Tk()
+        app = AppFrame(parent=tk)
+        app.mainloop()
