@@ -29,16 +29,15 @@ void ir_sensor_calibrate(){
     ir_sensor_c = ir_far_point - (ir_sensor_m/30000.0f);
 }
 
-uint32_t ir_sensor_get_distance(){
+uint32_t ir_sensor_get_distance() {
     /* returns the distance in cm */
     uint32_t val = adc_get_channel_data(ir_sensor_adc_channel);
     return ir_convert_to_distance(val);
 }
-uint32_t ir_sensor_get_raw_data(){
-	uint32_t data = adc_get_channel_data(ir_sensor_adc_channel);
-#ifdef RECORD
-	network_send(IR_HEADER, &data, sizeof(uint32_t), NULL);
-#endif
+
+uint32_t ir_sensor_get_raw_data() {
+    uint32_t data = adc_get_channel_data(ir_sensor_adc_channel);
+    record(IR_HEADER, &data, sizeof(uint32_t), NULL);
     return data;
 }
 uint32_t ir_convert_to_distance(uint32_t raw){

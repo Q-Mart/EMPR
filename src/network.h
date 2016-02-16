@@ -4,7 +4,7 @@
 
 #include "state.h"
 
-/* #define RECORD */
+#define RECORD
 
 /* Header for recording */
 #define ADC_HEADER 0x01
@@ -15,3 +15,4 @@
 #define ULTRASOUND_HEADER 0x06
 
 void network_send(state_t state_header, ...);
+void record(char header, ...);

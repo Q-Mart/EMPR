@@ -28,8 +28,6 @@ int servo_set_pos(int angle){
 }
 
 int servo_get_pos(){
-#ifdef RECORD
-	network_send(SERVO_HEADER, &current_pos, sizeof(int), NULL);
-#endif
+    record(SERVO_HEADER, &current_pos, sizeof(int), NULL);
     return current_pos;
 }

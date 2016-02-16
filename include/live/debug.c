@@ -6,6 +6,7 @@
 #include "lpc17xx_pinsel.h"
 
 #include "debug.h"
+#include "network.h"
 #include "pinsel.h"
 
 void debug_init(void)
@@ -28,11 +29,15 @@ void debug_init(void)
 
 int debug_send(char* s)
 {
+#ifndef RECORD
     return UART_Send(LPC_UART0, s, strlen(s), BLOCKING);
+#endif
 }
 
 int debug_send_arb(char* s, int len){
+#ifndef RECORD
     return UART_Send(LPC_UART0, s, len, BLOCKING);
+#endif
 }
 
 int debug_sendfc(char* fmt, char arg)

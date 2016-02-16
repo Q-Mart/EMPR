@@ -39,10 +39,8 @@ int adc_get_channel_data(int channel) {
 
     int data = ADC_ChannelGetData(LPC_ADC, channel);
 
-#ifdef RECORD
-	/* Send `data' to PC */
-	network_send(ADC_HEADER, &data, sizeof(int), NULL);
-#endif
+    /* Send `data' to PC */
+    record(ADC_HEADER, &data, sizeof(int), NULL);
 
     return data;
 }
