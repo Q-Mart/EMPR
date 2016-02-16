@@ -4,8 +4,6 @@
 
 #include "state.h"
 
-#define RECORD
-
 /* Header for recording */
 #define ADC_HEADER 0x01
 #define I2C_HEADER 0x02
