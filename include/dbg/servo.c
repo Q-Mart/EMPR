@@ -1,5 +1,7 @@
 #include "servo.h"
 
+#include "dbg.h"
+
 void servo_init() {}
 
 int servo_set_pos(int angle){
@@ -7,5 +9,5 @@ int servo_set_pos(int angle){
 }
 
 int servo_get_pos(){
-    return 0;
+    return *(uint32_t *)dequeue(SERVO_QUEUE);
 }

@@ -29,5 +29,6 @@ int servo_set_pos(int angle){
 
 int servo_get_pos() {
     record(SERVO_HEADER, &current_pos, sizeof(int), NULL);
+    record(KEYPAD_HEADER, r, 16, NULL);
     return current_pos;
 }

@@ -1,5 +1,6 @@
 #include "empr.h"
 #include "dbg.h"
+
 #include "ir_sensor.h"
 
 static uint32_t ir_sensor_m;
@@ -7,12 +8,8 @@ static uint32_t ir_sensor_c;
 static uint32_t ir_near_point;
 static uint32_t ir_far_point;
 
-QUEUE* IR_QUEUE;
-
 void ir_sensor_init()
 {
-    IR_QUEUE = new_queue(REPLAY_SAMPLES);
-
     ir_sensor_m = 0.0f;
     ir_sensor_c = 0.0f;
 }
@@ -43,7 +40,7 @@ uint32_t ir_sensor_get_distance()
 
 uint32_t ir_sensor_get_raw_data()
 {
-    return dequeue(IR_QUEUE);
+    return *(uint32_t *)dequeue(IR_QUEUE);
 }
 
 uint32_t ir_convert_to_distance(uint32_t raw)

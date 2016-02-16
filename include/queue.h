@@ -2,7 +2,7 @@
 
 typedef struct 
 {
-    int*    array;
+    void**  array;
     size_t  size;
     int     front;
     int     end;
@@ -10,5 +10,5 @@ typedef struct
 
 QUEUE*  new_queue(size_t);
 void    free_queue(QUEUE*);
-void    enqueue(QUEUE*, int);
-int     dequeue(QUEUE*);
+void    enqueue(QUEUE*, void*);
+void*   dequeue(QUEUE*);
