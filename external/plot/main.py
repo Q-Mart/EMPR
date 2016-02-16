@@ -122,7 +122,9 @@ def append_record(b):
 
 def read_record(r):
     while True:
+        print('read_record')
         header = r.read_byte()
+        print(header)
 
         if header == 0x03:
             vals = [r.read_byte() for _ in range(16)]
@@ -139,6 +141,13 @@ def read_record(r):
             print('ultra:', val)
             append_record(bytearray([header]))
             append_record(bytearray(val))
+        # sinks for others
+        elif header == 0x01:
+            print('adc')
+            r.read(4)
+        elif header == 0x05:
+            print('servo')
+            r.read(4)
 
 def read_live(frame, r):
     t = 1
