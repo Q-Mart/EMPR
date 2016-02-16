@@ -94,7 +94,7 @@ const transition_t lut[] = {
     {ANY, 'B', SCAN, &any_to_scan},
     {ANY, 'C', MEASURE, &any_to_measure},
     {ANY, 'D', MULTI, &any_to_multi},
-    {ANY, '5', TRACK, NULL}
+    {ANY, '5', TRACK, &any_to_track}
 };
 
 void state_transition(char key){
