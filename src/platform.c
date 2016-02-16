@@ -9,12 +9,8 @@ void any_to_platform(){
 }
 
 void platform_loop(){
-    stepper_send_nibble(6);
-    timer_delay(500);
-    stepper_send_nibble(3);
-    timer_delay(500);
-    stepper_send_nibble(9);
-    timer_delay(500);
-    stepper_send_nibble(12);
-    timer_delay(500);
+    stepper_full_clockwise(3);
+    timer_delay(5000);
+    stepper_full_anticlockwise(3);
+    timer_delay(5000);
 }
