@@ -1,3 +1,4 @@
+#include "empr.h"
 #include "pwm.h"
 
 #define FREQUENCY 500000
@@ -6,5 +7,5 @@
 #define STEP 148
 
 void servo_init();
-int servo_set_pos(int angle);
-int servo_get_pos();
+uint16_t servo_set_pos(int angle);
+uint16_t servo_get_pos();
