@@ -1,3 +1,7 @@
+#include "lpc17xx_pwm.h"
+#include "lpc17xx_pinsel.h"
+#include "lpc_types.h"
+
 #include "pwm.h"
 #include "pinsel.h"
 

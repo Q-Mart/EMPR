@@ -1,7 +1,8 @@
-#include "lpc17xx_i2c.h"
-
 /* enable I2C on mbed */
-void i2c_enable_mbed(LPC_I2C_TypeDef*);
-int i2c_send_mbed_polling(LPC_I2C_TypeDef*, int, int, char*);
-int i2c_recv_mbed_polling(LPC_I2C_TypeDef*, int, int, char*);
-int i2c_send_recv_mbed_polling(LPC_I2C_TypeDef*, int, int, char*, int, char*);
+#define I2C_DEVICE_1 1
+#define I2C_DEVICE_2 2
+
+void i2c_enable_mbed(int);
+int i2c_send_mbed_polling(int, int, int, char*);
+int i2c_recv_mbed_polling(int, int, int, char*);
+int i2c_send_recv_mbed_polling(int, int, int, char*, int, char*);

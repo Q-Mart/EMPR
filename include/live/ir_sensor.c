@@ -1,5 +1,7 @@
+#include "empr.h"
+
 #include "ir_sensor.h"
-#include <stdint.h>
+#include "network.h"
 
 
 static uint32_t ir_sensor_m;
@@ -23,8 +25,8 @@ void ir_sensor_set_far_point(uint32_t x){
 }
 
 void ir_sensor_calibrate(){
-    ir_sensor_m = (ir_near_point - ir_far_point) / ((1/15000.0f) - (1/30000.0f));
-    ir_sensor_c = ir_far_point - (ir_sensor_m/30000.0f);
+    ir_sensor_m = (ir_near_point - ir_far_point) / ((1/150000.0f) - (1/300000.0f));
+    ir_sensor_c = ir_far_point - (ir_sensor_m/300000.0f);
 }
 
 uint32_t ir_sensor_get_distance(){
@@ -33,7 +35,11 @@ uint32_t ir_sensor_get_distance(){
     return ir_convert_to_distance(val);
 }
 uint32_t ir_sensor_get_raw_data(){
-    return adc_get_channel_data(ir_sensor_adc_channel);
+	uint32_t data = adc_get_channel_data(ir_sensor_adc_channel);
+#ifdef RECORD
+	network_send(IR_HEADER, &data, sizeof(uint32_t), NULL);
+#endif
+    return data;
 }
 uint32_t ir_convert_to_distance(uint32_t raw){
   if (raw != ir_sensor_c){

@@ -1,4 +1,7 @@
+#include "empr.h"
+
 #include "servo.h"
+#include "network.h"
 
 static int current_pos = 0;
 
@@ -25,5 +28,8 @@ int servo_set_pos(int angle){
 }
 
 int servo_get_pos(){
+#ifdef RECORD
+	network_send(SERVO_HEADER, &current_pos, sizeof(int), NULL);
+#endif
     return current_pos;
 }
