@@ -27,7 +27,7 @@ int servo_set_pos(int angle){
     return current_pos;
 }
 
-int servo_get_pos(){
+int servo_get_pos() {
     record(SERVO_HEADER, &current_pos, sizeof(int), NULL);
     return current_pos;
 }
