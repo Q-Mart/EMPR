@@ -12,6 +12,9 @@ Options:
     -h --help   Show this text
 '''
 
+BASE_DIR = '../../'
+RECORD_FILE = BASE_DIR + 'records/record'
+
 import reader
 
 try:
@@ -114,7 +117,7 @@ def monitor(frame):
         read_live(frame, r)
 
 def append_record(b):
-    with open('./record', 'ab') as f:
+    with open(RECORD_FILE, 'ab') as f:
         f.write(b)
 
 def read_record(r):
