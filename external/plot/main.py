@@ -122,9 +122,7 @@ def append_record(b):
 
 def read_record(r):
     while True:
-        print('read_record')
         header = r.read_byte()
-        print(header)
 
         if header == 0x03:
             vals = [r.read_byte() for _ in range(16)]
@@ -143,11 +141,12 @@ def read_record(r):
             append_record(bytearray(val))
         # sinks for others
         elif header == 0x01:
-            print('adc')
             r.read(4)
         elif header == 0x05:
-            print('servo')
-            r.read(4)
+            val = r.read(4)
+            print('servo:')
+            append_record(bytearray([header]))
+            append_record(bytearray(val))
 
 def read_live(frame, r):
     t = 1
@@ -204,6 +203,9 @@ if __name__ == '__main__':
     args = docopt(__doc__)
 
     if args['--record']:
+        with open(RECORD_FILE, 'wb') as f:
+            f.write('')
+
         with SerialReader() as r:
             read_record(r)
     else:
