@@ -3,7 +3,6 @@
 
 #include "ultrasound.h"
 #include "network.h"
-#include <stdio.h>
 
 /* Ultrasound calibration variables. */
 static uint32_t ultrasound_calibration_m;
@@ -104,6 +103,8 @@ void TIMER2_IRQHandler(void)
         debug_send(debug_string);
     }
 }
+
+/* Retrieve ultrasound measured distance. */
 uint32_t ultrasound_get_distance(void){
 	return ultrasound_process_value(ultrasound_calibration_m, ultrasound_calibration_c, ultrasound_valid_response_time);
 }
