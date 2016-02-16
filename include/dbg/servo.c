@@ -2,10 +2,10 @@
 
 void servo_init() {}
 
-int servo_set_pos(int angle){
+uint16_t servo_set_pos(int angle){
     return angle;
 }
 
-int servo_get_pos(){
+uint16_t servo_get_pos(){
     return 0;
 }
