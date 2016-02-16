@@ -8,6 +8,7 @@ signed int scan_direction = 1;
 
 void any_to_scan(){
     lcd_send_line(LINE1, "Scan Mode");
+    servo_set_pos(0);
 }
 void scan_loop(){
     //Max 270
