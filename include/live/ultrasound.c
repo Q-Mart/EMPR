@@ -58,10 +58,10 @@ void ultrasound_set_far_point(){
 void ultrasound_calibrate(){
     //These are split to ensure that C implicitly casts the types correctly
     ultrasound_calibration_m = (ultrasound_far_point - ultrasound_near_point);
-	ultrasound_calibration_m = (300000.0f - 150000.0f) / ultrasound_calibration_m;
+    ultrasound_calibration_m = (300000.0f - 150000.0f) / ultrasound_calibration_m;
 
     ultrasound_calibration_c = (ultrasound_calibration_m * ultrasound_near_point);
-	ultrasound_calibration_c = 150000 - ultrasound_calibration_c;
+    ultrasound_calibration_c = 150000 - ultrasound_calibration_c;
 }
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
