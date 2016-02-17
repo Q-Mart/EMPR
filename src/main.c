@@ -29,6 +29,7 @@ int main(void)
     lcd_clear_display();
     keypad_init();
     ir_sensor_init();
+    ultrasound_initialise_timer_measurement();
     servo_init();
     any_to_calib();
     sound_init();
