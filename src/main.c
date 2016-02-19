@@ -12,6 +12,7 @@
 #include "ir_sensor.h"
 #include "timer.h"
 #include "servo.h"
+#include "ultrasound.h"
 
 int key_to_int(char key){
     //This was written to allow for numbers to be converted from
@@ -77,9 +78,15 @@ int main(void)
             case SCAN_DO:
                 scan_loop();
                 break;
-            case SCAN_PARAMETERS_1:
-                scan_parameters_1_loop(last_key_press);
+            case SCAN_PARAMETER_1:
+                scan_parameter_1_loop(last_key_press);
                 break;
+			case SCAN_PARAMETER_2:
+				scan_parameter_2_loop(last_key_press);
+				break;
+			case SCAN_PARAMETER_3:
+				scan_parameter_3_loop(last_key_press);
+				break;
             case MEASURE_DO:
                 measure_loop();
                 break;
@@ -100,8 +107,8 @@ void input_poll(void){
     int i;
     for(i = 0; i < 16; ++i){
         if(r[i] == 1) {
-            state_transition(KEYS[i]);
             last_key_press = key_to_int(KEYS[i]);
+			state_transition(KEYS[i]);
         }
     }
 }
@@ -123,9 +130,15 @@ const transition_t lut[] = {
     {CALIBRATE_NEAR_DONE, '#', CALIBRATE_DONE, &near_calib_to_done},
 
     {SCAN, '#', SCAN_DO, &scan_to_scan_do},
-    {SCAN, '*', SCAN_PARAMETERS, NULL},
-    {SCAN_PARAMETERS, '1', SCAN_PARAMETERS_1, &scan_parameters_to_1},
-    {SCAN_PARAMETERS_1, '#', SCAN_PARAMETERS, &scan_parameters_1_to_scan_parameters},
+	{SCAN_DO, '*', SCAN, &any_to_scan},
+    {SCAN, '*', SCAN_PARAMETERS, &any_to_scan_parameters},
+    {SCAN_PARAMETERS, '1', SCAN_PARAMETER_1, &scan_parameters_to_1},
+	{SCAN_PARAMETERS, '#', SCAN, &any_to_scan},
+    {SCAN_PARAMETER_1, '#', SCAN_PARAMETERS, &scan_parameter_1_to_scan_parameters},
+	{SCAN_PARAMETERS, '2', SCAN_PARAMETER_2, &scan_parameters_to_2},
+	{SCAN_PARAMETER_2, '#', SCAN_PARAMETERS, &scan_parameter_2_to_scan_parameters},
+	{SCAN_PARAMETERS, '3', SCAN_PARAMETER_3, &scan_parameters_to_3},
+	{SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters}, 
 
 
     {MEASURE, '#', MEASURE_DO, NULL},
@@ -150,6 +163,7 @@ void state_transition(char key){
             lcd_clear_display();
             if(lut[i].effect !=NULL) (*(lut[i].effect))();
             current_state = lut[i].next;
+			last_key_press = -2;//Reset last key press to stop it being used.
             return;
         }
     }
