@@ -21,31 +21,15 @@ int key_to_int(char key){
     //what type of keys are pressed.
     //Could be made clearer by replacing with an enum. But this works
     //for the time being.
-    switch(key){
-        case '0':
-            return 0;
-        case '1':
-            return 1;
-        case '2':
-            return 2;
-        case '3':
-            return 3;
-        case '4':
-            return 4;
-        case '5':
-            return 5;
-        case '6':
-            return 6;
-        case '7':
-            return 7;
-        case '8':
-            return 8;
-        case '9':
-            return 9;
+    if(key >= 48 && key <= 57){
+        return key - 48;
+    } else {
+        switch(key){
         case '*':
             return -1;
         default:
             return -2;//Don't care value
+        }
     }
 }
 

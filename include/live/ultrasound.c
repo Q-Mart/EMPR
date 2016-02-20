@@ -4,13 +4,14 @@
 #include "ultrasound.h"
 #include "network.h"
 
-#define SAMPLE_COUNT 10 //The number of samples to use
+#define SAMPLE_COUNT 10 //The number of samples to use for calibration.
 
 /* Ultrasound calibration variables. */
 static int32_t ultrasound_calibration_m; //Needs to be signed
 static int32_t ultrasound_calibration_c; //Can have intercept below 0
-static uint32_t ultrasound_near_points[SAMPLE_COUNT];
-static uint32_t ultrasound_far_points[SAMPLE_COUNT];
+
+static uint32_t ultrasound_near_points[SAMPLE_COUNT];//Sample windows for
+static uint32_t ultrasound_far_points[SAMPLE_COUNT];//calibration.
 
 /* Timer global variables, do not read from them. */
 static uint32_t ultrasound_current_timer_diff = 0;
@@ -45,6 +46,7 @@ void ultrasound_initialise_timer_measurement(void)
     is nearly identical to the ultrasound calibration. */
 
 void ultrasound_set_near_point(){
+    //We fill up the sample window to allow for averaging
     int i;
     for(i = 0; i < SAMPLE_COUNT; i++){
         ultrasound_send_test_pulse();
@@ -54,6 +56,7 @@ void ultrasound_set_near_point(){
 }
 
 void ultrasound_set_far_point(){
+    //Fill up the sample window for averaging.
     int i;
     for(i = 0; i < SAMPLE_COUNT; i++){
         ultrasound_send_test_pulse();
@@ -65,6 +68,8 @@ void ultrasound_set_far_point(){
 
 void ultrasound_calibrate(){
     //Average the inputs to get a more sensible value
+    //Here we are just finding the mean for both the near
+    //and far points
     int32_t ultrasound_near_point = 0;
     int32_t ultrasound_far_point = 0;
     int i;
@@ -72,8 +77,8 @@ void ultrasound_calibrate(){
         ultrasound_near_point += ultrasound_near_points[i];
         ultrasound_far_point += ultrasound_far_points[i];
     }
-    ultrasound_near_point /= 10;
-    ultrasound_far_point /= 10;
+    ultrasound_near_point /= SAMPLE_COUNT;
+    ultrasound_far_point /= SAMPLE_COUNT;
 
     //These are split to ensure that C implicitly casts the types correctly
     ultrasound_calibration_m = (ultrasound_far_point - ultrasound_near_point);
