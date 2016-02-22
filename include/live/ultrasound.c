@@ -5,8 +5,8 @@
 #include "network.h"
 
 /* Ultrasound calibration variables. */
-static uint32_t ultrasound_calibration_m;
-static uint32_t ultrasound_calibration_c;
+static int32_t ultrasound_calibration_m; //Needs to be signed
+static int32_t ultrasound_calibration_c; //Can have intercept below 0
 static uint32_t ultrasound_near_point;
 static uint32_t ultrasound_far_point;
 
@@ -42,27 +42,30 @@ void ultrasound_initialise_timer_measurement(void)
 /* Ultrasound calibration functions. Except for sending test pulse,
     is nearly identical to the ultrasound calibration. */
 
-void ultrasound_set_near_point(uint32_t x){
+void ultrasound_set_near_point(){
     ultrasound_send_test_pulse();
     timer_delay(50);
-    ultrasound_near_point = x;
+    ultrasound_near_point = 10 * ultrasound_valid_response_time / 2;
 }
 
-void ultrasound_set_far_point(uint32_t x){
+void ultrasound_set_far_point(){
     ultrasound_send_test_pulse();
     timer_delay(50);
-    ultrasound_far_point = x;
+    ultrasound_far_point = 10 * ultrasound_valid_response_time / 2;
     ultrasound_calibrate();
 }
 
 void ultrasound_calibrate(){
-    ultrasound_calibration_m = (ultrasound_near_point - ultrasound_far_point) / ((1/150000.0f) - (1/300000.0f));
-    ultrasound_calibration_c = ultrasound_far_point - (ultrasound_calibration_m/300000.0f);
+    //These are split to ensure that C implicitly casts the types correctly
+    ultrasound_calibration_m = (ultrasound_far_point - ultrasound_near_point);
+    ultrasound_calibration_m = (300000.0f - 150000.0f) / ultrasound_calibration_m;
+
+    ultrasound_calibration_c = (ultrasound_calibration_m * ultrasound_near_point);
+    ultrasound_calibration_c = 150000 - ultrasound_calibration_c;
 }
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
 void ultrasound_send_test_pulse(void){
-    debug_sendfc("Send pulse... %d\r\n", ultrasound_pulse_count++);
     ultrasound_false_edge_expected = 1;
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
     timer_delay(1);
@@ -99,10 +102,10 @@ void TIMER2_IRQHandler(void)
         ultrasound_false_edge_expected = 0;
     } else {
         ultrasound_valid_response_time = ultrasound_current_timer_diff;
-        sprintf(debug_string, "Timer Value: %lu \r\nTimer duration: %lu\r\n\r\n", (unsigned long)ultrasound_previous_timer_value, (unsigned long)ultrasound_valid_response_time);
-        debug_send(debug_string);
     }
 }
+
+/* Retrieve ultrasound measured distance. */
 uint32_t ultrasound_get_distance(void){
 	return ultrasound_process_value(ultrasound_calibration_m, ultrasound_calibration_c, ultrasound_valid_response_time);
 }
