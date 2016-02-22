@@ -4,11 +4,14 @@
 #include "ultrasound.h"
 #include "network.h"
 
+#define SAMPLE_COUNT 10 //The number of samples to use for calibration.
+
 /* Ultrasound calibration variables. */
 static int32_t ultrasound_calibration_m; //Needs to be signed
 static int32_t ultrasound_calibration_c; //Can have intercept below 0
-static uint32_t ultrasound_near_point;
-static uint32_t ultrasound_far_point;
+
+static uint32_t ultrasound_near_points[SAMPLE_COUNT];//Sample windows for
+static uint32_t ultrasound_far_points[SAMPLE_COUNT];//calibration.
 
 /* Timer global variables, do not read from them. */
 static uint32_t ultrasound_current_timer_diff = 0;
@@ -43,23 +46,43 @@ void ultrasound_initialise_timer_measurement(void)
     is nearly identical to the ultrasound calibration. */
 
 void ultrasound_set_near_point(){
-    ultrasound_send_test_pulse();
-    timer_delay(50);
-    ultrasound_near_point = 10 * ultrasound_valid_response_time / 2;
+    //We fill up the sample window to allow for averaging
+    int i;
+    for(i = 0; i < SAMPLE_COUNT; i++){
+        ultrasound_send_test_pulse();
+        timer_delay(50);
+        ultrasound_near_points[i] = 10 * ultrasound_valid_response_time / 2;
+    }
 }
 
 void ultrasound_set_far_point(){
-    ultrasound_send_test_pulse();
-    timer_delay(50);
-    ultrasound_far_point = 10 * ultrasound_valid_response_time / 2;
+    //Fill up the sample window for averaging.
+    int i;
+    for(i = 0; i < SAMPLE_COUNT; i++){
+        ultrasound_send_test_pulse();
+        timer_delay(50);
+        ultrasound_far_points[i] = 10 * ultrasound_valid_response_time / 2;
+    }
     ultrasound_calibrate();
 }
 
 void ultrasound_calibrate(){
+    //Average the inputs to get a more sensible value
+    //Here we are just finding the mean for both the near
+    //and far points
+    int32_t ultrasound_near_point = 0;
+    int32_t ultrasound_far_point = 0;
+    int i;
+    for(i = 0; i < SAMPLE_COUNT; i++){
+        ultrasound_near_point += ultrasound_near_points[i];
+        ultrasound_far_point += ultrasound_far_points[i];
+    }
+    ultrasound_near_point /= SAMPLE_COUNT;
+    ultrasound_far_point /= SAMPLE_COUNT;
+
     //These are split to ensure that C implicitly casts the types correctly
     ultrasound_calibration_m = (ultrasound_far_point - ultrasound_near_point);
     ultrasound_calibration_m = (300000.0f - 150000.0f) / ultrasound_calibration_m;
-
     ultrasound_calibration_c = (ultrasound_calibration_m * ultrasound_near_point);
     ultrasound_calibration_c = 150000 - ultrasound_calibration_c;
 }
