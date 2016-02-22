@@ -135,6 +135,14 @@ const transition_t lut[] = {
 
     {MEASURE, '#', MEASURE_DO, NULL},
     {MEASURE_DO, '*', MEASURE, &any_to_measure},
+    //Peronsal Project
+    {MEASURE, '*', MEASURE_PARAMETERS, NULL},
+    {MEASURE_PARAMETERS, '1', MEASURE_PARAMETER_1, NULL},
+    {MEASURE_PARAMETERS, '*', MEASURE, &any_to_measure},
+    {MEASURE_PARAMETER_1, '*', MEASURE_PARAMETERS, NULL},
+    {MEASURE_PARAMETER_1, '#', MEASURE_PARAMETERS, NULL},
+    {MEASURE_PARAMETERS, '#', MEASURE_DO, NULL},
+    //End Personal
     {MULTI, '#', MULTI_DO_STAGE_1, NULL},
     /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
     {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2, NULL},
