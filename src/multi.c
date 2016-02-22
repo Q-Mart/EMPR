@@ -11,6 +11,7 @@ static uint16_t current_sweep;
 
 void any_to_multi() {
     lcd_send_line(LINE1, "Multi-View mode");
+    lcd_send_line(LINE2, "Press # for settings");
 }
 
 void multi_to_multi_settings() {
@@ -20,10 +21,6 @@ void multi_to_multi_settings() {
 void multi_settings_to_multi_sweep() {
     lcd_send_line(LINE1, "Multi-sweep state");
 }
-
-void multi_wait_to_multi_sweep() {
-}
-
 
 void multi_settings_loop(int last_key_press) {
     utils_process_digit_input(last_key_press, &number_of_sweeps);
@@ -43,7 +40,8 @@ void multi_sweep_loop() {
 }
 
 void multi_wait_loop() {
-    lcd_send_line(LINE1, "Waiting...");
+    lcd_send_line(LINE1, "Please rotate");
+    lcd_send_line(LINE2, "Then press #");
 }
 
 void multi_done_loop() {
