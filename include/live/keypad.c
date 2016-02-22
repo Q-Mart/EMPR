@@ -66,9 +66,7 @@ void get_keyboard_presses(char * r)
         }
     }
 
-#ifdef RECORD
-	network_send(KEYPAD_HEADER, r, 16, NULL);
-#endif
+    record(KEYPAD_HEADER, r, 16, NULL);
 }
 
 char poll_keyboard(char column)

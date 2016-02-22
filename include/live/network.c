@@ -1,6 +1,8 @@
-#include<stdlib.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+
+#include "network.h"
 #include "debug.h"
 #include "state.h"
 
@@ -16,13 +18,14 @@ void network_send(state_t state_header, ...) {
        Terminate varargs with NULL
     */
 
+#ifndef RECORD
     uint8_t bb = 0;
     uint8_t *b = &bb;
 
-    debug_send_arb((char *)&state_header, 1);
-
     va_list ap;
     va_start(ap, b);
+
+    debug_send_arb((char *)&state_header, 1);
 
     while (1) {
         b = va_arg(ap, uint8_t*);
@@ -35,4 +38,28 @@ void network_send(state_t state_header, ...) {
     }
 
     va_end (ap);
+#endif
+}
+
+void record(char header, ...) {
+#ifdef RECORD
+    uint8_t bb = 0;
+    uint8_t *b = &bb;
+
+    va_list ap;
+    va_start(ap, b);
+    debug_send_arb(&header, 1);
+
+    while (1) {
+        b = va_arg(ap, uint8_t*);
+        if (b == NULL) {
+            break;
+        }
+
+        uint8_t k = va_arg(ap, int);
+        debug_send_arb(b, k);
+    }
+
+    va_end (ap);
+#endif
 }
