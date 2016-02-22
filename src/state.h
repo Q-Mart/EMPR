@@ -18,9 +18,9 @@ typedef enum {
      */
     SCAN_PARAMETERS,
     SCAN_PARAMETER_1, /* sweep 'speed' */
-    SCAN_PARAMETER_2, /* no of samples per sweep */
-    SCAN_PARAMETER_3, /* start position */
-    SCAN_PARAMETER_4, /* stop position */
+    SCAN_PARAMETER_2, /* start position */
+    SCAN_PARAMETER_3, /* stop position */
+    SCAN_PARAMETER_4, /* unused */
     SCAN_DO,
 
     MEASURE_DO,
