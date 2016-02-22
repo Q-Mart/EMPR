@@ -36,7 +36,6 @@ void adc_enable(void) {
         while (fread(c, sizeof(uint8_t), 1, f))
         {
             void* ptr;
-            debug_sendf("Got header=%x\r\n", *c);
             switch (*c)
             {
                 case IR_HEADER:
@@ -46,7 +45,7 @@ void adc_enable(void) {
                     break;
                 case KEYPAD_HEADER:
                     ptr = malloc(16 * sizeof(uint8_t));
-                    fread(ptr, sizeof(uint8_t), 16, f);
+                    fread(ptr, sizeof(char), 16, f);
                     enqueue(KEYPAD_QUEUE, ptr);
                     break;
                 case ULTRASOUND_HEADER:

@@ -1,3 +1,5 @@
+#include "empr.h"
+
 #define KEYPAD_ADDR 0x21
 
 #define COLUMN1 0x7f /* 0111 1111 */

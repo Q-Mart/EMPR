@@ -11,5 +11,9 @@ int keypad_get_int(void) {}
 char poll_keyboard(char column) {}
 
 void get_keyboard_presses(char * r) {
-    *r = dequeue(KEYPAD_QUEUE, char);
+    char* s = ptr_dequeue(KEYPAD_QUEUE);
+    int i;
+    for (i = 0; i < 16; ++i) {
+        r[i] = s[i];
+    }
 }

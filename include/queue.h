@@ -2,13 +2,14 @@
 
 typedef struct 
 {
-    void**  array;
-    size_t  size;
-    int     front;
-    int     end;
+    void**      array;
+    uint32_t    size;
+    uint32_t    max;
+    uint32_t    front;
+    uint32_t    end;
 } QUEUE;
 
-QUEUE*  new_queue(size_t);
+QUEUE*  new_queue(uint32_t);
 void    free_queue(QUEUE*);
 void    enqueue(QUEUE*, void*);
 void*   ptr_dequeue(QUEUE*);
