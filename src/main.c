@@ -21,6 +21,8 @@ int key_to_int(char key){
     //what type of keys are pressed.
     //Could be made clearer by replacing with an enum. But this works
     //for the time being.
+
+    //48 is ASCII 0 and 57 is ASCII 9
     if(key >= 48 && key <= 57){
         return key - 48;
     } else {
@@ -119,6 +121,7 @@ const transition_t lut[] = {
     {SCAN, '#', SCAN_DO, &scan_to_scan_do},
     {SCAN_DO, '*', SCAN, &any_to_scan},
     {SCAN, '*', SCAN_PARAMETERS, &any_to_scan_parameters},
+    {SCAN_PARAMETERS, '*', SCAN, &any_to_scan},
     {SCAN_PARAMETERS, '1', SCAN_PARAMETER_1, &scan_parameters_to_1},
     {SCAN_PARAMETERS, '#', SCAN, &any_to_scan},
     {SCAN_PARAMETER_1, '#', SCAN_PARAMETERS, &scan_parameter_1_to_scan_parameters},
@@ -129,6 +132,7 @@ const transition_t lut[] = {
 
 
     {MEASURE, '#', MEASURE_DO, NULL},
+    {MEASURE_DO, '*', MEASURE, &any_to_measure},
     {MULTI, '#', MULTI_DO_STAGE_1, NULL},
     /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
     {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2, NULL},

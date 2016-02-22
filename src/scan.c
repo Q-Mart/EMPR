@@ -32,8 +32,8 @@ void scan_process_digit_input(int last_key_press, uint16_t* result){
     }
 }
 void any_to_scan(){
-    lcd_send_line(LINE1, "Scan Mode");
-    lcd_send_line(LINE2, "Press * for options");
+    lcd_send_line(LINE1, "Scan, # to start");
+    lcd_send_line(LINE2, "* for options");
     servo_set_pos(160);
 }
 void scan_to_scan_do(){
@@ -41,7 +41,7 @@ void scan_to_scan_do(){
 }
 void scan_parameters_to_1(){
     scan_tentative_speed = scan_speed;
-    lcd_send_line(LINE1, "Speed: %d", scan_tentative_speed);
+    lcd_send_line(LINE1, "Speed %d", scan_tentative_speed);
     lcd_send_line(LINE2, "# to Confirm");
     timer_delay(300); //Prevent button bounce;
 }
@@ -86,14 +86,11 @@ void scan_parameter_3_to_scan_parameters(void){
     any_to_scan_parameters();
 }
 void scan_loop(){
-    //Max 270
-    //Min 0
-    //Middle 160
     int pos = servo_get_pos();
     if(pos <= scan_lower_bound) scan_direction = 1;
     if(pos >= scan_upper_bound) scan_direction = -1;
     servo_set_pos(pos + (scan_direction * scan_speed));
-    timer_delay(35);
+    timer_delay(35);//Time for it to phusically move
     uint32_t raw = ir_sensor_get_raw_data();
     raw = ir_convert_to_distance(raw);
     uint32_t raw_us = ultrasound_get_distance();
