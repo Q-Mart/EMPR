@@ -62,6 +62,7 @@ int main(void)
         switch (current_state) {
             case CALIBRATE:
                 break;
+            /*
             case SCAN_DO:
                 scan_loop();
                 break;
@@ -74,6 +75,7 @@ int main(void)
             case SCAN_PARAMETER_3:
                 scan_parameter_3_loop(last_key_press);
                 break;
+            */
             case MEASURE_DO:
                 measure_loop();
                 break;
@@ -121,7 +123,7 @@ const transition_t lut[] = {
     {CALIBRATE_DONE, '#', CALIBRATE, NULL},
     {CALIBRATE, '#', CALIBRATE_NEAR_DONE, &calib_to_near_calib},
     {CALIBRATE_NEAR_DONE, '#', CALIBRATE_DONE, &near_calib_to_done},
-
+/*
     {SCAN, '#', SCAN_DO, &scan_to_scan_do},
     {SCAN_DO, '*', SCAN, &any_to_scan},
     {SCAN, '*', SCAN_PARAMETERS, &any_to_scan_parameters},
@@ -132,7 +134,7 @@ const transition_t lut[] = {
     {SCAN_PARAMETERS, '2', SCAN_PARAMETER_2, &scan_parameters_to_2},
     {SCAN_PARAMETER_2, '#', SCAN_PARAMETERS, &scan_parameter_2_to_scan_parameters},
     {SCAN_PARAMETERS, '3', SCAN_PARAMETER_3, &scan_parameters_to_3},
-    {SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters}, 
+    {SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters}, */
 
 
     {MEASURE, '#', MEASURE_DO, NULL},
@@ -144,10 +146,10 @@ const transition_t lut[] = {
     {MULTI_DO_STAGE_3, '#', MULTI_DO_STAGE_4, NULL},
 
     {ANY, 'A', CALIBRATE, &any_to_calib},
-    {ANY, 'B', SCAN, &any_to_scan},
+    /*{ANY, 'B', SCAN, &any_to_scan},*/
+    {ANY, 'B', TRACK, &any_to_track},
     {ANY, 'C', MEASURE, &any_to_measure},
     {ANY, 'D', MULTI, &any_to_multi},
-    {ANY, '5', TRACK, &any_to_track}
 };
 
 void state_transition(char key){

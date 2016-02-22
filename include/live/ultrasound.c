@@ -7,8 +7,6 @@
 #define SAMPLE_COUNT 10 //The number of samples to use for calibration.
 
 /* Ultrasound calibration variables. */
-uint32_t ultrasound_calibration_m;
-uint32_t ultrasound_calibration_c;
 
 static int32_t ultrasound_calibration_m; //Needs to be signed
 static int32_t ultrasound_calibration_c; //Can have intercept below 0
@@ -92,7 +90,7 @@ void ultrasound_calibrate(){
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
 void ultrasound_send_test_pulse(void){
-    debug_sendfc("Send pulse... %d\r\n", ultrasound_pulse_count++);
+    //debug_sendfc("Send pulse... %d\r\n", ultrasound_pulse_count++);
     ultrasound_false_edge_expected = 1;
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
     timer_delay(1);
@@ -129,6 +127,7 @@ void TIMER2_IRQHandler(void)
         ultrasound_false_edge_expected = 0;
     } else {
         ultrasound_valid_response_time = ultrasound_current_timer_diff;
+        //debug_sendf("Value: %lu \r\n", ultrasound_valid_response_time);
     }
 }
 

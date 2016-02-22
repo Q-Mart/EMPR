@@ -3,7 +3,7 @@
 
 typedef enum {
     CALIBRATE,
-    SCAN,
+    //SCAN,
     MEASURE,
     MULTI,
     TRACK,
@@ -16,12 +16,12 @@ typedef enum {
      *  sent when going between SCAN and selecting
      *  which paramater to be chosen
      */
-    SCAN_PARAMETERS,
-    SCAN_PARAMETER_1, /* sweep 'speed' */
-    SCAN_PARAMETER_2, /* start position */
-    SCAN_PARAMETER_3, /* stop position */
-    SCAN_PARAMETER_4, /* unused */
-    SCAN_DO,
+    //SCAN_PARAMETERS,
+    //SCAN_PARAMETER_1, /* sweep 'speed' */
+    //SCAN_PARAMETER_2, /* start position */
+    //SCAN_PARAMETER_3, /* stop position */
+    //SCAN_PARAMETER_4, /* unused */
+    //SCAN_DO,
 
     MEASURE_DO,
 
