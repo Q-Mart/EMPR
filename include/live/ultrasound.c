@@ -107,10 +107,12 @@ uint32_t ultrasound_get_sample_median(uint32_t * samples){
 /* Compare function for two values */
 int ultrasound_compare_values(const void * elem1, const void * elem2) {
 
-    int a = *((int*)elem1);
-    int b = *((int*)elem2);
+    int a = *((uint32_t*)elem1);
+    int b = *((uint32_t*)elem2);
+    
     if (a > b) return 1;
     if (b < a) return -1;
+
     return 0;
 }
 
