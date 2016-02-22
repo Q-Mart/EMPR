@@ -13,5 +13,5 @@ uint32_t ultrasound_valid_response_time = 3;
 
 uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offset, int input_value)
 {
-    return *(uint32_t *)dequeue(ULTRASOUND_QUEUE);
+    return dequeue(ULTRASOUND_QUEUE, uint32_t);
 }

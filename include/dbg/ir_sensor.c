@@ -40,7 +40,7 @@ uint32_t ir_sensor_get_distance()
 
 uint32_t ir_sensor_get_raw_data()
 {
-    return *(uint32_t *)dequeue(IR_QUEUE);
+    return dequeue(IR_QUEUE, uint32_t);
 }
 
 uint32_t ir_convert_to_distance(uint32_t raw)

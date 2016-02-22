@@ -3,7 +3,7 @@
 QUEUE* new_queue(size_t sz) {
     QUEUE* q = (QUEUE* )malloc(sizeof(QUEUE));
     q->size = sz;
-    q->array = malloc(sz);
+    q->array = malloc(sz * (sizeof (void* )));
     q->front = 0;
     q->end = 0;
     return q;
@@ -26,9 +26,9 @@ void enqueue(QUEUE* q, void* v_ptr)
     q->end = (q->end + 1) % q->size;
 }
 
-void* dequeue(QUEUE* q) 
+void* ptr_dequeue(QUEUE* q) 
 {
-    void* v_ptr = q->array[q->front];
+    int front = q->front;
     q->front = (q->front + 1) % q->size;
-    return v_ptr;
+    return q->array[front];
 }

@@ -9,5 +9,6 @@ int servo_set_pos(int angle){
 }
 
 int servo_get_pos(){
-    return *(uint32_t *)dequeue(SERVO_QUEUE);
+    return dequeue(SERVO_QUEUE, uint32_t);
+
 }
