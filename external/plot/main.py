@@ -143,7 +143,7 @@ def read_record(r):
         elif header == 0x01:
             r.read(4)
         elif header == 0x05:
-            val = r.read(4)
+            val = r.read(2) # servo sends a uint16_t
             print('servo:')
             append_record(bytearray([header]))
             append_record(bytearray(val))
