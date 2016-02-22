@@ -11,7 +11,7 @@ typedef enum {
     CALIBRATE_NEAR_DONE,
     CALIBRATE_DONE,
 
-    /* SCAN_PARAMETERS 
+    /* SCAN_PARAMETERS
      *  sent when going between SCAN and selecting
      *  which paramater to be chosen
      */
@@ -30,13 +30,13 @@ typedef enum {
      */
 
     MULTI_DO,
-    MULTI_DO_STAGE_1, /* First Sweep */
-    MULTI_DO_STAGE_2, /* Second Sweep */
-    MULTI_DO_STAGE_3, /* Third Sweep */
-    MULTI_DO_STAGE_4, /* Fourth Sweep */
+    MULTI_SWEEP,
+    MULTI_WAIT,
+    MULTI_SETTINGS,
 
     MULTI_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY
 } state_t;
 
+void change_state(state_t state);
 #endif

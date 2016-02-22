@@ -76,9 +76,20 @@ int main(void)
             case MEASURE_DO:
                 measure_loop();
                 break;
-            case MULTI:
+            case MULTI_SWEEP:
+                multi_sweep_loop();
+                break;
+            case MULTI_WAIT:
+                multi_wait_loop();
+                break;
+            case MULTI_SETTINGS:
+                multi_settings_loop(last_key_press);
+                break;
+            case MULTI_DONE:
+                multi_done_loop();
                 break;
             default:
+                //have a break, have a kit kat
                 break;
         }
     }
@@ -133,11 +144,11 @@ const transition_t lut[] = {
 
     {MEASURE, '#', MEASURE_DO, NULL},
     {MEASURE_DO, '*', MEASURE, &any_to_measure},
-    {MULTI, '#', MULTI_DO_STAGE_1, NULL},
-    /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
-    {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2, NULL},
-    {MULTI_DO_STAGE_2, '#', MULTI_DO_STAGE_3, NULL},
-    {MULTI_DO_STAGE_3, '#', MULTI_DO_STAGE_4, NULL},
+
+    {MULTI, '#', MULTI_SETTINGS, &multi_to_multi_settings},
+    {MULTI_SETTINGS, '#', MULTI_SWEEP, &multi_settings_to_multi_sweep},
+    {MULTI_WAIT, '#', MULTI_SWEEP, NULL},
+    {MULTI_DONE, '#', CALIBRATE, NULL},
 
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},
@@ -158,4 +169,8 @@ void state_transition(char key){
             return;
         }
     }
+}
+
+void change_state(state_t state) {
+    current_state = state;
 }

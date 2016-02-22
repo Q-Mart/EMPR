@@ -5,6 +5,7 @@
 #include "ir_sensor.h"
 #include "ultrasound.h"
 #include "timer.h"
+#include "utils.h"
 signed int scan_direction = 1;
 static uint16_t scan_upper_bound = 270;
 static uint16_t scan_lower_bound = 0;
@@ -23,14 +24,6 @@ static uint16_t scan_tentative_lower_bound = 0;
  * pointers to a table and get a function in the main loop to multiplex to
  * one based on the current state.
  */
-void scan_process_digit_input(int last_key_press, uint16_t* result){
-    if (last_key_press >= 0){
-        (*result) = ((*result) * 10) + last_key_press;
-    } else if (last_key_press == -1){
-        (*result) /= 10;//Remove the last digit. 
-        //Works because C truncates towards 0.
-    }
-}
 void any_to_scan(){
     lcd_send_line(LINE1, "Scan, # to start");
     lcd_send_line(LINE2, "* for options");
@@ -46,7 +39,7 @@ void scan_parameters_to_1(){
     timer_delay(300); //Prevent button bounce;
 }
 void scan_parameter_1_loop(int last_key_press){
-    scan_process_digit_input(last_key_press, &scan_tentative_speed);
+    utils_process_digit_input(last_key_press, &scan_tentative_speed);
     lcd_send_line(LINE1, "Speed %d", scan_tentative_speed); 
 }
 void scan_parameter_1_to_scan_parameters(){
@@ -63,7 +56,7 @@ void scan_parameters_to_2(void){
     timer_delay(300); //Prevent Button Bounce
 }
 void scan_parameter_2_loop(int last_key_press){
-    scan_process_digit_input(last_key_press, &scan_tentative_upper_bound);
+    utils_process_digit_input(last_key_press, &scan_tentative_upper_bound);
     lcd_send_line(LINE1, "Left point %d", scan_tentative_upper_bound);
 }
 
@@ -78,7 +71,7 @@ void scan_parameters_to_3(void){
     timer_delay(300); //Prevent Button Bounce
 }
 void scan_parameter_3_loop(int last_key_press){
-    scan_process_digit_input(last_key_press, &scan_tentative_lower_bound);
+    utils_process_digit_input(last_key_press, &scan_tentative_lower_bound);
     lcd_send_line(LINE1, "Right Point %d", scan_tentative_lower_bound);
 }
 void scan_parameter_3_to_scan_parameters(void){
