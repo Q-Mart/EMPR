@@ -3,7 +3,7 @@
 #include "servo.h"
 #include "network.h"
 
-static int current_pos = 0;
+static uint16_t current_pos = 0;
 
 void servo_init(){
     pwm_init();
