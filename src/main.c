@@ -12,8 +12,31 @@
 #include "ir_sensor.h"
 #include "timer.h"
 #include "servo.h"
+#include "ultrasound.h"
+
+int key_to_int(char key){
+    //This was written to allow for numbers to be converted from
+    //char to int based on input from the keypad. A signed int is
+    //used to make a bit clearer that there is a seperation between
+    //what type of keys are pressed.
+    //Could be made clearer by replacing with an enum. But this works
+    //for the time being.
+
+    //48 is ASCII 0 and 57 is ASCII 9
+    if(key >= 48 && key <= 57){
+        return key - 48;
+    } else {
+        switch(key){
+        case '*':
+            return -1;
+        default:
+            return -2;//Don't care value
+        }
+    }
+}
 
 static state_t current_state = CALIBRATE;
+static int last_key_press = -2;
 void state_transition(char key);
 void input_poll();
 int main(void)
@@ -28,6 +51,7 @@ int main(void)
     lcd_clear_display();
     keypad_init();
     ir_sensor_init();
+    ultrasound_initialise_timer_measurement();
     servo_init();
     any_to_calib();
 
@@ -37,10 +61,19 @@ int main(void)
         switch (current_state) {
             case CALIBRATE:
                 break;
-            case SCAN:
+            case SCAN_DO:
                 scan_loop();
                 break;
-            case MEASURE:
+            case SCAN_PARAMETER_1:
+                scan_parameter_1_loop(last_key_press);
+                break;
+            case SCAN_PARAMETER_2:
+                scan_parameter_2_loop(last_key_press);
+                break;
+            case SCAN_PARAMETER_3:
+                scan_parameter_3_loop(last_key_press);
+                break;
+            case MEASURE_DO:
                 measure_loop();
                 break;
             case MULTI:
@@ -56,9 +89,14 @@ int main(void)
 void input_poll(void){
     char r[16] = {0};
     get_keyboard_presses(r);
+    last_key_press = -2; //Set to no last key pressed
     int i;
     for(i = 0; i < 16; ++i){
         if(r[i] == 1) {
+            //The order of these matters because otherwise the 
+            //key pressed for the transition will also register as
+            //an input for the corresponding loop function.
+            last_key_press = key_to_int(KEYS[i]);
             state_transition(KEYS[i]);
         }
     }
@@ -79,13 +117,28 @@ const transition_t lut[] = {
     {CALIBRATE_DONE, '#', CALIBRATE, NULL},
     {CALIBRATE, '#', CALIBRATE_NEAR_DONE, &calib_to_near_calib},
     {CALIBRATE_NEAR_DONE, '#', CALIBRATE_DONE, &near_calib_to_done},
-    {SCAN, '#', SCAN_DO, NULL},
+
+    {SCAN, '#', SCAN_DO, &scan_to_scan_do},
+    {SCAN_DO, '*', SCAN, &any_to_scan},
+    {SCAN, '*', SCAN_PARAMETERS, &any_to_scan_parameters},
+    {SCAN_PARAMETERS, '*', SCAN, &any_to_scan},
+    {SCAN_PARAMETERS, '1', SCAN_PARAMETER_1, &scan_parameters_to_1},
+    {SCAN_PARAMETERS, '#', SCAN, &any_to_scan},
+    {SCAN_PARAMETER_1, '#', SCAN_PARAMETERS, &scan_parameter_1_to_scan_parameters},
+    {SCAN_PARAMETERS, '2', SCAN_PARAMETER_2, &scan_parameters_to_2},
+    {SCAN_PARAMETER_2, '#', SCAN_PARAMETERS, &scan_parameter_2_to_scan_parameters},
+    {SCAN_PARAMETERS, '3', SCAN_PARAMETER_3, &scan_parameters_to_3},
+    {SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters}, 
+
+
     {MEASURE, '#', MEASURE_DO, NULL},
+    {MEASURE_DO, '*', MEASURE, &any_to_measure},
     {MULTI, '#', MULTI_DO_STAGE_1, NULL},
     /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
     {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2, NULL},
     {MULTI_DO_STAGE_2, '#', MULTI_DO_STAGE_3, NULL},
     {MULTI_DO_STAGE_3, '#', MULTI_DO_STAGE_4, NULL},
+
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},
     {ANY, 'C', MEASURE, &any_to_measure},
@@ -101,6 +154,7 @@ void state_transition(char key){
             lcd_clear_display();
             if(lut[i].effect !=NULL) (*(lut[i].effect))();
             current_state = lut[i].next;
+            last_key_press = -2;//Reset last key press to stop it being used.
             return;
         }
     }
