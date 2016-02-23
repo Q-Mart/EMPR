@@ -74,7 +74,7 @@ int main(void)
                 scan_parameter_3_loop(last_key_press);
                 break;
             case MEASURE_DO:
-                measure_loop();
+                measure_loop(last_key_press);
                 break;
             case MULTI:
                 break;
