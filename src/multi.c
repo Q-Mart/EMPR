@@ -45,7 +45,8 @@ void multi_sweep_loop() {
     for(i=0;i<270;i++) {
         pos = pos + scan_direction;
         servo_set_pos(pos + scan_direction);
-        timer_delay(35);
+        timer_delay(1);
+        uint32_t raw = utils_get_ir_and_ultrasound_distance();
     }
 
     current_sweep++;
@@ -63,6 +64,7 @@ void multi_wait_loop() {
 }
 
 void multi_done_loop() {
+    servo_set_pos(160);
     lcd_send_line(LINE1, "Finished!");
     lcd_send_line(LINE2, "Please press #");
 }

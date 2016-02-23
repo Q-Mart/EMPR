@@ -40,7 +40,7 @@ void scan_parameters_to_1(){
 }
 void scan_parameter_1_loop(int last_key_press){
     utils_process_digit_input(last_key_press, &scan_tentative_speed);
-    lcd_send_line(LINE1, "Speed %d", scan_tentative_speed); 
+    lcd_send_line(LINE1, "Speed %d", scan_tentative_speed);
 }
 void scan_parameter_1_to_scan_parameters(){
     scan_speed = scan_tentative_speed;
