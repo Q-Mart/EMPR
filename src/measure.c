@@ -38,6 +38,7 @@ void measure_loop(int last_key_press) {
         measure_state = (measure_state - 1 + NO_OF_STATES) % NO_OF_STATES;
 
     uint32_t dist = utils_get_ir_and_ultrasound_distance();
+    network_send(MEASURE_DO, (uint8_t *)&dist, 4, NULL);
 
     //Calculate the running mean. If the mean is 0 then we set the
     //mean to be the last value as 0 is our reset value. In practice it
