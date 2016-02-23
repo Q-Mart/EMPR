@@ -5,11 +5,11 @@
 #include "debug.h"
 #include "state.h"
 #include "network.h"
-
+#include "ultrasound.h"
 //These keep track of what data the measure mode will
 //display on the IO board lcd.
 #define NO_OF_STATES 2
-static enum measure_state {DISTANCE, AVG_DISTANCE};
+static enum _measure_state{DISTANCE, AVG_DISTANCE} measure_state = DISTANCE;
 
 
 static uint32_t measure_mean_distance = 0;
@@ -60,7 +60,7 @@ void measure_loop(int last_key_press) {
             break;
         case AVG_DISTANCE:
             lcd_send_line(LINE1, "Average Distance");
-            lcd_send_line(LINE2, "%d", measure_mean_dist);
+            lcd_send_line(LINE2, "%d", measure_mean_distance);
             break;
         default:
             break;
