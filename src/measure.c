@@ -9,6 +9,7 @@
 void any_to_measure() {
     lcd_send_line(LINE1, "Measure Mode");
     lcd_send_line(LINE2, "# to start");
+    network_send(MEASURE);
 }
 
 void measure_to_measure_do() {

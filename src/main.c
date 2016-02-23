@@ -13,6 +13,7 @@
 #include "timer.h"
 #include "servo.h"
 #include "ultrasound.h"
+#include "network.h"
 
 int key_to_int(char key){
     //This was written to allow for numbers to be converted from

@@ -5,6 +5,8 @@
 #include "ir_sensor.h"
 #include "ultrasound.h"
 #include "timer.h"
+#include "network.h"
+
 signed int scan_direction = 1;
 static uint16_t scan_upper_bound = 270;
 static uint16_t scan_lower_bound = 0;
@@ -35,6 +37,7 @@ void any_to_scan(){
     lcd_send_line(LINE1, "Scan, # to start");
     lcd_send_line(LINE2, "* for options");
     servo_set_pos(160);
+    network_send(SCAN);
 }
 void scan_to_scan_do(){
     lcd_send_line(LINE1, "Scanning...");
@@ -95,7 +98,6 @@ void scan_loop(){
     raw = ir_convert_to_distance(raw);
     uint32_t raw_us = ultrasound_get_distance();
     raw = (raw + raw_us) /2;
-    debug_send_arb((char*) &pos, 4);
-    debug_send_arb((char*) &raw, 4);
+    network_send(SCAN_DO, (uint8_t *)&pos, 4, (uint8_t* )&raw, 4, NULL);
     lcd_send_line(LINE2, "%d", raw);
 }
