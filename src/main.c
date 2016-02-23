@@ -165,8 +165,7 @@ const transition_t lut[] = {
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},
     {ANY, 'C', MEASURE, &any_to_measure},
-    {ANY, 'D', MULTI, &any_to_multi},
-    {ANY, '*', PLATFORM, &any_to_platform}
+    {ANY, 'D', PLATFORM, &any_to_platform}
 };
 
 void state_transition(char key){

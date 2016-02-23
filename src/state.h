@@ -25,16 +25,11 @@ typedef enum {
 
     MEASURE_DO,
 
-    MULTI_PARAMETERS,
-    /* MULTI_PARAMETERS goes to a copy of SCAN_PARAMETERS
-     * with return to MULTI_DO
-     */
-
-    MULTI_SWEEP, /* sweeping and scanning */
-    MULTI_WAIT, /* wait for user to turn object */
-    MULTI_SWEEP_NUMBER, /* settings: specify sweep number */
-    MULTI_MIN_ANGLE, /* settings: specify minimum sweep angle */
-    MULTI_MAX_ANGLE, /* settings: specify maximum sweep angle */
+    PLATFORM_SWEEP, /* sweeping and scanning */
+    PLATFORM_WAIT, /* wait for user to turn object */
+    PLATFORM_SWEEP_NUMBER, /* settings: specify sweep number */
+    PLATFORM_MIN_ANGLE, /* settings: specify minimum sweep angle */
+    PLATFORM_MAX_ANGLE, /* settings: specify maximum sweep angle */
 
     MULTI_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY
