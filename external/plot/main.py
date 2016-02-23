@@ -102,25 +102,27 @@ class Mode:
     SCAN = 1
     MEASURE = 2
     MULTI = 3
-    CALIBRATE_NEAR_DONE = 4
-    CALIBRATE_DONE = 5
-    SCAN_PARAMETERS = 6
-    SCAN_PARAMATER_1 = 7
-    SCAN_PARAMATER_2 = 8
-    SCAN_PARAMATER_3 = 9
-    SCAN_DO = 10
-    MEASURE_PARAMETERS = 11
-    MEASURE_PARAMATER_1 = 12
-    MEASURE_PARAMATER_2 = 13
-    MEASURE_PARAMATER_3 = 14
-    MEASURE_DO = 15
-    MULTI_PARAMETERS = 16
-    MULTI_DO_STAGE_1 = 17
-    MULTI_DO_STAGE_2 = 18
-    MULTI_DO_STAGE_3 = 19
-    MULTI_DO_STAGE_4 = 20
-    MULTI_DONE = 21
-    ANY = 22
+
+    CALIBRATE_NEAR = 4
+    CALIBRATE_NEAR_DONE = 5
+    CALIBRATE_DONE = 6
+
+    SCAN_PARAMETERS = 7
+    SCAN_PARAMETER_1 = 8 # sweep speed
+    SCAN_PARAMETER_2 = 9 # start position
+    SCAN_PARAMETER_3 = 10 # stop position
+    SCAN_PARAMETER_4 = 11 # unused
+    SCAN_DO = 12
+
+    MEASURE_DO = 13
+
+    MULTI_PARAMETERS = 14
+    MULTI_WAIT = 15
+    MULTI_SWEEP_NUMBER = 16
+    MULTI_MIN_ANGLE = 17
+    MULTI_MAX_ANGLE = 18
+    MULTI_DONE = 19
+    ANY = 20
 
 def monitor(frame):
     with SerialReader() as r:
@@ -179,7 +181,7 @@ def read_live(frame, r):
         elif mode == Mode.SCAN:
             frame.plotter = plotter.ScanPlotter()
         elif mode == Mode.MULTI:
-            pass
+            raise NotImplementedError
 
 class AppFrame(tkinter.Frame):
     def __init__(self, parent):
