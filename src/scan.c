@@ -84,10 +84,7 @@ void scan_loop(){
     if(pos >= scan_upper_bound) scan_direction = -1;
     servo_set_pos(pos + (scan_direction * scan_speed));
     timer_delay(35);//Time for it to phusically move
-    uint32_t raw = ir_sensor_get_raw_data();
-    raw = ir_convert_to_distance(raw);
-    uint32_t raw_us = ultrasound_get_distance();
-    raw = (raw + raw_us) /2;
+    uint32_t raw = utils_get_ir_and_ultrasound_distance();
     debug_send_arb((char*) &pos, 4);
     debug_send_arb((char*) &raw, 4);
     lcd_send_line(LINE2, "%d", raw);
