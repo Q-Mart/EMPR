@@ -14,6 +14,7 @@
 int tracker_upper_bound = 0;
 int tracker_lower_bound = 0;
 int tracker_current_center = 0;
+const int averaged_values_bearings[] = {-25, -15, -5, 5, 15, 25};
 
 void tracker(void)
 {
@@ -93,24 +94,27 @@ void tracker_narrow_sweep()
     range_index = 0;
     if (scan_start <= scan_end) {
         for (sensor_position = scan_start; sensor_position <= scan_end; sensor_position += 10) {
-            tracker_narrow_sweep_scan(range_index++, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
+            tracker_narrow_sweep_scan(range_index, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
+            range_index++;
         }
     }
     else {
         for (sensor_position = scan_start; sensor_position >= scan_end; sensor_position -= 10) {
-            tracker_narrow_sweep_scan(range_index++, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
+            tracker_narrow_sweep_scan(range_index, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
+            range_index++;
         }
     }
     
     //Find the angle with the smallest distance.
     new_index = tracker_compare_indices(
-        tracker_find_smallest_index(tracker_ultrasound_range_table, range_index, 0),
-        tracker_find_smallest_index(tracker_ir_range_table, range_index, 0));
-    tracker_current_center = (tracker_upper_bound + tracker_lower_bound) / 2 + 5 * tracker_index_table[new_index];
+        tracker_process_range_table(tracker_ultrasound_range_table, range_index),
+        tracker_process_range_table(tracker_ir_range_table, range_index) 
+        );
+    tracker_current_center = (tracker_upper_bound + tracker_lower_bound) / 2 + averaged_values_bearings[new_index];
     debug_sendf("Tracker: the object appears to be at %d degrees.\r\n", tracker_current_center);
 
     //Clear the range tables.
-    for (x = 0; x < 15; x++) {
+    for (x = 0; x < 7; x++) {
         tracker_ultrasound_range_table[x] = 0;
         tracker_ir_range_table[x] = 0;
     }
@@ -132,15 +136,18 @@ void tracker_narrow_sweep_scan(int range_index, int sensor_position, uint32_t * 
 
 }
 
-int tracker_process_range_table(uint32_t * range_table) {
-    int table_length = sizeof(range_table) / sizeof(range_table[0]);
-    int i;
-    int averaged_table[table_length - 1];
-    for (i = 0; i < (table_length - 1); i++) {
-        averaged_table = (range_table[i] + range_table[i+1]) / 2;
+int tracker_process_range_table(uint32_t * range_table, int range_table_size) {
+
+    int i;                                
+    uint32_t averaged_table[range_table_size - 1];
+    /* range_table at   -30 -20 -10  0  10  20  30 degrees 
+       averaged_table at -25, -15, -5, 5, 15, 25 degrees, taking 2 closest values in range_table
+    */
+    for (i = 0; i < (range_table_size - 1); i++) {
+        averaged_table[i] = (range_table[i] + range_table[i+1]) / 2;
     }
-    tracker_find_smallest_index(averaged_table, table_length)...
-    //TODO: finish this.
+    debug_sendf("tracker_process_range_table: %lu, %d", averaged_table[i], i);
+    return tracker_find_smallest_index(averaged_table, (range_table_size - 1), 0);
 }
 
 void tracker_set_bound()
@@ -181,8 +188,8 @@ int tracker_find_smallest_index(uint32_t darray[], int length, int initial)
     uint32_t smallest = darray[initial];
     int i;
     for (i = (initial+1); i < length; i++) {
-        if ((darray[i] < smallest) && (darray[i] > 2)) {
-            /* Ignore values smaller than 2, due to unreliable values under the measurable range.*/
+        if ((darray[i] < smallest) && (darray[i] > 10)) {
+            /* Ignore unreliable values.*/
             smallest_index = i;
             smallest = darray[i];
         }
