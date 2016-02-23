@@ -29,12 +29,11 @@ typedef enum {
      * with return to MULTI_DO
      */
 
-    MULTI_DO,
-    MULTI_SWEEP,
-    MULTI_WAIT,
-    MULTI_SWEEP_NUMBER,
-    MULTI_MIN_ANGLE,
-    MULTI_MAX_ANGLE,
+    MULTI_SWEEP, /* sweeping and scanning */
+    MULTI_WAIT, /* wait for user to turn object */
+    MULTI_SWEEP_NUMBER, /* settings: specify sweep number */
+    MULTI_MIN_ANGLE, /* settings: specify minimum sweep angle */
+    MULTI_MAX_ANGLE, /* settings: specify maximum sweep angle */
 
     MULTI_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY
