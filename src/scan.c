@@ -83,7 +83,7 @@ void scan_loop(){
     if(pos <= scan_lower_bound) scan_direction = 1;
     if(pos >= scan_upper_bound) scan_direction = -1;
     servo_set_pos(pos + (scan_direction * scan_speed));
-    timer_delay(35);//Time for it to phusically move
+    timer_delay(1);//Time for it to phusically move
     uint32_t raw = utils_get_ir_and_ultrasound_distance();
     debug_send_arb((char*) &pos, 4);
     debug_send_arb((char*) &raw, 4);
