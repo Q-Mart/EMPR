@@ -16,7 +16,7 @@ static int scan_direction;
 void any_to_multi() {
     lcd_send_line(LINE1, "Multi-View mode");
     lcd_send_line(LINE2, "Press # for settings");
-    network_send(MULTI);
+    network_send(MULTI, NULL);
 }
 
 void multi_to_multi_sweep_number() {

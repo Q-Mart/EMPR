@@ -29,5 +29,5 @@ void near_calib_to_done(){
 void any_to_calib(){
     lcd_send_line(LINE1,"Calibration Mode");
     lcd_send_line(LINE2, "Place at 15cm");
-    network_send(CALIBRATE);
+    network_send(CALIBRATE, NULL);
 }

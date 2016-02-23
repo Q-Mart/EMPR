@@ -30,7 +30,7 @@ void any_to_scan(){
     lcd_send_line(LINE1, "Scan, # to start");
     lcd_send_line(LINE2, "* for options");
     servo_set_pos(160);
-    network_send(SCAN);
+    network_send(SCAN, NULL);
 }
 void scan_to_scan_do(){
     lcd_send_line(LINE1, "Scanning...");
