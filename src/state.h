@@ -32,7 +32,9 @@ typedef enum {
     MULTI_DO,
     MULTI_SWEEP,
     MULTI_WAIT,
-    MULTI_SETTINGS,
+    MULTI_SWEEP_NUMBER,
+    MULTI_MIN_ANGLE,
+    MULTI_MAX_ANGLE,
 
     MULTI_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY

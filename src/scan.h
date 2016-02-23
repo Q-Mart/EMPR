@@ -11,6 +11,6 @@ void scan_parameter_2_loop(int last_key_press);
 void scan_parameter_2_to_scan_parameters(void); 
 //Scan Paramter 3 ==> End Position
 void scan_parameters_to_3(void);
-void scan_paramter_3_loop(int last_key_press);
+void scan_parameter_3_loop(int last_key_press);
 void scan_parameter_3_to_scan_parameters(void);
 void any_to_scan_parameters(void);

@@ -6,8 +6,9 @@
 #include "keypad.h"
 #include "state.h"
 #include "servo.h"
-#include "debug.h"
 
+static uint16_t max_angle;
+static uint16_t min_angle;
 static uint16_t number_of_sweeps;
 static uint16_t current_sweep;
 static int scan_direction;
@@ -17,24 +18,46 @@ void any_to_multi() {
     lcd_send_line(LINE2, "Press # for settings");
 }
 
-void multi_to_multi_settings() {
+void multi_to_multi_sweep_number() {
     lcd_send_line(LINE1, "Multi-settings");
 }
 
-void multi_settings_to_multi_sweep() {
+void multi_sweep_number_to_multi_min_angle() {
+    lcd_send_line(LINE1, "Multi-min");
+}
+
+void multi_min_angle_to_multi_max_angle() {
+    lcd_send_line(LINE1, "Multi-max");
+}
+
+void multi_sweep() {
     lcd_send_line(LINE1, "Multi-sweep state");
-    servo_set_pos(0);
+    //Clamp the angles if they are out of range
+    if (max_angle>270) max_angle = 270;
+    if (min_angle>270) min_angle = 0;
+    servo_set_pos(min_angle);
     //Wait to move
     timer_delay(500);
 }
 
-void multi_settings_loop(int last_key_press) {
+void multi_sweep_number_loop(int last_key_press) {
     utils_process_digit_input(last_key_press, &number_of_sweeps);
     lcd_send_line(LINE2, "%d", number_of_sweeps);
 }
 
+void multi_min_angle_loop(int last_key_press) {
+    utils_process_digit_input(last_key_press, &min_angle);
+    lcd_send_line(LINE2, "%d", min_angle);
+}
+
+void multi_max_angle_loop(int last_key_press) {
+    utils_process_digit_input(last_key_press, &max_angle);
+    lcd_send_line(LINE2, "%d", max_angle);
+}
+
 void multi_sweep_loop() {
     int i;
+    int angle_range = max_angle-min_angle;
     int pos = servo_get_pos();
 
     lcd_send_line(LINE2, "Sweep %d of %d", current_sweep+1, number_of_sweeps);
@@ -42,7 +65,7 @@ void multi_sweep_loop() {
     if (pos<=0) scan_direction = 1;
     if (pos>=270) scan_direction = -1;
 
-    for(i=0;i<270;i++) {
+    for(i=0;i<angle_range;i++) {
         pos = pos + scan_direction;
         servo_set_pos(pos + scan_direction);
         timer_delay(1);
@@ -65,6 +88,7 @@ void multi_wait_loop() {
 
 void multi_done_loop() {
     servo_set_pos(160);
+    current_sweep = 0;
     lcd_send_line(LINE1, "Finished!");
     lcd_send_line(LINE2, "Please press #");
 }
