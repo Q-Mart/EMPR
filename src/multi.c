@@ -7,9 +7,9 @@
 #include "state.h"
 #include "servo.h"
 
-static uint16_t max_angle;
-static uint16_t min_angle;
-static uint16_t number_of_sweeps;
+static uint16_t max_angle = 270;
+static uint16_t min_angle = 0;
+static uint16_t number_of_sweeps = 4;
 static uint16_t current_sweep;
 static int scan_direction;
 
