@@ -67,8 +67,8 @@ class PlotCanvas(tkinter.Canvas):
         max_x = self.parent.plotter.max_x or max(xs)
         max_y = self.parent.plotter.max_y or max(ys)
 
-        tx = w / float(max_x)
-        ty = h / float(max_y)
+        tx = float(w) / float(max_x)
+        ty = float(h) / float(max_y)
 
         x0, y0 = 0, 0
         for x, y in zip(xs, ys):
@@ -88,6 +88,8 @@ class PlotCanvas(tkinter.Canvas):
         self.lines = []
 
     def on_resize(self, event):
+        '''TODO: This
+        '''
         scale = (event.width / self.width, event.height / self.height)
         self.width = event.width
         self.height = event.height
@@ -178,8 +180,10 @@ def read_live(frame, r):
             frame.draw()
         elif mode == Mode.MEASURE:
             frame.plotter = plotter.MeasurePlotter()
+            frame.draw()
         elif mode == Mode.SCAN:
             frame.plotter = plotter.ScanPlotter()
+            frame.draw()
         elif mode == Mode.MULTI:
             raise NotImplementedError
 

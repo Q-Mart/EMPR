@@ -27,11 +27,11 @@ class Reader:
 
     def read_int(self):
         i = self.read(4)
-        return struct.unpack('i', i)[0]
+        return struct.unpack('I', i)[0]
 
     def read_byte(self):
         b = self.read(1)
-        return struct.unpack('b', b)[0]
+        return struct.unpack('B', b)[0]
 
     def close(self):
         raise NotImplementedError
