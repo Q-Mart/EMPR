@@ -27,7 +27,6 @@ void measure_to_measure_do() {
 }
 
 void measure_loop(int last_key_press) {
-    
     //Uses the last key press the change what data is displayed
     //on the lcd.
     //This should not be too vulnerable to button bounce as there
@@ -38,12 +37,7 @@ void measure_loop(int last_key_press) {
     if(last_key_press == 1)
         measure_state = (measure_state - 1 + NO_OF_STATES) % NO_OF_STATES;
 
-    uint32_t raw_ir = ir_sensor_get_raw_data();
-    ultrasound_send_test_pulse();
-    uint32_t dist_ir = ir_convert_to_distance(raw_ir);
-    uint32_t dist_us = ultrasound_get_distance(); 
-    uint32_t dist = (dist_ir + dist_us)/2;
-    network_send(MEASURE_DO, (uint8_t *)&dist, 4, NULL);
+    uint32_t dist = utils_get_ir_and_ultrasound_distance();
 
     //Calculate the running mean. If the mean is 0 then we set the
     //mean to be the last value as 0 is our reset value. In practice it
@@ -64,6 +58,5 @@ void measure_loop(int last_key_press) {
             break;
         default:
             break;
-            
     }
 }
