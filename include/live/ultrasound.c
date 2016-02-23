@@ -77,14 +77,43 @@ void ultrasound_calibrate(){
         ultrasound_near_point += ultrasound_near_points[i];
         ultrasound_far_point += ultrasound_far_points[i];
     }
-    ultrasound_near_point /= SAMPLE_COUNT;
-    ultrasound_far_point /= SAMPLE_COUNT;
+    ultrasound_near_point = ultrasound_get_sample_median(ultrasound_near_points);
+    ultrasound_far_point = ultrasound_get_sample_median(ultrasound_far_points);
 
     //These are split to ensure that C implicitly casts the types correctly
     ultrasound_calibration_m = (ultrasound_far_point - ultrasound_near_point);
     ultrasound_calibration_m = (300000.0f - 150000.0f) / ultrasound_calibration_m;
     ultrasound_calibration_c = (ultrasound_calibration_m * ultrasound_near_point);
     ultrasound_calibration_c = 150000 - ultrasound_calibration_c;
+}
+
+/* Find the median of all non zero values and return */
+uint32_t ultrasound_get_sample_median(uint32_t * samples){
+
+    int i = 0, non_zero_count = 0;
+    uint32_t non_zeros[SAMPLE_COUNT];
+
+    for (i = 0; i < SAMPLE_COUNT; i++) {
+        if (samples[i] != 0) {
+            non_zeros[non_zero_count++] = samples[i];
+        }
+    }
+
+    qsort(non_zeros, non_zero_count, sizeof(uint32_t), ultrasound_compare_values);
+        
+    return non_zeros[non_zero_count/2];
+}
+
+/* Compare function for two values */
+int ultrasound_compare_values(const void * elem1, const void * elem2) {
+
+    int a = *((uint32_t*)elem1);
+    int b = *((uint32_t*)elem2);
+    
+    if (a > b) return 1;
+    if (b < a) return -1;
+
+    return 0;
 }
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
@@ -148,9 +177,6 @@ uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offs
      different from 340m/s. Unit is microsecond/s with offset. */
     uint32_t distance = (microseconds * calibration_gradient + calibration_offset);
 
-#ifdef RECORD
-	network_send(ULTRASOUND_HEADER, distance, sizeof(uint32_t), NULL);
-#endif
-
+    record(ULTRASOUND_HEADER, distance, sizeof(uint32_t), NULL);
     return distance;
 }
