@@ -4,11 +4,14 @@
 #include "ultrasound.h"
 #include "network.h"
 
+#define SAMPLE_COUNT 10 //The number of samples to use for calibration.
+
 /* Ultrasound calibration variables. */
-static uint32_t ultrasound_calibration_m;
-static uint32_t ultrasound_calibration_c;
-static uint32_t ultrasound_near_point;
-static uint32_t ultrasound_far_point;
+static int32_t ultrasound_calibration_m; //Needs to be signed
+static int32_t ultrasound_calibration_c; //Can have intercept below 0
+
+static uint32_t ultrasound_near_points[SAMPLE_COUNT];//Sample windows for
+static uint32_t ultrasound_far_points[SAMPLE_COUNT];//calibration.
 
 /* Timer global variables, do not read from them. */
 static uint32_t ultrasound_current_timer_diff = 0;
@@ -42,27 +45,79 @@ void ultrasound_initialise_timer_measurement(void)
 /* Ultrasound calibration functions. Except for sending test pulse,
     is nearly identical to the ultrasound calibration. */
 
-void ultrasound_set_near_point(uint32_t x){
-    ultrasound_send_test_pulse();
-    timer_delay(50);
-    ultrasound_near_point = x;
+void ultrasound_set_near_point(){
+    //We fill up the sample window to allow for averaging
+    int i;
+    for(i = 0; i < SAMPLE_COUNT; i++){
+        ultrasound_send_test_pulse();
+        timer_delay(50);
+        ultrasound_near_points[i] = 10 * ultrasound_valid_response_time / 2;
+    }
 }
 
-void ultrasound_set_far_point(uint32_t x){
-    ultrasound_send_test_pulse();
-    timer_delay(50);
-    ultrasound_far_point = x;
+void ultrasound_set_far_point(){
+    //Fill up the sample window for averaging.
+    int i;
+    for(i = 0; i < SAMPLE_COUNT; i++){
+        ultrasound_send_test_pulse();
+        timer_delay(50);
+        ultrasound_far_points[i] = 10 * ultrasound_valid_response_time / 2;
+    }
     ultrasound_calibrate();
 }
 
 void ultrasound_calibrate(){
-    ultrasound_calibration_m = (ultrasound_near_point - ultrasound_far_point) / ((1/150000.0f) - (1/300000.0f));
-    ultrasound_calibration_c = ultrasound_far_point - (ultrasound_calibration_m/300000.0f);
+    //Average the inputs to get a more sensible value
+    //Here we are just finding the mean for both the near
+    //and far points
+    int32_t ultrasound_near_point = 0;
+    int32_t ultrasound_far_point = 0;
+    int i;
+    for(i = 0; i < SAMPLE_COUNT; i++){
+        ultrasound_near_point += ultrasound_near_points[i];
+        ultrasound_far_point += ultrasound_far_points[i];
+    }
+    ultrasound_near_point = ultrasound_get_sample_median(ultrasound_near_points);
+    ultrasound_far_point = ultrasound_get_sample_median(ultrasound_far_points);
+
+    //These are split to ensure that C implicitly casts the types correctly
+    ultrasound_calibration_m = (ultrasound_far_point - ultrasound_near_point);
+    ultrasound_calibration_m = (300000.0f - 150000.0f) / ultrasound_calibration_m;
+    ultrasound_calibration_c = (ultrasound_calibration_m * ultrasound_near_point);
+    ultrasound_calibration_c = 150000 - ultrasound_calibration_c;
+}
+
+/* Find the median of all non zero values and return */
+uint32_t ultrasound_get_sample_median(uint32_t * samples){
+
+    int i = 0, non_zero_count = 0;
+    uint32_t non_zeros[SAMPLE_COUNT];
+
+    for (i = 0; i < SAMPLE_COUNT; i++) {
+        if (samples[i] != 0) {
+            non_zeros[non_zero_count++] = samples[i];
+        }
+    }
+
+    qsort(non_zeros, non_zero_count, sizeof(uint32_t), ultrasound_compare_values);
+        
+    return non_zeros[non_zero_count/2];
+}
+
+/* Compare function for two values */
+int ultrasound_compare_values(const void * elem1, const void * elem2) {
+
+    int a = *((uint32_t*)elem1);
+    int b = *((uint32_t*)elem2);
+    
+    if (a > b) return 1;
+    if (b < a) return -1;
+
+    return 0;
 }
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
 void ultrasound_send_test_pulse(void){
-    debug_sendfc("Send pulse... %d\r\n", ultrasound_pulse_count++);
     ultrasound_false_edge_expected = 1;
     set_general_gpio(HCSR_SIGNAL_PORT, HCSR_SIGNAL_PIN, 1);
     timer_delay(1);
@@ -99,10 +154,10 @@ void TIMER2_IRQHandler(void)
         ultrasound_false_edge_expected = 0;
     } else {
         ultrasound_valid_response_time = ultrasound_current_timer_diff;
-        sprintf(debug_string, "Timer Value: %lu \r\nTimer duration: %lu\r\n\r\n", (unsigned long)ultrasound_previous_timer_value, (unsigned long)ultrasound_valid_response_time);
-        debug_send(debug_string);
     }
 }
+
+/* Retrieve ultrasound measured distance. */
 uint32_t ultrasound_get_distance(void){
 	return ultrasound_process_value(ultrasound_calibration_m, ultrasound_calibration_c, ultrasound_valid_response_time);
 }
@@ -122,9 +177,6 @@ uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offs
      different from 340m/s. Unit is microsecond/s with offset. */
     uint32_t distance = (microseconds * calibration_gradient + calibration_offset);
 
-#ifdef RECORD
-	network_send(ULTRASOUND_HEADER, distance, sizeof(uint32_t), NULL);
-#endif
-
+    record(ULTRASOUND_HEADER, distance, sizeof(uint32_t), NULL);
     return distance;
 }

@@ -3,7 +3,7 @@
 #include "servo.h"
 #include "network.h"
 
-static int current_pos = 0;
+static uint16_t current_pos = 0;
 
 void servo_init(){
     pwm_init();
@@ -12,7 +12,7 @@ void servo_init(){
     pwm_enable();
 }
 
-int servo_set_pos(int angle){
+uint16_t servo_set_pos(int angle){
     if (angle >= 270){
         current_pos = 270;
         pwm_set_match(2, MAX_WIDTH);
@@ -27,9 +27,7 @@ int servo_set_pos(int angle){
     return current_pos;
 }
 
-int servo_get_pos(){
-#ifdef RECORD
-	network_send(SERVO_HEADER, &current_pos, sizeof(int), NULL);
-#endif
+uint16_t servo_get_pos(){
+    record(SERVO_HEADER, &current_pos, sizeof(uint16_t), NULL);
     return current_pos;
 }
