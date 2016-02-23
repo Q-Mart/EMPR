@@ -1,7 +1,6 @@
 #include "multi.h"
 #include "lcd.h"
 #include "utils.h"
-#include <stdio.h>
 #include "timer.h"
 #include "keypad.h"
 #include "state.h"
