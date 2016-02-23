@@ -19,19 +19,18 @@ void any_to_multi() {
 }
 
 void multi_to_multi_sweep_number() {
-    lcd_send_line(LINE1, "Multi-settings");
+    lcd_send_line(LINE1, "Number of sweeps");
 }
 
 void multi_sweep_number_to_multi_min_angle() {
-    lcd_send_line(LINE1, "Multi-min");
+    lcd_send_line(LINE1, "Minimum angle");
 }
 
 void multi_min_angle_to_multi_max_angle() {
-    lcd_send_line(LINE1, "Multi-max");
+    lcd_send_line(LINE1, "Maximum angle");
 }
 
 void multi_sweep() {
-    lcd_send_line(LINE1, "Multi-sweep state");
     //Clamp the angles if they are out of range
     if (max_angle>270) max_angle = 270;
     if (min_angle>270) min_angle = 0;
@@ -60,15 +59,15 @@ void multi_sweep_loop() {
     int angle_range = max_angle-min_angle;
     int pos = servo_get_pos();
 
-    lcd_send_line(LINE2, "Sweep %d of %d", current_sweep+1, number_of_sweeps);
+    lcd_send_line(LINE1, "Sweep %d of %d", current_sweep+1, number_of_sweeps);
 
-    if (pos<=0) scan_direction = 1;
-    if (pos>=270) scan_direction = -1;
+    if (pos<=min_angle) scan_direction = 1;
+    if (pos>=max_angle) scan_direction = -1;
 
     for(i=0;i<angle_range;i++) {
         pos = pos + scan_direction;
-        servo_set_pos(pos + scan_direction);
-        timer_delay(1);
+        servo_set_pos(pos);
+        timer_delay(35);
         uint32_t raw = utils_get_ir_and_ultrasound_distance();
     }
 
