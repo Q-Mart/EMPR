@@ -17,10 +17,6 @@ int tracker_current_center = 0;
 
 void tracker(void)
 {
-    debug_init();
-    
-    ultrasound_initialise_timer_measurement();
-    servo_init();
 
     uint32_t tracker_ultrasound_range_table[32], tracker_ir_range_table[32];
     int tracker_range_index;
@@ -44,7 +40,7 @@ void tracker(void)
     {
         tracker_narrow_sweep();
         tracker_set_bound();
-        timer_delay(125);
+        timer_delay(35);
     }
 }
 
@@ -54,7 +50,7 @@ int tracker_full_scan(int start, int end, int increment, uint32_t * tracker_ultr
     int range_index = 0;
     static uint32_t ultrasound_measured_distance;
     static uint32_t ir_measured_distance;
-    char print_distance[64];
+
     debug_send("===Beginning full scan.===\r\n");
     for (sensor_position = start; sensor_position <= end; sensor_position += increment)
     {
@@ -76,13 +72,12 @@ int tracker_full_scan(int start, int end, int increment, uint32_t * tracker_ultr
 /* Narrow sweep within a cone of +-30 degrees, returns the new center */
 void tracker_narrow_sweep()
 {
-    int range_index, new_index, scan_start, scan_end, sensor_position, direction;
+    int range_index, new_index, scan_start, scan_end, sensor_position, x;
 
-    static uint32_t ultrasound_measured_distance, ir_measured_distance;
-    static uint32_t tracker_ultrasound_range_table[15];
-    static uint32_t tracker_ir_range_table[15];
-    static int tracker_index_table[15];
+    static uint32_t tracker_ultrasound_range_table[7];
+    static uint32_t tracker_ir_range_table[7];
 
+    //Set boundaries for sweep.
     if (abs(tracker_lower_bound - servo_get_pos()) < abs(tracker_upper_bound - servo_get_pos()))
     {
         scan_start = tracker_lower_bound;
@@ -93,55 +88,64 @@ void tracker_narrow_sweep()
         scan_end = tracker_lower_bound;
     }
 
+    //Perform narrow sweep.
     debug_sendf("Starting at %d, Finishing at %d \r\n", scan_start, scan_end);
+    range_index = 0;
     if (scan_start <= scan_end) {
-        range_index = 0;
-        for (sensor_position = scan_start; sensor_position <= scan_end; sensor_position += 5) {
-            servo_set_pos(sensor_position);
-            timer_delay(100);
-            ir_measured_distance = ir_sensor_get_distance();
-            ultrasound_send_test_pulse();
-            timer_delay(50);          
-            ultrasound_measured_distance = ultrasound_get_distance();
-            tracker_ultrasound_range_table[range_index] = ultrasound_measured_distance;
-            tracker_ir_range_table[range_index] = ir_measured_distance;
-            tracker_index_table[range_index] = range_index - 6;
-            range_index++;
+        for (sensor_position = scan_start; sensor_position <= scan_end; sensor_position += 10) {
+            tracker_narrow_sweep_scan(range_index++, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
         }
     }
     else {
-        range_index = 0;
-        for (sensor_position = scan_start; sensor_position >= scan_end; sensor_position -= 5) {
-            servo_set_pos(sensor_position);
-            timer_delay(100);
-            ir_measured_distance = ir_sensor_get_distance();
-            ultrasound_send_test_pulse();
-            timer_delay(50);
-            ultrasound_measured_distance = ultrasound_get_distance();
-            tracker_ultrasound_range_table[range_index] = ultrasound_measured_distance;
-            tracker_ir_range_table[range_index] = ir_measured_distance;
-            tracker_index_table[range_index] = range_index - 6;
-            range_index++;
+        for (sensor_position = scan_start; sensor_position >= scan_end; sensor_position -= 10) {
+            tracker_narrow_sweep_scan(range_index++, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
         }
     }
     
+    //Find the angle with the smallest distance.
     new_index = tracker_compare_indices(
         tracker_find_smallest_index(tracker_ultrasound_range_table, range_index, 0),
         tracker_find_smallest_index(tracker_ir_range_table, range_index, 0));
     tracker_current_center = (tracker_upper_bound + tracker_lower_bound) / 2 + 5 * tracker_index_table[new_index];
-    debug_sendf("Tracker: the object is at %d degrees.\r\n", tracker_current_center);
-    debug_sendf("Ultrasound: value: %d\r\n", tracker_ultrasound_range_table[new_index]);
-    debug_sendf("IR: value: %d\r\n\r\n", tracker_ir_range_table[new_index]);
+    debug_sendf("Tracker: the object appears to be at %d degrees.\r\n", tracker_current_center);
 
-    int x;
+    //Clear the range tables.
     for (x = 0; x < 15; x++) {
         tracker_ultrasound_range_table[x] = 0;
         tracker_ir_range_table[x] = 0;
     }
 }
 
+void tracker_narrow_sweep_scan(int range_index, int sensor_position, uint32_t * tracker_ultrasound_range_table, uint32_t * tracker_ir_range_table)
+{
+    
+    static uint32_t ultrasound_measured_distance, ir_measured_distance;
+
+    servo_set_pos(sensor_position);
+    timer_delay(35);
+    ir_measured_distance = ir_sensor_get_distance();
+    ultrasound_send_test_pulse();
+    timer_delay(50);
+    ultrasound_measured_distance = ultrasound_get_distance();
+    tracker_ultrasound_range_table[range_index] = ultrasound_measured_distance;
+    tracker_ir_range_table[range_index] = ir_measured_distance;
+
+}
+
+int tracker_process_range_table(uint32_t * range_table) {
+    int table_length = sizeof(range_table) / sizeof(range_table[0]);
+    int i;
+    int averaged_table[table_length - 1];
+    for (i = 0; i < (table_length - 1); i++) {
+        averaged_table = (range_table[i] + range_table[i+1]) / 2;
+    }
+    tracker_find_smallest_index(averaged_table, table_length)...
+    //TODO: finish this.
+}
+
 void tracker_set_bound()
 {
+
     if (tracker_current_center >= 240)
     {
         tracker_upper_bound = 270;
@@ -161,7 +165,7 @@ int tracker_compare_indices(int ultrasound_index, int ir_index)
 {
     debug_sendf("U: %d \r\n", ultrasound_index);
     debug_sendf("I: %d \r\n", ir_index);
-    if (abs(ultrasound_index - ir_index) >= 3)
+    if (abs(ultrasound_index - ir_index) >= 4)
     {
         return ir_index;
     }
@@ -187,6 +191,6 @@ int tracker_find_smallest_index(uint32_t darray[], int length, int initial)
 }
 
 void any_to_track(){
-    lcd_send_line(LINE1,"Narrow Sweep");
+    lcd_send_line(LINE1, "Narrow Sweep");
     lcd_send_line(LINE2, "Tracking Object");
 }
