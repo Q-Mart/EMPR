@@ -74,7 +74,7 @@ int main(void)
                 scan_parameter_3_loop(last_key_press);
                 break;
             case MEASURE_DO:
-                measure_loop();
+                measure_loop(last_key_press);
                 break;
             case MULTI_SWEEP:
                 multi_sweep_loop();
@@ -148,7 +148,7 @@ const transition_t lut[] = {
     {SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters},
 
 
-    {MEASURE, '#', MEASURE_DO, NULL},
+    {MEASURE, '#', MEASURE_DO, &measure_to_measure_do},
     {MEASURE_DO, '*', MEASURE, &any_to_measure},
 
     {MULTI, '#', MULTI_SWEEP_NUMBER, &multi_to_multi_sweep_number},
