@@ -15,6 +15,9 @@ Options:
 BASE_DIR = '../../'
 RECORD_FILE = BASE_DIR + 'records/record'
 
+CANVAS_WIDTH  = 450
+CANVAS_HEIGHT = 300
+
 import reader
 
 try:
@@ -83,6 +86,13 @@ class PlotCanvas(tkinter.Canvas):
     def clear(self):
         self.delete(*self.lines)
         self.lines = []
+
+    def on_resize(self, event):
+        scale = (event.width / self.width, event.height / self.height)
+        self.width = event.width
+        self.height = event.height
+        self.config(width=self.width, height=self.height)
+        self.scale("all", 0, 0, *scale)
 
 class Mode:
     '''These mode values come from the `state_t` enum
@@ -184,7 +194,7 @@ class AppFrame(tkinter.Frame):
         self.monitor_t.start()
 
     def init(self):
-        self.graph_canvas = PlotCanvas(self, 400, 600)
+        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH, CANVAS_HEIGHT)
         self.graph_canvas.pack(side='top')
 
         quit = tkinter.Button(text='Quit', command=tk.destroy)
@@ -220,4 +230,5 @@ if __name__ == '__main__':
 
         tk = tkinter.Tk()
         app = AppFrame(parent=tk)
+        app.pack(expand=tkinter.YES)
         app.mainloop()
