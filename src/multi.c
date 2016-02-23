@@ -5,9 +5,12 @@
 #include "timer.h"
 #include "keypad.h"
 #include "state.h"
+#include "servo.h"
+#include "debug.h"
 
 static uint16_t number_of_sweeps;
 static uint16_t current_sweep;
+static int scan_direction;
 
 void any_to_multi() {
     lcd_send_line(LINE1, "Multi-View mode");
@@ -20,6 +23,9 @@ void multi_to_multi_settings() {
 
 void multi_settings_to_multi_sweep() {
     lcd_send_line(LINE1, "Multi-sweep state");
+    servo_set_pos(0);
+    //Wait to move
+    timer_delay(500);
 }
 
 void multi_settings_loop(int last_key_press) {
@@ -28,8 +34,20 @@ void multi_settings_loop(int last_key_press) {
 }
 
 void multi_sweep_loop() {
+    int i;
+    int pos = servo_get_pos();
+
     lcd_send_line(LINE2, "Sweep %d of %d", current_sweep+1, number_of_sweeps);
-    timer_delay(1000);
+
+    if (pos<=0) scan_direction = 1;
+    if (pos>=270) scan_direction = -1;
+
+    for(i=0;i<270;i++) {
+        pos = pos + scan_direction;
+        servo_set_pos(pos + scan_direction);
+        timer_delay(35);
+    }
+
     current_sweep++;
 
     if (current_sweep < number_of_sweeps) {
