@@ -11,7 +11,7 @@ typedef enum {
     CALIBRATE_NEAR_DONE,
     CALIBRATE_DONE,
 
-    /* SCAN_PARAMETERS 
+    /* SCAN_PARAMETERS
      *  sent when going between SCAN and selecting
      *  which paramater to be chosen
      */
@@ -29,11 +29,11 @@ typedef enum {
      * with return to MULTI_DO
      */
 
-    MULTI_DO,
-    MULTI_DO_STAGE_1, /* First Sweep */
-    MULTI_DO_STAGE_2, /* Second Sweep */
-    MULTI_DO_STAGE_3, /* Third Sweep */
-    MULTI_DO_STAGE_4, /* Fourth Sweep */
+    MULTI_SWEEP, /* sweeping and scanning */
+    MULTI_WAIT, /* wait for user to turn object */
+    MULTI_SWEEP_NUMBER, /* settings: specify sweep number */
+    MULTI_MIN_ANGLE, /* settings: specify minimum sweep angle */
+    MULTI_MAX_ANGLE, /* settings: specify maximum sweep angle */
 
     MULTI_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY,
@@ -41,4 +41,5 @@ typedef enum {
     MEASURE_PARAMETERS_1
 } state_t;
 
+void change_state(state_t state);
 #endif
