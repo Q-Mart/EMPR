@@ -131,7 +131,7 @@ const transition_t lut[] = {
     {SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters}, 
 
 
-    {MEASURE, '#', MEASURE_DO, NULL},
+    {MEASURE, '#', MEASURE_DO, &measure_to_measure_do},
     {MEASURE_DO, '*', MEASURE, &any_to_measure},
     {MULTI, '#', MULTI_DO_STAGE_1, NULL},
     /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
