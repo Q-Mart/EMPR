@@ -145,8 +145,9 @@ int tracker_process_range_table(uint32_t * range_table, int range_table_size) {
     */
     for (i = 0; i < (range_table_size - 1); i++) {
         averaged_table[i] = (range_table[i] + range_table[i+1]) / 2;
+        debug_sendf("%d: %lu, ", i, averaged_table[i]);
     }
-    debug_sendf("tracker_process_range_table: %lu, %d", averaged_table[i], i);
+    debug_sendf("\r\n");
     return tracker_find_smallest_index(averaged_table, (range_table_size - 1), 0);
 }
 
