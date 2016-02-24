@@ -16,7 +16,7 @@ static uint64_t measure_total_distance = 0;
 static uint16_t measure_count = 0;
 
 
-static uint32_t measure_point = 0; //The desired measure point
+static uint16_t measure_point = 0; //The desired measure point
 static uint8_t measure_alarm_enabled = 0; //0: Alarm off, 1: Alarm on
 void any_to_measure() {
     lcd_send_line(LINE1, "Measure Mode # to start");
