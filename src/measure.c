@@ -6,13 +6,14 @@
 #include "state.h"
 #include "network.h"
 #include "ultrasound.h"
+#include "utils.h"
 //These keep track of what data the measure mode will
 //display on the IO board lcd.
 #define NO_OF_STATES 2
 static enum _measure_state{DISTANCE, AVG_DISTANCE} measure_state = DISTANCE;
 
 static uint64_t measure_total_distance = 0;
-static uint32_t measure_count = 0;
+static uint16_t measure_count = 0;
 
 
 static uint32_t measure_point = 0; //The desired measure point
@@ -22,6 +23,17 @@ void any_to_measure() {
     lcd_send_line(LINE2, "* for options");
 }
 
+void any_to_measure_parameters(){
+    lcd_send_line(LINE1, "Measure Parameters");
+}
+void measure_parameters_to_1(){
+    lcd_send_line(LINE1, "Point %u", measure_point);
+    lcd_send_line(LINE2, "# to confirm");
+}
+void measure_parameter_1_loop(int last_key_press){
+    utils_process_digit_input(last_key_press, &measure_count);
+    lcd_send_line(LINE1, "Point %u", measure_point);
+}
 void measure_to_measure_do() {
     lcd_send_line(LINE1, "Distance");
     measure_count = 0;

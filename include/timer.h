@@ -1,3 +1,5 @@
+#ifndef TIMER_H
+#define TIMER_H
 typedef void (*systick_func)(void);
 
 void timer_enable_systick();
@@ -14,3 +16,4 @@ void timer_delay(int);
 
 void timer_initialise_tim(void);
 void timer_configure_tim_capture(int, int, int, int);
+#endif //TIMER_H

@@ -78,6 +78,9 @@ int main(void)
             case MEASURE_DO:
                 measure_loop(last_key_press);
                 break;
+            case MEASURE_PARAMETER_1:
+                measure_parameter_1_loop(last_key_press);
+                break;
             case MULTI_SWEEP:
                 multi_sweep_loop();
                 break;
@@ -153,12 +156,12 @@ const transition_t lut[] = {
     {MEASURE, '#', MEASURE_DO, &measure_to_measure_do},
     {MEASURE_DO, '*', MEASURE, &any_to_measure},
     //Peronsal Project
-    {MEASURE, '*', MEASURE_PARAMETERS, NULL},
-    {MEASURE_PARAMETERS, '1', MEASURE_PARAMETER_1, NULL},
+    {MEASURE, '*', MEASURE_PARAMETERS, &any_to_measure_parameters},
+    {MEASURE_PARAMETERS, '1', MEASURE_PARAMETER_1, &measure_parameters_to_1},
     {MEASURE_PARAMETERS, '*', MEASURE, &any_to_measure},
-    {MEASURE_PARAMETER_1, '*', MEASURE_PARAMETERS, NULL},
-    {MEASURE_PARAMETER_1, '#', MEASURE_PARAMETERS, NULL},
-    {MEASURE_PARAMETERS, '#', MEASURE_DO, NULL},
+    {MEASURE_PARAMETER_1, '*', MEASURE_PARAMETERS, &any_to_measure_parameters},
+    {MEASURE_PARAMETER_1, '#', MEASURE_PARAMETERS, &any_to_measure_parameters},
+    {MEASURE_PARAMETERS, '#', MEASURE_DO, &measure_to_measure_do},
     //End Personal
     {MULTI, '#', MULTI_SWEEP_NUMBER, &multi_to_multi_sweep_number},
     {MULTI_SWEEP_NUMBER, '#', MULTI_MIN_ANGLE, &multi_sweep_number_to_multi_min_angle},
