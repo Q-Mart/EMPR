@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "ultrasound.h"
 
 void utils_process_digit_input(int last_key_press, uint16_t* result){
     if (last_key_press >= 0){
@@ -10,6 +11,7 @@ void utils_process_digit_input(int last_key_press, uint16_t* result){
 }
 
 uint32_t utils_get_ir_and_ultrasound_distance() {
+    ultrasound_send_test_pulse();
     uint32_t raw = ir_sensor_get_raw_data();
     raw = ir_convert_to_distance(raw);
     uint32_t raw_us = ultrasound_get_distance();
