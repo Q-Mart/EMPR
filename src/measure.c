@@ -27,12 +27,12 @@ void any_to_measure_parameters(){
     lcd_send_line(LINE1, "Measure Parameters");
 }
 void measure_parameters_to_1(){
-    lcd_send_line(LINE1, "Point %u", measure_point);
+    lcd_send_line(LINE1, "Point %d", measure_point);
     lcd_send_line(LINE2, "# to confirm");
 }
 void measure_parameter_1_loop(int last_key_press){
     utils_process_digit_input(last_key_press, &measure_count);
-    lcd_send_line(LINE1, "Point %u", measure_point);
+    lcd_send_line(LINE1, "Point %d", measure_point);
 }
 void measure_to_measure_do() {
     lcd_send_line(LINE1, "Distance");
