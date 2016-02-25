@@ -159,7 +159,6 @@ const transition_t lut[] = {
     {MEASURE, '*', MEASURE_PARAMETERS, &any_to_measure_parameters},
     {MEASURE_PARAMETERS, '1', MEASURE_PARAMETER_1, &measure_parameters_to_1},
     {MEASURE_PARAMETERS, '*', MEASURE, &any_to_measure},
-    {MEASURE_PARAMETER_1, '*', MEASURE_PARAMETERS, &any_to_measure_parameters},
     {MEASURE_PARAMETER_1, '#', MEASURE_PARAMETERS, &any_to_measure_parameters},
     {MEASURE_PARAMETERS, '#', MEASURE_DO, &measure_to_measure_do},
     //End Personal

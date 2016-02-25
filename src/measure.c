@@ -15,7 +15,6 @@ static enum _measure_state{DISTANCE, AVG_DISTANCE} measure_state = DISTANCE;
 static uint64_t measure_total_distance = 0;
 static uint16_t measure_count = 0;
 
-
 static uint16_t measure_point = 0; //The desired measure point
 static uint8_t measure_alarm_enabled = 0; //0: Alarm off, 1: Alarm on
 void any_to_measure() {
@@ -31,7 +30,7 @@ void measure_parameters_to_1(){
     lcd_send_line(LINE2, "# to confirm");
 }
 void measure_parameter_1_loop(int last_key_press){
-    utils_process_digit_input(last_key_press, &measure_count);
+    utils_process_digit_input(last_key_press, &measure_point);
     lcd_send_line(LINE1, "Point %d", measure_point);
 }
 void measure_to_measure_do() {
