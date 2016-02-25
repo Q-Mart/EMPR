@@ -12,9 +12,10 @@ void utils_process_digit_input(int last_key_press, uint16_t* result){
 
 uint32_t utils_get_ir_and_ultrasound_distance() {
     ultrasound_send_test_pulse();
-    uint32_t raw = ir_sensor_get_raw_data();
-    raw = ir_convert_to_distance(raw);
+    uint32_t raw_ir = ir_sensor_get_raw_data();
+    raw_ir = ir_convert_to_distance(raw_ir);
     uint32_t raw_us = ultrasound_get_distance();
-    raw = (raw + raw_us) /2;
+    debug_sendf("Measurement: IR %lu ; US: %lu .\r\n", raw_ir, raw_us);
+    uint32_t raw = (raw_ir + raw_us) /2;
     return raw;
 }
