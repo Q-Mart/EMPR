@@ -18,3 +18,5 @@ uint32_t utils_get_ir_and_ultrasound_distance() {
     uint32_t raw = (raw_ir + raw_us) /2;
     return raw;
 }
+
+uint32_t utils_get_ir_and_ultrasound_median() {}

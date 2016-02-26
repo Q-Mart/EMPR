@@ -88,7 +88,7 @@ void ultrasound_calibrate(){
 }
 
 /* Find the median of all non zero values and return */
-uint32_t ultrasound_get_sample_median(uint32_t * samples){
+uint32_t ultrasound_get_sample_median_without_zeroes(uint32_t * samples){
 
     int i = 0, non_zero_count = 0;
     uint32_t non_zeros[SAMPLE_COUNT];
@@ -101,6 +101,11 @@ uint32_t ultrasound_get_sample_median(uint32_t * samples){
 
     qsort(non_zeros, non_zero_count, sizeof(uint32_t), ultrasound_compare_values);
         
+    return non_zeros[non_zero_count/2];
+}
+
+uint32_t ultrasound_get_sample_median_with_zeroes(uint32_t * samples){
+    qsort(samples, 3, sizeof(uint32_t), ultrasound_compare_values);
     return non_zeros[non_zero_count/2];
 }
 
