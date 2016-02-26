@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <errno.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
 
 #include "adc.h"
 #include "dbg.h"
@@ -14,6 +18,8 @@ QUEUE* IR_QUEUE;
 QUEUE* KEYPAD_QUEUE;
 QUEUE* ULTRASOUND_QUEUE;
 QUEUE* SERVO_QUEUE;
+
+int SOCK;
 
 void adc_enable(void) {
     /* Load QUEUEs from file */
@@ -69,6 +75,12 @@ void adc_enable(void) {
         perror(RECORD_FILE);
         exit(0);
     }
+
+    SOCK = socket(AF_UNIX, SOCK_DGRAM, 0);
+    struct sockaddr_un addr;
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, SOCK_ADDR, sizeof(addr.sun_path) - 1);
+    bind(SOCK, (struct sockaddr*)&addr, sizeof(addr));
 }
 
 void adc_enable_channel(int channel) {}
