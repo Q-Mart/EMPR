@@ -48,6 +48,9 @@ def split_lines(frame, vals):
 
     p = top
     for _ in range(2):
+        if len(vals) == 1:
+            break
+
         val, vals = vals[0], vals[1:]
         n, = struct.unpack('B', val)
         for _ in range(n):
