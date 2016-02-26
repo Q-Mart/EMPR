@@ -81,6 +81,9 @@ class LcdCanvas(tkinter.Canvas):
         tkinter.Label(parent, textvariable=bot).pack(side='bottom')
         self._lines = [top, bot]
 
+    def update(self, *lines):
+        self.lines = lines
+
     def draw(self):
         list(map(lambda t, s: t.set(s), self._lines, self.lines))
         
@@ -97,7 +100,7 @@ class AppFrame(tkinter.Frame):
         monitor_t.start()
 
     def update(self, *lines):
-        self.lcd.lines = lines
+        self.lcd.update(*lines)
         self.lcd.draw()
 
 def run_lcd():

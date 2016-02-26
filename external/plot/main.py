@@ -38,6 +38,8 @@ except ImportError:
 
 from docopt import docopt
 
+import lcd
+
 class PlotCanvas(tkinter.Canvas):
     def __init__(self, parent, width, height):
         tkinter.Canvas.__init__(self, parent, width=width, height=height)
@@ -229,12 +231,12 @@ if __name__ == '__main__':
         if args['--debug']:
             DEBUG = True
 
-        if DEBUG:
-            print('Running in DEBUG mode, defauling to MockReader for testing')
-            SerialReader = reader.MockReader
-
-
         tk = tkinter.Tk()
         app = AppFrame(parent=tk)
-        app.pack(expand=tkinter.YES)
+        app.pack()
+
+        if DEBUG:
+            print('Running in DEBUG mode, reading from UNIX Socket')
+            SerialReader = functools.partial(reader.UnixReader, app)
+
         app.mainloop()

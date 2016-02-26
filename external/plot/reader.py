@@ -1,4 +1,9 @@
 import struct
+import os
+import collections
+
+from socket import AF_UNIX, SOCK_DGRAM, socket
+from contextlib import closing
 
 class Reader:
     def __iter__(self):
@@ -35,7 +40,7 @@ class Reader:
 
     def close(self):
         raise NotImplementedError
-    
+
 # b-mode i-angle i-value 
 SCAN_DO = 10
 MODE = lambda x, y, z: struct.pack('b', x) + struct.pack('i', y) + struct.pack('i', z)
@@ -62,3 +67,49 @@ class MockReader(Reader):
 
     def __iter__(self):
         return iter(self._data)
+
+SOCK_ADDR = '/tmp/empr_ipc_socket_network'
+def monitor(unix_reader):
+    '''Monitors a UNIX Socket
+    for IPC with debug build
+    '''
+
+    if os.path.exists(SOCK_ADDR):
+        os.remove(SOCK_ADDR)
+
+    processor = process(unix_reader)
+    next(processor)
+    with closing(socket(AF_UNIX, SOCK_DGRAM)) as sock:
+        sock.bind(SOCK_ADDR)
+
+        while True:
+            v = sock.recv(1024)
+
+            if not v:
+                break
+
+            processor.send(v)
+
+    os.remove(SOCK_ADDR)
+
+def process(reader):
+    while True:
+        v = yield
+        reader.Q.extend(v)
+
+class UnixReader(Reader):
+    def __init__(self, app):
+        self.app = app
+        self.Q = collections.deque()
+
+    def read(self, n):
+        while not Q:
+            ...
+
+        return self.Q.popleft()
+
+    def close(self):
+        pass
+
+    def __iter__(self):
+        return self
