@@ -1,14 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "lpc17xx_timer.h"
-#include "keypad.h"
-#include "lcd.h"
-#include "debug.h"
-#include "gpio.h"
-#include "timer.h"
-#include "ultrasound.h"
-#include "servo.h"
-#include "ir_sensor.h"
 #include "tracker.h"
 
 int tracker_upper_bound = 0;
@@ -74,6 +63,7 @@ int tracker_full_scan(int start, int end, int increment, uint32_t * tracker_ultr
 void tracker_narrow_sweep()
 {
     int range_index, new_index, scan_start, scan_end, sensor_position, x;
+    char lcd_string[20];
 
     static uint32_t tracker_ultrasound_range_table[7];
     static uint32_t tracker_ir_range_table[7];
@@ -88,6 +78,11 @@ void tracker_narrow_sweep()
         scan_start = tracker_upper_bound;
         scan_end = tracker_lower_bound;
     }
+    tracker_current_center = (tracker_upper_bound + tracker_lower_bound) / 2;
+
+
+    //Move servo to the current object direction.
+    //servo_set_pos(tracker_current_center);
 
     //Perform narrow sweep.
     debug_sendf("Starting at %d, Finishing at %d \r\n", scan_start, scan_end);
@@ -110,8 +105,10 @@ void tracker_narrow_sweep()
         tracker_process_range_table(tracker_ultrasound_range_table, range_index),
         tracker_process_range_table(tracker_ir_range_table, range_index) 
         );
-    tracker_current_center = (tracker_upper_bound + tracker_lower_bound) / 2 + averaged_values_bearings[new_index];
-    debug_sendf("Tracker: the object appears to be at %d degrees.\r\n", tracker_current_center);
+    tracker_current_center += averaged_values_bearings[new_index];
+
+    sprintf(lcd_string, "At %d degrees", tracker_current_center);
+    lcd_send_line(LINE2, lcd_string);
 
     //Clear the range tables.
     for (x = 0; x < 7; x++) {
@@ -151,17 +148,18 @@ int tracker_process_range_table(uint32_t * range_table, int range_table_size) {
     return tracker_find_smallest_index(averaged_table, (range_table_size - 1), 0);
 }
 
+//Todo: add a directional bias to tracker_set_bound on Monday.
 void tracker_set_bound()
 {
 
     if (tracker_current_center >= 240)
     {
-        tracker_upper_bound = 270;
-        tracker_lower_bound = 210;
+        tracker_upper_bound = 255;
+        tracker_lower_bound = 195;
     }
     else if (tracker_current_center <= 30) {
-        tracker_lower_bound = 0;
-        tracker_upper_bound = 60;
+        tracker_lower_bound = 15;
+        tracker_upper_bound = 75;
     }
     else {
         tracker_lower_bound = tracker_current_center - 30;
@@ -173,13 +171,8 @@ int tracker_compare_indices(int ultrasound_index, int ir_index)
 {
     debug_sendf("U: %d \r\n", ultrasound_index);
     debug_sendf("I: %d \r\n", ir_index);
-    if (abs(ultrasound_index - ir_index) >= 4)
-    {
-        return ir_index;
-    }
-    else {
-        return ((ultrasound_index + ir_index) / 2);
-    }
+        
+    return ((ultrasound_index + ir_index) / 2);
 }
 
 int tracker_find_smallest_index(uint32_t darray[], int length, int initial)

@@ -1,3 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "lpc17xx_timer.h"
+#include "lcd.h"
+#include "debug.h"
+#include "gpio.h"
+#include "timer.h"
+#include "ultrasound.h"
+#include "servo.h"
+#include "ir_sensor.h"
+
 void tracker(void);
 int tracker_full_scan(int, int, int, uint32_t*, uint32_t*);
 void tracker_narrow_sweep();

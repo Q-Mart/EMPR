@@ -54,6 +54,7 @@ int main(void)
     ir_sensor_init();
     ultrasound_initialise_timer_measurement();
     servo_init();
+    servo_set_pos(155);
     any_to_calib();
 
     while (1)
