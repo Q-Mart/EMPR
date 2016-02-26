@@ -15,7 +15,6 @@ uint32_t utils_get_ir_and_ultrasound_distance() {
     uint32_t raw_ir = ir_sensor_get_raw_data();
     raw_ir = ir_convert_to_distance(raw_ir);
     uint32_t raw_us = ultrasound_get_distance();
-    debug_sendf("Measurement: IR %lu ; US: %lu .\r\n", raw_ir, raw_us);
     uint32_t raw = (raw_ir + raw_us) /2;
     return raw;
 }
