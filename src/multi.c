@@ -70,7 +70,7 @@ void multi_sweep_loop() {
         servo_set_pos(pos);
         timer_delay(35);
         uint32_t raw = utils_get_ir_and_ultrasound_distance();
-        //***DATA SHOULD BE SENT HERE***
+        network_send(MULTI_SWEEP, &pos, 4, &raw, 4, NULL);     
     }
 
     current_sweep++;
