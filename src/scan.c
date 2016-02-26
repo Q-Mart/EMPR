@@ -6,6 +6,7 @@
 #include "ultrasound.h"
 #include "timer.h"
 #include "utils.h"
+#include "empr.h"
 #define NO_OF_STATES 3
 static enum _scan_state{DISTANCE, ANGLE, AVG_DISTANCE} scan_state = DISTANCE;
 signed int scan_direction = 1;
@@ -91,7 +92,7 @@ void scan_loop(int last_key_press){
     if(pos <= scan_lower_bound) scan_direction = 1;
     if(pos >= scan_upper_bound) scan_direction = -1;
     servo_set_pos(pos + (scan_direction * scan_speed));
-    timer_delay(1);//Time for it to phusically move
+    timer_delayc(1, &input_poll);//Time for it to phusically move
     uint32_t raw = utils_get_ir_and_ultrasound_distance();
     debug_send_arb((char*) &pos, 4);
     debug_send_arb((char*) &raw, 4);
