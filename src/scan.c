@@ -7,12 +7,12 @@
 #include "timer.h"
 #include "utils.h"
 signed int scan_direction = 1;
-static uint16_t scan_upper_bound = 270;
-static uint16_t scan_lower_bound = 0;
-static uint16_t scan_speed = 1;
-static uint16_t scan_tentative_speed = 1;
-static uint16_t scan_tentative_upper_bound = 270;
-static uint16_t scan_tentative_lower_bound = 0;
+static uint32_t scan_upper_bound = 270;
+static uint32_t scan_lower_bound = 0;
+static uint32_t scan_speed = 1;
+static uint32_t scan_tentative_speed = 1;
+static uint32_t scan_tentative_upper_bound = 270;
+static uint32_t scan_tentative_lower_bound = 0;
 /*
  * Parameter Loops:
  * Each parameter state has a loop function that runs during the
@@ -34,13 +34,13 @@ void scan_to_scan_do(){
 }
 void scan_parameters_to_1(){
     scan_tentative_speed = scan_speed;
-    lcd_send_line(LINE1, "Speed %d", scan_tentative_speed);
+    lcd_send_line(LINE1, "Speed %u", scan_tentative_speed);
     lcd_send_line(LINE2, "# to Confirm");
     timer_delay(300); //Prevent button bounce;
 }
 void scan_parameter_1_loop(int last_key_press){
     utils_process_digit_input(last_key_press, &scan_tentative_speed);
-    lcd_send_line(LINE1, "Speed %d", scan_tentative_speed);
+    lcd_send_line(LINE1, "Speed %u", scan_tentative_speed);
 }
 void scan_parameter_1_to_scan_parameters(){
     scan_speed = scan_tentative_speed;
@@ -51,13 +51,13 @@ void any_to_scan_parameters(void){
 }
 void scan_parameters_to_2(void){
     scan_tentative_upper_bound = scan_upper_bound;
-    lcd_send_line(LINE1, "Left point %d", scan_tentative_upper_bound);
+    lcd_send_line(LINE1, "Left point %u", scan_tentative_upper_bound);
     lcd_send_line(LINE2, "# to confirm");
     timer_delay(300); //Prevent Button Bounce
 }
 void scan_parameter_2_loop(int last_key_press){
     utils_process_digit_input(last_key_press, &scan_tentative_upper_bound);
-    lcd_send_line(LINE1, "Left point %d", scan_tentative_upper_bound);
+    lcd_send_line(LINE1, "Left point %u", scan_tentative_upper_bound);
 }
 
 void scan_parameter_2_to_scan_parameters(void){
@@ -66,13 +66,13 @@ void scan_parameter_2_to_scan_parameters(void){
 }
 void scan_parameters_to_3(void){
     scan_tentative_lower_bound = scan_lower_bound;
-    lcd_send_line(LINE1, "Right point %d", scan_tentative_lower_bound);
+    lcd_send_line(LINE1, "Right point %u", scan_tentative_lower_bound);
     lcd_send_line(LINE2, "# to confirm");
     timer_delay(300); //Prevent Button Bounce
 }
 void scan_parameter_3_loop(int last_key_press){
     utils_process_digit_input(last_key_press, &scan_tentative_lower_bound);
-    lcd_send_line(LINE1, "Right Point %d", scan_tentative_lower_bound);
+    lcd_send_line(LINE1, "Right Point %u", scan_tentative_lower_bound);
 }
 void scan_parameter_3_to_scan_parameters(void){
     scan_lower_bound = scan_tentative_lower_bound;
@@ -87,5 +87,5 @@ void scan_loop(){
     uint32_t raw = utils_get_ir_and_ultrasound_distance();
     debug_send_arb((char*) &pos, 4);
     debug_send_arb((char*) &raw, 4);
-    lcd_send_line(LINE2, "%d", raw);
+    lcd_send_line(LINE2, "%u", raw);
 }
