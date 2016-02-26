@@ -59,13 +59,6 @@ def split_lines(frame, vals):
     bot = ''.join(bot)
     frame.update(top, bot)
 
-def debug_producer():
-    with closing(socket(AF_UNIX, SOCK_DGRAM)) as sock:
-        sock.connect(SOCK_ADDR)
-        while True:
-            time.sleep(1)
-            sock.send(bytearray(b'\0\x01A\x01B\0'))
-
 class LcdCanvas(tkinter.Canvas):
     def __init__(self, parent, width=None, height=None):
         if not width or not height:
@@ -109,10 +102,6 @@ def run_lcd():
 
     time.sleep(0.1)
 
-    monitor_t = threading.Thread(target=debug_producer)
-    monitor_t.daemon = True
-    monitor_t.start()
-    
     app.mainloop()
 
 if __name__ == '__main__':
