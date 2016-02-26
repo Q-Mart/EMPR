@@ -5,6 +5,8 @@ import threading
 import time
 import struct
 import os
+import collections
+import functools
 
 try:
     import tkinter
@@ -21,46 +23,48 @@ def monitor(frame):
     if os.path.exists(SOCK_ADDR):
         os.remove(SOCK_ADDR)
 
+    processor = process(frame)
+    next(processor)
     with closing(socket(AF_UNIX, SOCK_DGRAM)) as sock:
         sock.bind(SOCK_ADDR)
 
-        buf = []
         while True:
             v = sock.recv(1024)
 
             if not v:
                 break
 
-            buf.extend(v)
-            if b'\0' in buf:
-                buf_i = buf.index(b'\0')
-                vals, buf = buf[:buf_i], buf[buf_i+1:]
-                try:
-                    split_lines(frame, vals)
-                except:
-                    pass
+            processor.send(v)
 
     os.remove(SOCK_ADDR)
-    print('Monitor dead.')
 
-def split_lines(frame, vals):
-    top, bot = [], []
+def process(frame):
+    '''Try process `buffer`
+    '''
+    strs = collections.deque()
+    buf = collections.deque()
 
-    p = top
-    for _ in range(2):
-        if len(vals) == 1:
-            break
+    top, bot = "", ""
 
-        val, vals = vals[0], vals[1:]
-        n, = struct.unpack('B', val)
-        for _ in range(n):
-            val, vals = vals[0], vals[1:]
-            p.append(val)
-        p = bot
+    while True:
+        v = yield
+        buf.extend(v) 
 
-    top = ''.join(top)
-    bot = ''.join(bot)
-    frame.update(top, bot)
+        if b'\0' in buf:
+            line, s = get_str(buf)
+            if line == 1:
+                top = s
+            else:
+                bot = s
+
+            frame.update(top, bot)
+
+def get_str(buf):
+    line, = struct.unpack('B', buf.popleft())
+    s = ""
+    for x in iter(buf.popleft, b'\0'):
+        s += x
+    return line, s
 
 class LcdCanvas(tkinter.Canvas):
     def __init__(self, parent, width=None, height=None):
@@ -71,24 +75,22 @@ class LcdCanvas(tkinter.Canvas):
 
         self.lines = [None, None]
 
-        top = tkinter.Text()
-        bot = tkinter.Text()
+        top = tkinter.StringVar()
+        bot = tkinter.StringVar()
+        tkinter.Label(parent, textvariable=top).pack(side='top')
+        tkinter.Label(parent, textvariable=bot).pack(side='bottom')
         self._lines = [top, bot]
 
-        top.pack(side='top')
-        bot.pack(side='bottom')
-
     def draw(self):
-        list(map(lambda t: t.delete('0.0', tkinter.END), self._lines))
-        list(map(lambda t, s: t.insert(tkinter.END, s), self._lines, self.lines))
+        list(map(lambda t, s: t.set(s), self._lines, self.lines))
         
 class AppFrame(tkinter.Frame):
     def __init__(self, parent):
         tkinter.Frame.__init__(self, parent)
 
         self.pack()
-        self.lcd = LcdCanvas(self, 30, 10)
-        self.lcd.pack(side='top')
+        self.lcd = LcdCanvas(self, 10, 5)
+        self.lcd.pack()
 
         monitor_t = threading.Thread(target=monitor, args=(self,))
         monitor_t.daemon = True
@@ -100,6 +102,11 @@ class AppFrame(tkinter.Frame):
 
 def run_lcd():
     tk = tkinter.Tk()
+    W, H = 150, 50
+    tk.minsize(width=W, height=H)
+    tk.maxsize(width=W, height=H)
+    tk.resizable(width=tkinter.FALSE, height=tkinter.FALSE)
+
     app = AppFrame(parent=tk)
     app.pack(expand=tkinter.YES)
 
