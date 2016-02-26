@@ -80,7 +80,7 @@ void adc_enable(void) {
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, SOCK_ADDR, sizeof(addr.sun_path) - 1);
-    bind(SOCK, (struct sockaddr*)&addr, sizeof(addr));
+    connect(SOCK, (struct sockaddr*)&addr, sizeof(addr));
 }
 
 void adc_enable_channel(int channel) {}

@@ -11,8 +11,8 @@ void lcd_init(void) {}
 void lcd_clear_display(void) {}
 void lcd_wait_while_busy(void) {}
 
-static char top[16];
-static char bot[16];
+static char top[17];
+static char bot[17];
 
 /* Send a string of 16 characters to either LINE1 or LINE2
  * uses formatting and varargs
@@ -25,8 +25,14 @@ void lcd_send_line(uint8_t line, char* fmt, ...) {
 
     if (line == LINE1)
         s = top;
+    else if (line == LINE2)
+        s = bot;
 
     vsprintf(s, fmt, ap);
+    s[16] = '\0';
+
+    debug_sendf("Top: `%s`[%d]\r\n", top, strlen(top));
+    debug_sendf("Bot: `%s`[%d]\r\n", bot, strlen(bot));
 
     uint8_t sz = strlen(top);
     send(SOCK, &sz, 1, 0);
