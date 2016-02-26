@@ -4,7 +4,7 @@
 #include "lcd.h"
 #include "test.h"
 #include "calibration_mode.h"
-#include "multi.h"
+#include "platform.h"
 #include "scan.h"
 #include "measure.h"
 #include "platform.h"
@@ -77,23 +77,13 @@ int main(void)
             case MEASURE_DO:
                 measure_loop(last_key_press);
                 break;
-            case MULTI_SWEEP:
-                multi_sweep_loop();
+            case PLATFORM_SCAN:
+                platform_scan_loop();
                 break;
-            case MULTI_WAIT:
-                multi_wait_loop();
+            case PLATFORM_WAIT:
                 break;
-            case MULTI_SWEEP_NUMBER:
-                multi_sweep_number_loop(last_key_press);
-                break;
-            case MULTI_MIN_ANGLE:
-                multi_min_angle_loop(last_key_press);
-                break;
-            case MULTI_MAX_ANGLE:
-                multi_max_angle_loop(last_key_press);
-                break;
-            case MULTI_DONE:
-                multi_done_loop();
+            case PLATFORM_DONE:
+                platform_done_loop();
                 break;
             case PLATFORM:
                 platform_loop();
@@ -155,12 +145,8 @@ const transition_t lut[] = {
     {MEASURE, '#', MEASURE_DO, &measure_to_measure_do},
     {MEASURE_DO, '*', MEASURE, &any_to_measure},
 
-    {MULTI, '#', MULTI_SWEEP_NUMBER, &multi_to_multi_sweep_number},
-    {MULTI_SWEEP_NUMBER, '#', MULTI_MIN_ANGLE, &multi_sweep_number_to_multi_min_angle},
-    {MULTI_MIN_ANGLE, '#', MULTI_MAX_ANGLE, &multi_min_angle_to_multi_max_angle},
-    {MULTI_MAX_ANGLE, '#', MULTI_SWEEP, NULL},
-    {MULTI_WAIT, '#', MULTI_SWEEP, NULL},
-    {MULTI_DONE, '#', CALIBRATE, NULL},
+    {PLATFORM, '#', PLATFORM_SCAN, NULL},
+    {PLATFORM_DONE, '#', CALIBRATE, NULL},
 
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},

@@ -25,13 +25,10 @@ typedef enum {
 
     MEASURE_DO,
 
-    PLATFORM_SWEEP, /* sweeping and scanning */
+    PLATFORM_SCAN, /* sweeping and scanning */
     PLATFORM_WAIT, /* wait for user to turn object */
-    PLATFORM_SWEEP_NUMBER, /* settings: specify sweep number */
-    PLATFORM_MIN_ANGLE, /* settings: specify minimum sweep angle */
-    PLATFORM_MAX_ANGLE, /* settings: specify maximum sweep angle */
 
-    MULTI_DONE, /* Finished Scan so, idle */
+    PLATFORM_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY
 } state_t;
 
