@@ -31,19 +31,13 @@ void lcd_send_line(uint8_t line, char* fmt, ...) {
     vsprintf(s, fmt, ap);
     s[16] = '\0';
 
-    debug_sendf("Top: `%s`[%d]\r\n", top, strlen(top));
-    debug_sendf("Bot: `%s`[%d]\r\n", bot, strlen(bot));
-
-    uint8_t sz = strlen(top);
-    send(SOCK, &sz, 1, 0);
-    send(SOCK, top, sz, 0);
-
-    sz = strlen(bot);
-    send(SOCK, &sz, 1, 0);
-    send(SOCK, bot, sz, 0);
-
-    char data = '\0';
+    uint8_t data = 1;
     send(SOCK, &data, 1, 0);
+    send(SOCK, top, strlen(top) + 1, 0);
+
+    data = 2;
+    send(SOCK, &data, 1, 0);
+    send(SOCK, bot, strlen(bot) + 1, 0);
 
     va_end(ap);
 }
