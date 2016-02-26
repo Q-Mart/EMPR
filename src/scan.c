@@ -6,6 +6,8 @@
 #include "ultrasound.h"
 #include "timer.h"
 #include "utils.h"
+#define NO_OF_STATES 3
+static enum _scan_state{DISTANCE, ANGLE, AVG_DISTANCE} scan_state = DISTANCE;
 signed int scan_direction = 1;
 static uint32_t scan_upper_bound = 270;
 static uint32_t scan_lower_bound = 0;
@@ -13,6 +15,8 @@ static uint32_t scan_speed = 1;
 static uint32_t scan_tentative_speed = 1;
 static uint32_t scan_tentative_upper_bound = 270;
 static uint32_t scan_tentative_lower_bound = 0;
+static uint64_t scan_total_distance = 0;
+static uint32_t scan_count = 0;
 /*
  * Parameter Loops:
  * Each parameter state has a loop function that runs during the
@@ -78,7 +82,11 @@ void scan_parameter_3_to_scan_parameters(void){
     scan_lower_bound = scan_tentative_lower_bound;
     any_to_scan_parameters();
 }
-void scan_loop(){
+void scan_loop(int last_key_press){
+    if(last_key_press == 3)
+        scan_state = (scan_state + 1) % NO_OF_STATES;
+    if(last_key_press == 1)
+        scan_state = (scan_state - 1 + NO_OF_STATES) % NO_OF_STATES;
     int pos = servo_get_pos();
     if(pos <= scan_lower_bound) scan_direction = 1;
     if(pos >= scan_upper_bound) scan_direction = -1;
@@ -87,5 +95,20 @@ void scan_loop(){
     uint32_t raw = utils_get_ir_and_ultrasound_distance();
     debug_send_arb((char*) &pos, 4);
     debug_send_arb((char*) &raw, 4);
-    lcd_send_line(LINE2, "%u", raw);
+    scan_count++;
+    scan_total_distance += raw;
+    switch(scan_state){
+        case DISTANCE:
+            lcd_send_line(LINE1, "Distance");
+            lcd_send_line(LINE2, "%d", raw);
+            break;
+        case AVG_DISTANCE:
+            lcd_send_line(LINE1, "Average Distance");
+            lcd_send_line(LINE2, "%d", scan_total_distance/scan_count);
+            break;
+        case ANGLE:
+            lcd_send_line(LINE1, "ANGLE");
+            lcd_send_line(LINE2, "%d", pos);
+            break;
+    }
 }
