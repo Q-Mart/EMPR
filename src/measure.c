@@ -11,8 +11,8 @@
 #define NO_OF_STATES 2
 static enum _measure_state{DISTANCE, AVG_DISTANCE} measure_state = DISTANCE;
 
-
-static uint32_t measure_mean_distance = 0;
+static uint64_t measure_total_distance = 0;
+static uint32_t measure_count = 0;
 
 
 void any_to_measure() {
@@ -22,7 +22,8 @@ void any_to_measure() {
 
 void measure_to_measure_do() {
     lcd_send_line(LINE1, "Distance");
-    measure_mean_distance = 0;
+    measure_count = 0;
+    measure_total_distance = 0;
     //We reset the mean distance
 }
 
@@ -43,11 +44,8 @@ void measure_loop(int last_key_press) {
     //Calculate the running mean. If the mean is 0 then we set the
     //mean to be the last value as 0 is our reset value. In practice it
     //can never actually have a distance of 0.
-    if(measure_mean_distance == 0)
-        measure_mean_distance = dist;
-    else
-        measure_mean_distance = (measure_mean_distance + dist) / 2;
-
+    measure_total_distance += dist;
+    measure_count++;
     switch(measure_state){
         case DISTANCE:
             lcd_send_line(LINE1, "Distance");
@@ -55,7 +53,7 @@ void measure_loop(int last_key_press) {
             break;
         case AVG_DISTANCE:
             lcd_send_line(LINE1, "Average Distance");
-            lcd_send_line(LINE2, "%d", measure_mean_distance);
+            lcd_send_line(LINE2, "%d", measure_total_distance/measure_count);
             break;
         default:
             break;
