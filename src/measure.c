@@ -33,10 +33,29 @@ void measure_parameter_1_loop(int last_key_press){
     utils_process_digit_input(last_key_press, &measure_point);
     lcd_send_line(LINE1, "Point %d", measure_point);
 }
+const char* measure_get_alarm_status_string(){
+    if(measure_alarm_enabled)
+        return "Yes";
+    else
+        return "No";
+}
+void measure_parameters_to_2(){
+    lcd_send_line(LINE1, "Alarm Enabled %s", measure_get_alarm_status_string());
+    lcd_send_line(LINE2, "# to confirm");
+}
+void measure_parameter_2_loop(int last_key_press){
+    if(last_key_press == 1 || last_key_press == 3){
+        measure_alarm_enabled = (measure_alarm_enabled + 1) % 2;
+    }
+    lcd_send_line(LINE1, "Alarm Enabled %s", measure_get_alarm_status_string());
+}
 void measure_to_measure_do() {
     lcd_send_line(LINE1, "Distance");
     measure_count = 0;
     measure_total_distance = 0;
+    if(measure_alarm_enabled){
+        sound_enable();
+    }
     //We reset the mean distance
 }
 
@@ -47,7 +66,7 @@ void measure_loop(int last_key_press) {
     //This should not be too vulnerable to button bounce as there
     //is a sleep during the process that records the data from
     //the ultrasound later in this function.
-    if(last_key_press == 3)
+    if(last_key_press == 3)//If the last key pressed was the actual key with 3 on it.
         measure_state = (measure_state + 1) % NO_OF_STATES;
     if(last_key_press == 1)
         measure_state = (measure_state - 1 + NO_OF_STATES) % NO_OF_STATES;
@@ -74,6 +93,14 @@ void measure_loop(int last_key_press) {
     }
     if(measure_alarm_enabled){
         //Peform update of alarm.
+        uint32_t diff;
+        if (dist >= measure_point){
+            diff = dist - measure_point;
+        } else {
+            diff = measure_point - dist;
+        }
+        uint16_t count_val = (diff/measure_point) * 255;
+        sound_change_count_rate(count_val);
 
     }
 }

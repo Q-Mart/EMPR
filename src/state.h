@@ -38,7 +38,8 @@ typedef enum {
     MULTI_DONE, /* Finished Scan so, idle */
     /* Special Ignore State */ ANY,
     MEASURE_PARAMETERS,
-    MEASURE_PARAMETER_1
+    MEASURE_PARAMETER_1,
+    MEASURE_PARAMETER_2
 } state_t;
 
 void change_state(state_t state);
