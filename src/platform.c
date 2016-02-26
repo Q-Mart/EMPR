@@ -12,7 +12,7 @@ static int scan_direction;
 
 void any_to_platform() {
     lcd_send_line(LINE1, "Platform mode");
-    lcd_send_line(LINE2, "Press # for settings");
+    lcd_send_line(LINE2, "Press # to start");
     servo_set_pos(160);
 }
 

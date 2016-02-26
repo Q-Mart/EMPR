@@ -23,6 +23,7 @@ typedef enum {
 
     MEASURE_DO,
 
+    PLATFORM,
     PLATFORM_SCAN, /* sweeping and scanning */
     PLATFORM_WAIT, /* wait for user to turn object */
 
