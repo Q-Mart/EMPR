@@ -85,9 +85,6 @@ int main(void)
             case PLATFORM_DONE:
                 platform_done_loop();
                 break;
-            case PLATFORM:
-                platform_loop();
-                break;
             default:
                 //have a break, have a kit kat
                 break;
