@@ -15,8 +15,8 @@ Options:
 BASE_DIR = '../../'
 RECORD_FILE = BASE_DIR + 'records/record'
 
-CANVAS_WIDTH  = 450
-CANVAS_HEIGHT = 300
+CANVAS_WIDTH  = 4*150
+CANVAS_HEIGHT = 3*150
 
 import reader
 
@@ -29,6 +29,7 @@ except ImportError:
 
 import time
 import threading
+import functools
 import plotter
 
 try:
@@ -43,8 +44,6 @@ import lcd
 class PlotCanvas(tkinter.Canvas):
     def __init__(self, parent, width, height):
         tkinter.Canvas.__init__(self, parent, width=width, height=height)
-        self.width = width
-        self.height = height
         self.lines = []
         self.parent = parent
 
@@ -54,8 +53,8 @@ class PlotCanvas(tkinter.Canvas):
         if len(xs) != len(ys):
             raise ValueError('Mismatch of argc')
 
-        w = self.width
-        h = self.height
+        w = self.winfo_width()
+        h = self.winfo_height()
 
         self.draw_border(w, h)
 
@@ -72,13 +71,15 @@ class PlotCanvas(tkinter.Canvas):
         tx = float(w) / float(max_x)
         ty = float(h) / float(max_y)
 
-        x0, y0 = 0, 0
+        s = 3
+
+        x0, y0 = 0, h
         for x, y in zip(xs, ys):
             x, y = int(tx * x), h - int(ty * y)
             self.line(x0, y0, x, y)
 
-            #self.line(x-s, y-s, x+s, y+s, fill='red')
-            #self.line(x+s, y-s, x-s, y+s, fill='red')
+            self.line(x-s, y-s, x+s, y+s, fill='red')
+            self.line(x+s, y-s, x-s, y+s, fill='red')
             x0, y0 = x, y
 
     def draw_border(self, w, h):
@@ -92,6 +93,9 @@ class PlotCanvas(tkinter.Canvas):
     def on_resize(self, event):
         '''TODO: This
         '''
+        self.width = self.winfo_width()
+        self.height = self.winfo_height()
+
         scale = (event.width / self.width, event.height / self.height)
         self.width = event.width
         self.height = event.height
@@ -128,9 +132,32 @@ class Mode:
     MULTI_DONE = 19
     ANY = 20
 
-def monitor(frame):
-    with SerialReader() as r:
-        read_live(frame, r)
+def monitor(frame, r):
+    while True:
+        mode = r.read_byte()
+
+        if mode == Mode.SCAN_DO:
+            angle = r.read_int()
+            value = r.read_int()
+    
+            frame.plotter.update(angle, value)
+            frame.draw()
+        elif mode == Mode.MEASURE_DO:
+            value = r.read_int()
+            t += 1
+            frame.plotter.update(t, value)
+            frame.draw()
+        elif mode == Mode.MEASURE:
+            t = 1
+            frame.graph_canvas.clear()
+            frame.plotter = plotter.MeasurePlotter(*frame.dimensions)
+            frame.draw()
+        elif mode == Mode.SCAN:
+            frame.graph_canvas.clear()
+            frame.plotter = plotter.ScanPlotter(*frame.dimensions)
+            frame.draw()
+        elif mode == Mode.MULTI:
+            raise NotImplementedError
 
 def append_record(b):
     with open(RECORD_FILE, 'ab') as f:
@@ -164,57 +191,62 @@ def read_record(r):
             append_record(bytearray([header]))
             append_record(bytearray(val))
 
-def read_live(frame, r):
-    t = 1
-    while True:
-        mode = r.read_byte()
-
-        if mode == Mode.SCAN_DO:
-            angle = r.read_int()
-            value = r.read_int()
-    
-            frame.plotter.update(angle, value)
-            frame.draw()
-        elif mode == Mode.MEASURE_DO:
-            value = r.read_int()
-            t += 1
-            frame.plotter.update(t, value)
-            frame.draw()
-        elif mode == Mode.MEASURE:
-            frame.plotter = plotter.MeasurePlotter()
-            frame.draw()
-        elif mode == Mode.SCAN:
-            frame.plotter = plotter.ScanPlotter()
-            frame.draw()
-        elif mode == Mode.MULTI:
-            raise NotImplementedError
-
 class AppFrame(tkinter.Frame):
     def __init__(self, parent):
         tkinter.Frame.__init__(self, parent)
-        self.plotter = plotter.DefaultPlotter()
 
-        self.pack()
+        if DEBUG:
+            global SerialReader
+            SerialReader = functools.partial(reader.UnixReader, self)
+
         self.init()
+        self.plotter = plotter.DefaultPlotter(*self.dimensions)
 
-        self.monitor_t = threading.Thread(target=monitor, args=(self,))
-        self.monitor_t.daemon = True
-        self.monitor_t.start()
+        self.init_monitors()
+        self.draw()
+
+    @property
+    def dimensions(self):
+        return self.graph_canvas.winfo_width(), self.graph_canvas.winfo_height()
+
+    def init_monitors(self):
+        unix_reader = [None]
+        def _monitor():
+            with SerialReader() as r:
+                unix_reader[0] = r
+                monitor(self, r)
+
+        t = threading.Thread(target=_monitor)
+        t.daemon = True
+        t.start()
+
+        if DEBUG:
+            t2 = threading.Thread(target=reader.monitor, args=(unix_reader[0],))
+            t2.daemon = True
+            t2.start()
+
+            t3 = threading.Thread(target=lcd.monitor, args=(self.lcd_canvas,))
+            t3.daemon = True
+            t3.start()
 
     def init(self):
+        if DEBUG:
+            self.lcd_canvas = lcd.LcdCanvas(self, CANVAS_WIDTH, 75)
+            self.lcd_canvas.pack(side='top')
+
         self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH, CANVAS_HEIGHT)
-        self.graph_canvas.pack(side='top')
+        self.graph_canvas.pack()
 
         quit = tkinter.Button(text='Quit', command=tk.destroy)
         quit.pack(side='bottom')
-
-        self.draw()
 
     def draw(self):
         xs, ys = self.plotter.x, self.plotter.y
 
         self.graph_canvas.clear()
         self.graph_canvas.plot(xs, ys)
+
+        self.lcd_canvas.draw()
 
 if __name__ == '__main__':
     global DEBUG
@@ -232,6 +264,10 @@ if __name__ == '__main__':
             DEBUG = True
 
         tk = tkinter.Tk()
+        tk.minsize(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
+        tk.maxsize(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
+        tk.resizable(width=tkinter.FALSE, height=tkinter.FALSE)
+
         app = AppFrame(parent=tk)
         app.pack()
 

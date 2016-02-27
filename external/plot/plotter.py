@@ -4,9 +4,10 @@ class Plotter:
     '''Uses Tkinter to plot incoming data
     to a tkinter board thingy
     '''
-    def __init__(self):
+    def __init__(self, *dimensions):
         self.max_x = None
         self.max_y = None
+        self.dimensions = dimensions
 
     def update(self, *data):
         '''Update the Plotter with some new data
@@ -14,8 +15,8 @@ class Plotter:
         raise NotImplemenetedError
 
 class DefaultPlotter(Plotter):
-    def __init__(self):
-        Plotter.__init__(self)
+    def __init__(self, *dimensions):
+        Plotter.__init__(self, *dimensions)
         self.xs = []
         self.ys = []
 
@@ -34,13 +35,13 @@ class DefaultPlotter(Plotter):
         self.ys.append(y)
 
 class MeasurePlotter(Plotter):
-    def __init__(self):
-        Plotter.__init__(self)
+    def __init__(self, w, h):
+        Plotter.__init__(self, w, h)
         self.max_x = None
         self.max_y = int(1e6)
         self.xs = []
         self.ys = []
-        self.bound = 100
+        self.bound = w
         self.x_offs = 0
 
     @property
@@ -63,8 +64,8 @@ class MeasurePlotter(Plotter):
         self.ys.append(y)
 
 class ScanPlotter(Plotter):
-    def __init__(self):
-        Plotter.__init__(self)
+    def __init__(self, *dimensions):
+        Plotter.__init__(self, *dimensions)
         self.max_x = 270
         self.max_y = int(1e6)
         self.values = {}

@@ -13,7 +13,7 @@ try:
 except ImportError:
    import Tkinter as tkinter
 
-SOCK_ADDR = '/tmp/empr_ipc_socket'
+SOCK_ADDR = '/tmp/empr_ipc_socket_lcd'
 
 def monitor(frame):
     '''Monitors a UNIX Socket
@@ -77,8 +77,8 @@ class LcdCanvas(tkinter.Canvas):
 
         top = tkinter.StringVar()
         bot = tkinter.StringVar()
-        tkinter.Label(parent, textvariable=top).pack(side='top')
-        tkinter.Label(parent, textvariable=bot).pack(side='bottom')
+        tkinter.Label(parent, textvariable=top).pack()
+        tkinter.Label(parent, textvariable=bot).pack()
         self._lines = [top, bot]
 
     def update(self, *lines):
@@ -105,13 +105,14 @@ class AppFrame(tkinter.Frame):
 
 def run_lcd():
     tk = tkinter.Tk()
+
     W, H = 150, 50
     tk.minsize(width=W, height=H)
     tk.maxsize(width=W, height=H)
     tk.resizable(width=tkinter.FALSE, height=tkinter.FALSE)
 
     app = AppFrame(parent=tk)
-    app.pack(expand=tkinter.YES)
+    app.pack()
 
     time.sleep(0.1)
 

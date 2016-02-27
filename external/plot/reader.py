@@ -5,6 +5,8 @@ import collections
 from socket import AF_UNIX, SOCK_DGRAM, socket
 from contextlib import closing
 
+SOCK_ADDR = '/tmp/empr_ipc_socket_network'
+
 class Reader:
     def __iter__(self):
         '''Make this iterable
@@ -43,7 +45,7 @@ class Reader:
 
 # b-mode i-angle i-value 
 SCAN_DO = 10
-MODE = lambda x, y, z: struct.pack('b', x) + struct.pack('i', y) + struct.pack('i', z)
+MODE = lambda x, y, z: struct.pack('B', x) + struct.pack('I', y) + struct.pack('I', z)
 BYTE_STR = MODE(SCAN_DO, 5, 10) + MODE(SCAN_DO, 10, 15) + MODE(SCAN_DO, 15, 20)
 
 class MockReader(Reader):
@@ -60,7 +62,8 @@ class MockReader(Reader):
                 self._data_iter = iter(self._data)
                 b = next(self._data_iter)
             l.append(b)
-        return bytes(l)
+
+        return bytearray(l)
 
     def close(self):
         pass
@@ -68,7 +71,6 @@ class MockReader(Reader):
     def __iter__(self):
         return iter(self._data)
 
-SOCK_ADDR = '/tmp/empr_ipc_socket_network'
 def monitor(unix_reader):
     '''Monitors a UNIX Socket
     for IPC with debug build
@@ -79,6 +81,7 @@ def monitor(unix_reader):
 
     processor = process(unix_reader)
     next(processor)
+
     with closing(socket(AF_UNIX, SOCK_DGRAM)) as sock:
         sock.bind(SOCK_ADDR)
 
@@ -103,10 +106,17 @@ class UnixReader(Reader):
         self.Q = collections.deque()
 
     def read(self, n):
-        while not Q:
-            ...
+        i = n
+        L = []
 
-        return self.Q.popleft()
+        while i > 0:
+            while not self.Q:
+                pass
+
+            L.append(self.Q.popleft())
+            i -= 1
+        
+        return bytearray(L)
 
     def close(self):
         pass
