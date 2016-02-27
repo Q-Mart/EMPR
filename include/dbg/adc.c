@@ -19,7 +19,8 @@ QUEUE* KEYPAD_QUEUE;
 QUEUE* ULTRASOUND_QUEUE;
 QUEUE* SERVO_QUEUE;
 
-int SOCK;
+int SOCK_LCD;
+int SOCK_NETWORK;
 
 void adc_enable(void) {
     /* Load QUEUEs from file */
@@ -76,11 +77,17 @@ void adc_enable(void) {
         exit(0);
     }
 
-    SOCK = socket(AF_UNIX, SOCK_DGRAM, 0);
+    SOCK_LCD = socket(AF_UNIX, SOCK_DGRAM, 0);
+    SOCK_NETWORK = socket(AF_UNIX, SOCK_DGRAM, 0);
+
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, SOCK_ADDR, sizeof(addr.sun_path) - 1);
-    connect(SOCK, (struct sockaddr*)&addr, sizeof(addr));
+
+    strncpy(addr.sun_path, SOCK_ADDR_LCD, sizeof(addr.sun_path) - 1);
+    connect(SOCK_LCD, (struct sockaddr*)&addr, sizeof(addr));
+
+    strncpy(addr.sun_path, SOCK_ADDR_NETWORK, sizeof(addr.sun_path) - 1);
+    connect(SOCK_NETWORK, (struct sockaddr*)&addr, sizeof(addr));
 }
 
 void adc_enable_channel(int channel) {}

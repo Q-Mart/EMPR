@@ -32,12 +32,12 @@ void lcd_send_line(uint8_t line, char* fmt, ...) {
     s[16] = '\0';
 
     uint8_t data = 1;
-    send(SOCK, &data, 1, 0);
-    send(SOCK, top, strlen(top) + 1, 0);
+    send(SOCK_LCD, &data, 1, 0);
+    send(SOCK_LCD, top, strlen(top) + 1, 0);
 
     data = 2;
-    send(SOCK, &data, 1, 0);
-    send(SOCK, bot, strlen(bot) + 1, 0);
+    send(SOCK_LCD, &data, 1, 0);
+    send(SOCK_LCD, bot, strlen(bot) + 1, 0);
 
     va_end(ap);
 }
