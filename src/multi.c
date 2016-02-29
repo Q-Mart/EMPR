@@ -31,7 +31,7 @@ void multi_min_angle_to_multi_max_angle() {
     lcd_send_line(LINE1, "Maximum angle");
 }
 
-void multi_sweep() {
+void multi_max_angle_to_multi_sweep() {
     //Clamp the angles if they are out of range
     if (max_angle>270) max_angle = 270;
     if (min_angle>270) min_angle = 0;

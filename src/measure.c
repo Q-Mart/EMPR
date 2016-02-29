@@ -6,6 +6,7 @@
 #include "state.h"
 #include "network.h"
 #include "ultrasound.h"
+#include "utils.h"
 //These keep track of what data the measure mode will
 //display on the IO board lcd.
 #define NO_OF_STATES 2

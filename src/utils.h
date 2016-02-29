@@ -2,7 +2,7 @@
 #include "ir_sensor.h"
 #include "ultrasound.h"
 
-#define SAMPLE_SIZE 3
+#define SAMPLE_SIZE 10
 
 void utils_process_digit_input(int last_key_press, uint32_t* result);
 int utils_compare_values(const void * elem1, const void * elem2);
