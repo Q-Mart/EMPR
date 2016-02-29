@@ -32,6 +32,7 @@ class DefaultPlotter(Plotter):
 
     def update(self, *data):
         x, y = data
+        #print('got (x, y) = (%d, %d)' % (x,y))
 
         self.xs.append(x)
         self.ys.append(y)

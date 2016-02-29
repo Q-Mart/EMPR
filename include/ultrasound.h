@@ -1,9 +1,10 @@
-#include "lpc17xx_gpio.h"
-#include "lpc17xx_timer.h"
+#include <stdlib.h>
+
 #include "pinsel.h"
 #include "timer.h"
 #include "debug.h"
 #include "gpio.h"
+
 
 #define HCSR_TIMER_PORT 0
 #define HCSR_TIMER_PIN 5
@@ -13,6 +14,11 @@
 
 void ultrasound_initialise_timer_measurement(void);
 void ultrasound_send_test_pulse(void);
-double ultrasound_process_value(int, int);
-
+uint32_t ultrasound_get_distance(void);
+uint32_t ultrasound_process_value(int, int, int);
+void ultrasound_set_near_point(void);
+void ultrasound_set_far_point(void);
+void ultrasound_calibrate(void);
+uint32_t ultrasound_get_sample_median(uint32_t *);
+int ultrasound_compare_values(const void *, const void *);
 extern uint32_t ultrasound_valid_response_time;

@@ -47,10 +47,13 @@ void SysTick_Handler(void)
     SysTick_on++;
 }
 
-/* Get RIT Interrupt Status */
-IntStatus timer_get_rit_status(void)
+/* Get RIT Interrupt Status 
+* N.B. this used to return `IntStatus', but now returns int
+* where SET=1 and RESET=0 (as defined in `lpc_types.h'
+*/
+int timer_get_rit_status(void)
 {
-    return RIT_GetIntStatus(LPC_RIT);
+    return (int)RIT_GetIntStatus(LPC_RIT);
 }
 
 /* wait for `n` ms before returning control */
