@@ -99,10 +99,10 @@ class ScanPlotter(Plotter):
 def MultiPlotter(Plotter):
     SWEEP = 1
     NEXT = 2
+    PARAMS = 3
 
-    def __init__(self, scan_number, *dimensions):
-        self._number = scan_number
-        self._angle = math.pi / float(scan_number)
+    def __init__(self, *dimensions):
+        Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
         self.xs = []
         self.ys = []
 
@@ -116,12 +116,10 @@ def MultiPlotter(Plotter):
 
     def _rotate(self):
         new = []
-        rot = [cos -sin; sin cos]
-        n = rot*x
         cos_t = math.cos(self._angle)
         sin_t = math.sin(self._angle)
         for x, y in zip(self.xs, self.ys):
-            # rotate by 
+            # rotate by _angle
             n_x = x*cos_t - y*sin_t
             n_y = x*sin_t + y*cos_t
             new.append((new_x, new_y))
@@ -142,3 +140,7 @@ def MultiPlotter(Plotter):
         elif msg == MultiPlotter.NEXT:
             # rotate
             self._rotate()
+        elif msg == MultiPlotter.PARAMS:
+            scan_number, = value
+            self._number = scan_number
+            self._angle = math.pi / float(scan_number)

@@ -158,6 +158,10 @@ def monitor(frame, r):
         elif mode == Mode.MULTI_WAIT:
             frame.plotter.update(plotter.MultiPlotter.NEXT, None)
             frame.draw()
+        elif mode == Mode.MULTI_PARAMETERS:
+            scan_number = r.read_int()
+            frame.plotter.update(plotter.MultiPlotter.PARAMS, (scan_number,))
+            frame.draw()
         elif mode == Mode.MEASURE:
             t = 1
             frame.graph_canvas.clear()
@@ -168,9 +172,8 @@ def monitor(frame, r):
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
             frame.draw()
         elif mode == Mode.MULTI:
-            scan_number = r.read_int()
             frame.graph_canvas.clear()
-            frame.plotter = plotter.MultiPlotter(scan_number, *frame.dimensions)
+            frame.plotter = plotter.MultiPlotter(*frame.dimensions)
             frame.draw()
 
 def append_record(b):
