@@ -1,5 +1,5 @@
 void any_to_scan(void);
-void scan_loop(void);
+void scan_loop(int);
 void scan_to_scan_do(void);
 //Scan Parameter 1 ==> Scan Speed
 void scan_parameters_to_1(void);
