@@ -1,4 +1,5 @@
 import collections
+import math
 
 class Plotter:
     '''Uses Tkinter to plot incoming data
@@ -32,7 +33,6 @@ class DefaultPlotter(Plotter):
 
     def update(self, *data):
         x, y = data
-        #print('got (x, y) = (%d, %d)' % (x,y))
 
         self.xs.append(x)
         self.ys.append(y)
@@ -95,3 +95,50 @@ class ScanPlotter(Plotter):
     def update(self, *data):
         x, y = data
         self.values[x] = y
+
+def MultiPlotter(Plotter):
+    SWEEP = 1
+    NEXT = 2
+
+    def __init__(self, scan_number, *dimensions):
+        self._number = scan_number
+        self._angle = math.pi / float(scan_number)
+        self.xs = []
+        self.ys = []
+
+    @property
+    def x(self):
+        return self.xs
+
+    @property
+    def y(self):
+        return self.ys
+
+    def _rotate(self):
+        new = []
+        rot = [cos -sin; sin cos]
+        n = rot*x
+        cos_t = math.cos(self._angle)
+        sin_t = math.sin(self._angle)
+        for x, y in zip(self.xs, self.ys):
+            # rotate by 
+            n_x = x*cos_t - y*sin_t
+            n_y = x*sin_t + y*cos_t
+            new.append((new_x, new_y))
+
+        new = sorted(new)
+        self.xs = []
+        self.ys = []
+        for (x, y) in new:
+            self.xs.append(x)
+            self.xs.append(y)
+
+    def update(self, *data):
+        msg, value = data
+        if msg == MultiPlotter.SWEEP:
+            x, y = value
+            self.xs.append(x)
+            self.ys.append(y)
+        elif msg == MultiPlotter.NEXT:
+            # rotate
+            self._rotate()

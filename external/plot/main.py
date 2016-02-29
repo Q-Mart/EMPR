@@ -124,13 +124,14 @@ class Mode:
 
     MEASURE_DO = 13
 
-    MULTI_PARAMETERS = 14
-    MULTI_WAIT = 15
-    MULTI_SWEEP_NUMBER = 16
-    MULTI_MIN_ANGLE = 17
-    MULTI_MAX_ANGLE = 18
-    MULTI_DONE = 19
-    ANY = 20
+    MULTI_SWEEP = 14
+    MULTI_PARAMETERS = 15
+    MULTI_WAIT = 16
+    MULTI_SWEEP_NUMBER = 17
+    MULTI_MIN_ANGLE = 18
+    MULTI_MAX_ANGLE = 19
+    MULTI_DONE = 20
+    ANY = 21
 
 def monitor(frame, r):
     t = 0
@@ -148,6 +149,15 @@ def monitor(frame, r):
             t += 1
             frame.plotter.update(t, value)
             frame.draw()
+        elif mode == Mode.MULTI_SWEEP:
+            angle = r.read_int()
+            value = r.read_int()
+
+            frame.plotter.update(plotter.MultiPlotter.SWEEP, (angle, value))
+            frame.draw()
+        elif mode == Mode.MULTI_WAIT:
+            frame.plotter.update(plotter.MultiPlotter.NEXT, None)
+            frame.draw()
         elif mode == Mode.MEASURE:
             t = 1
             frame.graph_canvas.clear()
@@ -158,7 +168,10 @@ def monitor(frame, r):
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
             frame.draw()
         elif mode == Mode.MULTI:
-            raise NotImplementedError
+            scan_number = r.read_int()
+            frame.graph_canvas.clear()
+            frame.plotter = plotter.MultiPlotter(scan_number, *frame.dimensions)
+            frame.draw()
 
 def append_record(b):
     with open(RECORD_FILE, 'ab') as f:
@@ -253,7 +266,6 @@ class AppFrame(tkinter.Frame):
 
     def draw(self):
         xs, ys = self.plotter.x, self.plotter.y
-
         left, bot = self.axes_labels
 
         self.graph_canvas.clear()
