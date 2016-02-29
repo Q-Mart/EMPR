@@ -1,4 +1,6 @@
 #include "calibration_mode.h"
+#include "state.h"
+#include "network.h"
 #include "lcd.h"
 #include "ir_sensor.h"
 #include "ultrasound.h"
@@ -27,4 +29,5 @@ void near_calib_to_done(){
 void any_to_calib(){
     lcd_send_line(LINE1,"Calibration Mode");
     lcd_send_line(LINE2, "Place at 15cm");
+    network_send(CALIBRATE, NULL);
 }
