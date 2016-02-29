@@ -26,7 +26,8 @@ void multi_to_multi_sweep_number() {
 void multi_sweep_number_to_multi_min_angle() {
     lcd_send_line(LINE1, "Minimum angle");
 }
-void multi_min_angle_to_multi_max_angle() { lcd_send_line(LINE1, "Maximum angle");
+void multi_min_angle_to_multi_max_angle() { 
+    lcd_send_line(LINE1, "Maximum angle");
 }
 
 void multi_sweep() {
