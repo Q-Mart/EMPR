@@ -14,6 +14,7 @@ int timer_get_rit_status(void)
 }
 
 void timer_delay(int n) {}
+void timer_delayc(int n, timer_callback callback){}
 
 /* Initialise general purpose timer 2 (TIM2). */
 void timer_initialise_tim(void) {}

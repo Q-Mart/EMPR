@@ -1,3 +1,7 @@
+#ifndef TIMER_H
+#define TIMER_H
+typedef void (*timer_callback)(void);
+
 void timer_enable_systick();
 void timer_enable_rit(int);
 
@@ -8,6 +12,8 @@ void timer_disable_systick(void);
 void timer_disable_rit(void);
 
 void timer_delay(int);
+void timer_delayc(int, timer_callback);
 
 void timer_initialise_tim(void);
 void timer_configure_tim_capture(int, int, int, int);
+#endif
