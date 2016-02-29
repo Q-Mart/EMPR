@@ -175,7 +175,6 @@ def monitor(frame, r):
             frame.draw()
         elif mode == Mode.MULTI:
             frame.graph_canvas.clear()
-            print('changing plotter!')
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
             frame.draw()
 

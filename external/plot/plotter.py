@@ -1,6 +1,8 @@
 import collections
 import math
 
+MAX = int(6e5)
+
 class Plotter:
     '''Uses Tkinter to plot incoming data
     to a tkinter board thingy
@@ -41,7 +43,7 @@ class MeasurePlotter(Plotter):
     def __init__(self, w, h):
         Plotter.__init__(self, 'Time', 'Distance', w, h)
         self.max_x = w
-        self.max_y = int(3e7)
+        self.max_y = MAX
         self.xs = []
         self.ys = []
 
@@ -77,7 +79,7 @@ class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
         Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
-        self.max_y = int(3e7)
+        self.max_y = MAX
         self.values = {}
 
     @property
@@ -104,9 +106,12 @@ class MultiPlotter(Plotter):
     def __init__(self, *dimensions):
         Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
-        self.max_y = int(3e7)
+        self.max_y = MAX
         self.xs = []
         self.ys = []
+        self.centre_x = 180
+        self.centre_y = int(15e5)
+        self._current = 0
 
     @property
     def x(self):
@@ -116,34 +121,29 @@ class MultiPlotter(Plotter):
     def y(self):
         return self.ys
 
-    def _rotate(self):
-        print('_rotate')
-        new = []
-        cos_t = math.cos(self._angle)
-        sin_t = math.sin(self._angle)
-        for x, y in zip(self.xs, self.ys):
-            # rotate by _angle
-            n_x = x*cos_t - y*sin_t
-            n_y = x*sin_t + y*cos_t
-            new.append((n_x, n_y))
+    def _append(self, x, y):
+        t = (self._number - self._current - 1) * self._angle
+        t = 0
+        cos_t = math.cos(t)
+        sin_t = math.sin(t)
 
-        new = sorted(new)
-        self.xs = []
-        self.ys = []
-        for (x, y) in new:
-            self.xs.append(int(x))
-            self.ys.append(int(y))
-        print('_rotate, done.')
+        # rotate
+        x, y = x - self.centre_x, y - self.centre_y
+        x, y = x*cos_t - y*sin_t, x*sin_t + y*cos_t
+        x, y = x + self.centre_x, y + self.centre_y
+        print(x, y)
+
+        self.xs.append(x)
+        self.ys.append(y)
 
     def update(self, *data):
         msg, value = data
         if msg == MultiPlotter.SWEEP:
             x, y = value
-            self.xs.append(x)
-            self.ys.append(y)
+            self._append(x, y)
         elif msg == MultiPlotter.NEXT:
             # rotate
-            self._rotate()
+            self._current += 0
         elif msg == MultiPlotter.PARAMS:
             scan_number, _, _ = value
             self._number = scan_number
