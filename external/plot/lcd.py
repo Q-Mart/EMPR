@@ -77,8 +77,8 @@ class LcdCanvas(tkinter.Canvas):
 
         top = tkinter.StringVar()
         bot = tkinter.StringVar()
-        tkinter.Label(parent, textvariable=top).pack()
-        tkinter.Label(parent, textvariable=bot).pack()
+        tkinter.Label(parent, textvariable=top).grid(row=0)
+        tkinter.Label(parent, textvariable=bot).grid(row=1)
         self._lines = [top, bot]
 
     def update(self, *lines):

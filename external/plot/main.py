@@ -83,8 +83,8 @@ class PlotCanvas(tkinter.Canvas):
             x0, y0 = x, y
 
     def draw_border(self, w, h):
-        self.line(1, h, w, h, fill='black')
-        self.line(1, 1, 1, h, fill='black')
+        self.line(1, h-1, w, h-1, fill='black', width=3)
+        self.line(0, 0, 0, h, fill='black', width=3)
 
     def clear(self):
         self.delete(*self.lines)
@@ -133,6 +133,7 @@ class Mode:
     ANY = 20
 
 def monitor(frame, r):
+    t = 0
     while True:
         mode = r.read_byte()
 
@@ -232,21 +233,37 @@ class AppFrame(tkinter.Frame):
     def init(self):
         if DEBUG:
             self.lcd_canvas = lcd.LcdCanvas(self, CANVAS_WIDTH, 75)
-            self.lcd_canvas.pack(side='top')
+            #self.lcd_canvas.grid(row=3)
 
-        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH, CANVAS_HEIGHT)
-        self.graph_canvas.pack()
+        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH-25, CANVAS_HEIGHT-50)
+        left = tkinter.StringVar()
+        bot = tkinter.StringVar()
+        left.set('Left!')
+        bot.set('Bot!')
+        t_left = tkinter.Label(self, textvariable=left)
+        t_bot = tkinter.Label(self, textvariable=bot)
+        self.axes_labels = (left, bot)
+        quit = tkinter.Button(self, text='Quit', command=tk.destroy)
 
-        quit = tkinter.Button(text='Quit', command=tk.destroy)
-        quit.pack(side='bottom')
+        self.graph_canvas.grid(row=0)
+        t_left.grid(row=0)
+        t_bot.grid(row=1)
+        quit.grid(row=2)
+        self.pack()
 
     def draw(self):
         xs, ys = self.plotter.x, self.plotter.y
 
+        left, bot = self.axes_labels
+
         self.graph_canvas.clear()
         self.graph_canvas.plot(xs, ys)
 
-        self.lcd_canvas.draw()
+        left.set(self.plotter.label_y)
+        bot.set(self.plotter.label_x)
+
+        if DEBUG:
+            self.lcd_canvas.draw()
 
 if __name__ == '__main__':
     global DEBUG
@@ -269,7 +286,6 @@ if __name__ == '__main__':
         tk.resizable(width=tkinter.FALSE, height=tkinter.FALSE)
 
         app = AppFrame(parent=tk)
-        app.pack()
 
         if DEBUG:
             print('Running in DEBUG mode, reading from UNIX Socket')
