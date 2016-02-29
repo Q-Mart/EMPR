@@ -1,4 +1,5 @@
 #include "multi.h"
+#include "network.h"
 #include "lcd.h"
 #include "utils.h"
 #include "timer.h"
@@ -15,6 +16,7 @@ static int scan_direction;
 void any_to_multi() {
     lcd_send_line(LINE1, "Multi-View mode");
     lcd_send_line(LINE2, "Press # for settings");
+    network_send(MULTI, NULL);
 }
 
 void multi_to_multi_sweep_number() {
@@ -68,7 +70,7 @@ void multi_sweep_loop() {
         servo_set_pos(pos);
         timer_delay(35);
         uint32_t raw = utils_get_ir_and_ultrasound_distance();
-        //***DATA SHOULD BE SENT HERE***
+        network_send(MULTI_SWEEP, &pos, 4, &raw, 4, NULL);     
     }
 
     current_sweep++;

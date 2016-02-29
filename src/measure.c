@@ -20,6 +20,7 @@ static uint8_t measure_alarm_enabled = 0; //0: Alarm off, 1: Alarm on
 void any_to_measure() {
     lcd_send_line(LINE1, "Measure Mode # to start");
     lcd_send_line(LINE2, "* for options");
+    network_send(MEASURE, NULL);
 }
 
 void any_to_measure_parameters(){

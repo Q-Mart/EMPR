@@ -1,7 +1,7 @@
 #include "utils.h"
 #include "ultrasound.h"
 
-void utils_process_digit_input(int last_key_press, uint16_t* result){
+void utils_process_digit_input(int last_key_press, uint32_t* result){
     if (last_key_press >= 0){
         (*result) = ((*result) * 10) + last_key_press;
     } else if (last_key_press == -1){

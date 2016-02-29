@@ -14,6 +14,7 @@
 #include "servo.h"
 #include "sound.h"
 #include "ultrasound.h"
+#include "network.h"
 
 int key_to_int(char key){
     //This was written to allow for numbers to be converted from
@@ -123,6 +124,7 @@ void input_poll(void){
             //an input for the corresponding loop function
             last_key_press = key_to_int(KEYS[i]);
             state_transition(KEYS[i]);
+            timer_delay(100);//Prevent button bounce
         }
     }
 }
