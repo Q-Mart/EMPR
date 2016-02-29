@@ -160,7 +160,9 @@ def monitor(frame, r):
             frame.draw()
         elif mode == Mode.MULTI_PARAMETERS:
             scan_number = r.read_int()
-            frame.plotter.update(plotter.MultiPlotter.PARAMS, (scan_number,))
+            min_angle = r.read_int()
+            max_angle = r.read_int()
+            frame.plotter.update(plotter.MultiPlotter.PARAMS, (scan_number, min_angle, max_angle))
             frame.draw()
         elif mode == Mode.MEASURE:
             t = 1
