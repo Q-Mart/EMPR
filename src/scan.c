@@ -5,10 +5,11 @@
 #include "ir_sensor.h"
 #include "ultrasound.h"
 #include "timer.h"
+#include "network.h"
 #include "utils.h"
 #include "empr.h"
-#define NO_OF_STATES 3
-static enum _scan_state{DISTANCE, ANGLE, AVG_DISTANCE} scan_state = DISTANCE;
+#define NO_OF_STATES 4
+static enum _scan_state{DISTANCE, ANGLE, AVG_DISTANCE, NO_SAMPLES} scan_state = DISTANCE;
 signed int scan_direction = 1;
 static uint32_t scan_upper_bound = 270;
 static uint32_t scan_lower_bound = 0;
@@ -33,6 +34,7 @@ void any_to_scan(){
     lcd_send_line(LINE1, "Scan, # to start");
     lcd_send_line(LINE2, "* for options");
     servo_set_pos(160);
+    network_send(SCAN, NULL);
 }
 void scan_to_scan_do(){
     lcd_send_line(LINE1, "Scanning...");
@@ -94,22 +96,26 @@ void scan_loop(int last_key_press){
     servo_set_pos(pos + (scan_direction * scan_speed));
     timer_delayc(1, &input_poll);//Time for it to phusically move
     uint32_t raw = utils_get_ir_and_ultrasound_distance();
-    debug_send_arb((char*) &pos, 4);
-    debug_send_arb((char*) &raw, 4);
+    network_send(SCAN_DO, (uint8_t *)&pos, 4, (uint8_t* )&raw, 4, NULL);
     scan_count++;
     scan_total_distance += raw;
     switch(scan_state){
         case DISTANCE:
             lcd_send_line(LINE1, "Distance");
-            lcd_send_line(LINE2, "%d", raw);
+            lcd_send_line(LINE2, "%u", raw);
             break;
         case AVG_DISTANCE:
             lcd_send_line(LINE1, "Average Distance");
-            lcd_send_line(LINE2, "%d", scan_total_distance/scan_count);
+            lcd_send_line(LINE2, "%u", scan_total_distance/scan_count);
             break;
         case ANGLE:
             lcd_send_line(LINE1, "ANGLE");
-            lcd_send_line(LINE2, "%d", pos);
+            lcd_send_line(LINE2, "%u", pos);
+            break;
+        case NO_SAMPLES:
+            lcd_send_line(LINE1, "No of Samples");
+            lcd_send_line(LINE2, "%u"
+                    ,(scan_upper_bound - scan_lower_bound) / scan_speed);
             break;
     }
 }
