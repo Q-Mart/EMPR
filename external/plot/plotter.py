@@ -132,7 +132,7 @@ class MultiPlotter(Plotter):
         self.ys = []
         for (x, y) in new:
             self.xs.append(int(x))
-            self.xs.append(int(y))
+            self.ys.append(int(y))
         print('_rotate, done.')
 
     def update(self, *data):
