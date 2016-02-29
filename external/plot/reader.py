@@ -1,6 +1,7 @@
 import struct
 import os
 import collections
+import time
 
 from socket import AF_UNIX, SOCK_DGRAM, socket
 from contextlib import closing
@@ -99,6 +100,7 @@ def process(reader):
     while True:
         v = yield
         reader.Q.extend(v)
+        time.sleep(0.1)
 
 class UnixReader(Reader):
     def __init__(self, app):

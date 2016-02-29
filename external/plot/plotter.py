@@ -41,7 +41,7 @@ class MeasurePlotter(Plotter):
     def __init__(self, w, h):
         Plotter.__init__(self, 'Time', 'Distance', w, h)
         self.max_x = w
-        self.max_y = int(1e6)
+        self.max_y = int(3e7)
         self.xs = []
         self.ys = []
 
@@ -77,7 +77,7 @@ class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
         Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
-        self.max_y = int(1e6)
+        self.max_y = int(3e7)
         self.values = {}
 
     @property
@@ -103,6 +103,8 @@ def MultiPlotter(Plotter):
 
     def __init__(self, *dimensions):
         Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
+        self.max_x = 270
+        self.max_y = int(3e7)
         self.xs = []
         self.ys = []
 
