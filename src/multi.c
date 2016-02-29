@@ -83,8 +83,10 @@ void multi_sweep_loop() {
 
     if (current_sweep < number_of_sweeps) {
         change_state(MULTI_WAIT);
+        network_send(MULTI_WAIT, NULL);
     } else {
         change_state(MULTI_DONE);
+        network_send(MULTI_DONE, NULL);
     }
 }
 
