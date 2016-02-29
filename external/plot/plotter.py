@@ -117,6 +117,7 @@ class MultiPlotter(Plotter):
         return self.ys
 
     def _rotate(self):
+        print('_rotate')
         new = []
         cos_t = math.cos(self._angle)
         sin_t = math.sin(self._angle)
@@ -124,7 +125,7 @@ class MultiPlotter(Plotter):
             # rotate by _angle
             n_x = x*cos_t - y*sin_t
             n_y = x*sin_t + y*cos_t
-            new.append((new_x, new_y))
+            new.append((n_x, n_y))
 
         new = sorted(new)
         self.xs = []
@@ -132,6 +133,7 @@ class MultiPlotter(Plotter):
         for (x, y) in new:
             self.xs.append(int(x))
             self.xs.append(int(y))
+        print('_rotate, done.')
 
     def update(self, *data):
         msg, value = data

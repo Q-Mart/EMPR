@@ -75,7 +75,6 @@ class PlotCanvas(tkinter.Canvas):
 
         x0, y0 = 0, h
         for x, y in zip(xs, ys):
-            print(x, y)
             x, y = int(tx * x), h - int(ty * y)
             self.line(x0, y0, x, y)
 
