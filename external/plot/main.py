@@ -233,9 +233,9 @@ class AppFrame(tkinter.Frame):
     def init(self):
         if DEBUG:
             self.lcd_canvas = lcd.LcdCanvas(self, CANVAS_WIDTH, 75)
-            #self.lcd_canvas.grid(row=3)
+            self.lcd_canvas.grid(row=2, column=1)
 
-        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH-25, CANVAS_HEIGHT-50)
+        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH-50, CANVAS_HEIGHT-75)
         left = tkinter.StringVar()
         bot = tkinter.StringVar()
         left.set('Left!')
@@ -245,9 +245,9 @@ class AppFrame(tkinter.Frame):
         self.axes_labels = (left, bot)
         quit = tkinter.Button(self, text='Quit', command=tk.destroy)
 
-        self.graph_canvas.grid(row=0)
+        self.graph_canvas.grid(row=0, column=1)
         t_left.grid(row=0)
-        t_bot.grid(row=1)
+        t_bot.grid(row=1, columnspan=2)
         quit.grid(row=2)
         self.pack()
 
