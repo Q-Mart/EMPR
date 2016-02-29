@@ -62,7 +62,7 @@ int main(void)
             case CALIBRATE:
                 break;
             case SCAN_DO:
-                scan_loop();
+                scan_loop(last_key_press);
                 break;
             case SCAN_PARAMETER_1:
                 scan_parameter_1_loop(last_key_press);
@@ -74,11 +74,28 @@ int main(void)
                 scan_parameter_3_loop(last_key_press);
                 break;
             case MEASURE_DO:
-                measure_loop();
+                measure_loop(last_key_press);
                 break;
-            case MULTI:
+            case MULTI_SWEEP:
+                multi_sweep_loop();
+                break;
+            case MULTI_WAIT:
+                multi_wait_loop();
+                break;
+            case MULTI_SWEEP_NUMBER:
+                multi_sweep_number_loop(last_key_press);
+                break;
+            case MULTI_MIN_ANGLE:
+                multi_min_angle_loop(last_key_press);
+                break;
+            case MULTI_MAX_ANGLE:
+                multi_max_angle_loop(last_key_press);
+                break;
+            case MULTI_DONE:
+                multi_done_loop();
                 break;
             default:
+                //have a break, have a kit kat
                 break;
         }
     }
@@ -93,11 +110,12 @@ void input_poll(void){
     int i;
     for(i = 0; i < 16; ++i){
         if(r[i] == 1) {
-            //The order of these matters because otherwise the 
+            //The order of these matters because otherwise the
             //key pressed for the transition will also register as
-            //an input for the corresponding loop function.
+            //an input for the corresponding loop function
             last_key_press = key_to_int(KEYS[i]);
             state_transition(KEYS[i]);
+            timer_delay(100);//Prevent button bounce
         }
     }
 }
@@ -128,16 +146,18 @@ const transition_t lut[] = {
     {SCAN_PARAMETERS, '2', SCAN_PARAMETER_2, &scan_parameters_to_2},
     {SCAN_PARAMETER_2, '#', SCAN_PARAMETERS, &scan_parameter_2_to_scan_parameters},
     {SCAN_PARAMETERS, '3', SCAN_PARAMETER_3, &scan_parameters_to_3},
-    {SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters}, 
+    {SCAN_PARAMETER_3, '#', SCAN_PARAMETERS, &scan_parameter_3_to_scan_parameters},
 
 
-    {MEASURE, '#', MEASURE_DO, NULL},
+    {MEASURE, '#', MEASURE_DO, &measure_to_measure_do},
     {MEASURE_DO, '*', MEASURE, &any_to_measure},
-    {MULTI, '#', MULTI_DO_STAGE_1, NULL},
-    /* MAYBE DO THIS AUTOMATICALLY OR HAVE A WAIT? */
-    {MULTI_DO_STAGE_1, '#', MULTI_DO_STAGE_2, NULL},
-    {MULTI_DO_STAGE_2, '#', MULTI_DO_STAGE_3, NULL},
-    {MULTI_DO_STAGE_3, '#', MULTI_DO_STAGE_4, NULL},
+
+    {MULTI, '#', MULTI_SWEEP_NUMBER, &multi_to_multi_sweep_number},
+    {MULTI_SWEEP_NUMBER, '#', MULTI_MIN_ANGLE, &multi_sweep_number_to_multi_min_angle},
+    {MULTI_MIN_ANGLE, '#', MULTI_MAX_ANGLE, &multi_min_angle_to_multi_max_angle},
+    {MULTI_MAX_ANGLE, '#', MULTI_SWEEP, NULL},
+    {MULTI_WAIT, '#', MULTI_SWEEP, NULL},
+    {MULTI_DONE, '#', CALIBRATE, NULL},
 
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},
@@ -158,4 +178,8 @@ void state_transition(char key){
             return;
         }
     }
+}
+
+void change_state(state_t state) {
+    current_state = state;
 }

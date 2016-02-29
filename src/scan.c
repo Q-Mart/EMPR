@@ -5,13 +5,18 @@
 #include "ir_sensor.h"
 #include "ultrasound.h"
 #include "timer.h"
+#include "utils.h"
+#define NO_OF_STATES 3
+static enum _scan_state{DISTANCE, ANGLE, AVG_DISTANCE} scan_state = DISTANCE;
 signed int scan_direction = 1;
-static uint16_t scan_upper_bound = 270;
-static uint16_t scan_lower_bound = 0;
-static uint16_t scan_speed = 1;
-static uint16_t scan_tentative_speed = 1;
-static uint16_t scan_tentative_upper_bound = 270;
-static uint16_t scan_tentative_lower_bound = 0;
+static uint32_t scan_upper_bound = 270;
+static uint32_t scan_lower_bound = 0;
+static uint32_t scan_speed = 1;
+static uint32_t scan_tentative_speed = 1;
+static uint32_t scan_tentative_upper_bound = 270;
+static uint32_t scan_tentative_lower_bound = 0;
+static uint64_t scan_total_distance = 0;
+static uint32_t scan_count = 0;
 /*
  * Parameter Loops:
  * Each parameter state has a loop function that runs during the
@@ -23,14 +28,6 @@ static uint16_t scan_tentative_lower_bound = 0;
  * pointers to a table and get a function in the main loop to multiplex to
  * one based on the current state.
  */
-void scan_process_digit_input(int last_key_press, uint16_t* result){
-    if (last_key_press >= 0){
-        (*result) = ((*result) * 10) + last_key_press;
-    } else if (last_key_press == -1){
-        (*result) /= 10;//Remove the last digit. 
-        //Works because C truncates towards 0.
-    }
-}
 void any_to_scan(){
     lcd_send_line(LINE1, "Scan, # to start");
     lcd_send_line(LINE2, "* for options");
@@ -41,13 +38,13 @@ void scan_to_scan_do(){
 }
 void scan_parameters_to_1(){
     scan_tentative_speed = scan_speed;
-    lcd_send_line(LINE1, "Speed %d", scan_tentative_speed);
+    lcd_send_line(LINE1, "Speed %u", scan_tentative_speed);
     lcd_send_line(LINE2, "# to Confirm");
     timer_delay(300); //Prevent button bounce;
 }
 void scan_parameter_1_loop(int last_key_press){
-    scan_process_digit_input(last_key_press, &scan_tentative_speed);
-    lcd_send_line(LINE1, "Speed %d", scan_tentative_speed); 
+    utils_process_digit_input(last_key_press, &scan_tentative_speed);
+    lcd_send_line(LINE1, "Speed %u", scan_tentative_speed);
 }
 void scan_parameter_1_to_scan_parameters(){
     scan_speed = scan_tentative_speed;
@@ -58,13 +55,13 @@ void any_to_scan_parameters(void){
 }
 void scan_parameters_to_2(void){
     scan_tentative_upper_bound = scan_upper_bound;
-    lcd_send_line(LINE1, "Left point %d", scan_tentative_upper_bound);
+    lcd_send_line(LINE1, "Left point %u", scan_tentative_upper_bound);
     lcd_send_line(LINE2, "# to confirm");
     timer_delay(300); //Prevent Button Bounce
 }
 void scan_parameter_2_loop(int last_key_press){
-    scan_process_digit_input(last_key_press, &scan_tentative_upper_bound);
-    lcd_send_line(LINE1, "Left point %d", scan_tentative_upper_bound);
+    utils_process_digit_input(last_key_press, &scan_tentative_upper_bound);
+    lcd_send_line(LINE1, "Left point %u", scan_tentative_upper_bound);
 }
 
 void scan_parameter_2_to_scan_parameters(void){
@@ -73,29 +70,45 @@ void scan_parameter_2_to_scan_parameters(void){
 }
 void scan_parameters_to_3(void){
     scan_tentative_lower_bound = scan_lower_bound;
-    lcd_send_line(LINE1, "Right point %d", scan_tentative_lower_bound);
+    lcd_send_line(LINE1, "Right point %u", scan_tentative_lower_bound);
     lcd_send_line(LINE2, "# to confirm");
     timer_delay(300); //Prevent Button Bounce
 }
 void scan_parameter_3_loop(int last_key_press){
-    scan_process_digit_input(last_key_press, &scan_tentative_lower_bound);
-    lcd_send_line(LINE1, "Right Point %d", scan_tentative_lower_bound);
+    utils_process_digit_input(last_key_press, &scan_tentative_lower_bound);
+    lcd_send_line(LINE1, "Right Point %u", scan_tentative_lower_bound);
 }
 void scan_parameter_3_to_scan_parameters(void){
     scan_lower_bound = scan_tentative_lower_bound;
     any_to_scan_parameters();
 }
-void scan_loop(){
+void scan_loop(int last_key_press){
+    if(last_key_press == 3)
+        scan_state = (scan_state + 1) % NO_OF_STATES;
+    if(last_key_press == 1)
+        scan_state = (scan_state - 1 + NO_OF_STATES) % NO_OF_STATES;
     int pos = servo_get_pos();
     if(pos <= scan_lower_bound) scan_direction = 1;
     if(pos >= scan_upper_bound) scan_direction = -1;
     servo_set_pos(pos + (scan_direction * scan_speed));
-    timer_delay(35);//Time for it to phusically move
-    uint32_t raw = ir_sensor_get_raw_data();
-    raw = ir_convert_to_distance(raw);
-    uint32_t raw_us = ultrasound_get_distance();
-    raw = (raw + raw_us) /2;
+    timer_delay(1);//Time for it to phusically move
+    uint32_t raw = utils_get_ir_and_ultrasound_distance();
     debug_send_arb((char*) &pos, 4);
     debug_send_arb((char*) &raw, 4);
-    lcd_send_line(LINE2, "%d", raw);
+    scan_count++;
+    scan_total_distance += raw;
+    switch(scan_state){
+        case DISTANCE:
+            lcd_send_line(LINE1, "Distance");
+            lcd_send_line(LINE2, "%d", raw);
+            break;
+        case AVG_DISTANCE:
+            lcd_send_line(LINE1, "Average Distance");
+            lcd_send_line(LINE2, "%d", scan_total_distance/scan_count);
+            break;
+        case ANGLE:
+            lcd_send_line(LINE1, "ANGLE");
+            lcd_send_line(LINE2, "%d", pos);
+            break;
+    }
 }
