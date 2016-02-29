@@ -97,8 +97,6 @@ void scan_loop(int last_key_press){
     timer_delay(1);//Time for it to phusically move
     uint32_t raw = utils_get_ir_and_ultrasound_distance();
     network_send(SCAN_DO, (uint8_t *)&pos, 4, (uint8_t* )&raw, 4, NULL);
-    debug_send_arb((char*) &pos, 4);
-    debug_send_arb((char*) &raw, 4);
     scan_count++;
     scan_total_distance += raw;
     switch(scan_state){
