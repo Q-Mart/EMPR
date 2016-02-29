@@ -75,6 +75,7 @@ class PlotCanvas(tkinter.Canvas):
 
         x0, y0 = 0, h
         for x, y in zip(xs, ys):
+            print(x, y)
             x, y = int(tx * x), h - int(ty * y)
             self.line(x0, y0, x, y)
 
@@ -124,8 +125,8 @@ class Mode:
 
     MEASURE_DO = 13
 
-    MULTI_SWEEP = 14
-    MULTI_PARAMETERS = 15
+    MULTI_PARAMETERS = 14
+    MULTI_SWEEP = 15
     MULTI_WAIT = 16
     MULTI_SWEEP_NUMBER = 17
     MULTI_MIN_ANGLE = 18
@@ -175,6 +176,7 @@ def monitor(frame, r):
             frame.draw()
         elif mode == Mode.MULTI:
             frame.graph_canvas.clear()
+            print('changing plotter!')
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
             frame.draw()
 
@@ -251,6 +253,7 @@ class AppFrame(tkinter.Frame):
     def init(self):
         if DEBUG:
             self.lcd_canvas = lcd.LcdCanvas(self, CANVAS_WIDTH, 75)
+            self.lcd_canvas.grid(row=3, column=1, rowspan=2)
 
         self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH-50, CANVAS_HEIGHT-75)
         left = tkinter.StringVar()
@@ -268,7 +271,6 @@ class AppFrame(tkinter.Frame):
         t_left.grid(row=0)
         t_bot.grid(row=1, columnspan=2)
         quit.grid(row=2, columnspan=2)
-        self.lcd_canvas.grid(row=3, column=1, rowspan=2)
         self.pack() 
     def draw(self):
         xs, ys = self.plotter.x, self.plotter.y

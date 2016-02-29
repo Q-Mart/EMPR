@@ -96,7 +96,7 @@ class ScanPlotter(Plotter):
         x, y = data
         self.values[x] = y
 
-def MultiPlotter(Plotter):
+class MultiPlotter(Plotter):
     SWEEP = 1
     NEXT = 2
     PARAMS = 3
@@ -130,8 +130,8 @@ def MultiPlotter(Plotter):
         self.xs = []
         self.ys = []
         for (x, y) in new:
-            self.xs.append(x)
-            self.xs.append(y)
+            self.xs.append(int(x))
+            self.xs.append(int(y))
 
     def update(self, *data):
         msg, value = data
@@ -143,6 +143,6 @@ def MultiPlotter(Plotter):
             # rotate
             self._rotate()
         elif msg == MultiPlotter.PARAMS:
-            scan_number, = value
+            scan_number, _, _ = value
             self._number = scan_number
             self._angle = math.pi / float(scan_number)
