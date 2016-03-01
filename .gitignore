@@ -1,6 +1,5 @@
 # Object files
-*.o
-*.ko
+*.o *.ko
 *.obj
 *.elf
 
@@ -34,5 +33,5 @@
 #Entire bin directory
 bin/*
 
-#Vim
-*.swp
+#Records binary file
+records/record

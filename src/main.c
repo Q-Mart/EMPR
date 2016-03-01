@@ -149,6 +149,13 @@ const transition_t lut[] = {
     {PLATFORM, '#', PLATFORM_SCAN, NULL},
     {PLATFORM_DONE, '#', CALIBRATE, NULL},
 
+    {MULTI, '#', MULTI_SWEEP_NUMBER, &multi_to_multi_sweep_number},
+    {MULTI_SWEEP_NUMBER, '#', MULTI_MIN_ANGLE, &multi_sweep_number_to_multi_min_angle},
+    {MULTI_MIN_ANGLE, '#', MULTI_MAX_ANGLE, &multi_min_angle_to_multi_max_angle},
+    {MULTI_MAX_ANGLE, '#', MULTI_SWEEP, &multi_sweep},
+    {MULTI_WAIT, '#', MULTI_SWEEP, NULL},
+    {MULTI_DONE, '#', CALIBRATE, NULL},
+
     {ANY, 'A', CALIBRATE, &any_to_calib},
     {ANY, 'B', SCAN, &any_to_scan},
     {ANY, 'C', MEASURE, &any_to_measure},
