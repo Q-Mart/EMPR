@@ -13,7 +13,7 @@ static systick_func systick_function = NULL;
 
 void timer_enable_systick()
 {
-    SysTick_Config(SystemCoreClock/1000);
+    SysTick_Config(SystemCoreClock/10000);
 }
 
 void timer_set_systick_function(systick_func sfunc){
