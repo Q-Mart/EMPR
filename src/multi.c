@@ -30,7 +30,7 @@ void multi_min_angle_to_multi_max_angle() {
     lcd_send_line(LINE1, "Maximum angle");
 }
 
-void multi_sweep() {
+void multi_max_angle_to_multi_sweep() {
     //Clamp the angles if they are out of range
     if (max_angle>270) max_angle = 270;
     if (min_angle>270) min_angle = 0;
@@ -75,7 +75,7 @@ void multi_sweep_loop() {
         pos = pos + scan_direction;
         servo_set_pos(pos);
         timer_delay(35);
-        uint32_t raw = utils_get_ir_and_ultrasound_distance();
+        uint32_t raw = utils_get_ir_and_ultrasound_median_distance();
         network_send(MULTI_SWEEP, &pos, 4, &raw, 4, NULL);     
     }
 

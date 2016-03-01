@@ -94,8 +94,8 @@ void scan_loop(int last_key_press){
     if(pos <= scan_lower_bound) scan_direction = 1;
     if(pos >= scan_upper_bound) scan_direction = -1;
     servo_set_pos(pos + (scan_direction * scan_speed));
-    timer_delayc(1, &input_poll);//Time for it to phusically move
-    uint32_t raw = utils_get_ir_and_ultrasound_distance();
+    timer_delayc(1, &input_poll);//Time for it to physically move
+    uint32_t raw = utils_get_ir_and_ultrasound_median_distance();
     network_send(SCAN_DO, (uint8_t *)&pos, 4, (uint8_t* )&raw, 4, NULL);
     scan_count++;
     scan_total_distance += raw;
