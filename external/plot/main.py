@@ -101,9 +101,11 @@ class PlotCanvas(tkinter.Canvas):
         self.line(1, h-1, w, h-1, fill='black', width=3)
         self.line(0, 0, 0, h, fill='black', width=3)
 
-    def clear(self):
-        self.delete(*self.lines)
+    def re_draw(self, xs, ys):
+        self.old_lines = self.lines
         self.lines = []
+        self.plot(xs, ys)
+        self.delete(*self.old_lines)
 
     def on_resize(self, event):
         '''TODO: This
@@ -185,13 +187,10 @@ def monitor(frame, r):
             frame.plotter.update(plotter.MultiPlotter.PARAMS, (scan_number, min_angle, max_angle))
         elif mode == Mode.MEASURE:
             t = 1
-            frame.graph_canvas.clear()
             frame.plotter = plotter.MeasurePlotter(*frame.dimensions)
         elif mode == Mode.SCAN:
-            frame.graph_canvas.clear()
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
         elif mode == Mode.MULTI:
-            frame.graph_canvas.clear()
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
 
 def append_record(b):
@@ -291,8 +290,7 @@ class AppFrame(tkinter.Frame):
         xs, ys = self.plotter.x, self.plotter.y
         left, bot = self.axes_labels
 
-        self.graph_canvas.clear()
-        self.graph_canvas.plot(xs, ys)
+        self.graph_canvas.re_draw(xs, ys)
 
         left.set(self.plotter.label_y)
         bot.set(self.plotter.label_x)
