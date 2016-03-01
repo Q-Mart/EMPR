@@ -114,7 +114,7 @@ class MultiPlotter(Plotter):
     PARAMS = 3
 
     def __init__(self, *dimensions):
-        Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Distance', *dimensions)
+        Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Shape', *dimensions)
         self.max_x = 270
         self.max_y = MAX
         self.x = []
@@ -125,7 +125,7 @@ class MultiPlotter(Plotter):
 
     def _append(self, x, y):
         t = (self._current) * self._angle
-        self.rotate(x, t, self.centre_x, self.centre_y)
+        self.rotate((x, y), math.pi, self.centre_x, self.centre_y)
         self.x.append(x)
         self.y.append(y)
 

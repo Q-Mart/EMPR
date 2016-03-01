@@ -77,12 +77,13 @@ class PlotCanvas(tkinter.Canvas):
         s = 3
 
         x0, y0 = 0, h
-        for x, y in zip(xs, ys):
-            x, y = int(tx * x), h - int(ty * y)
+        for xp, yp in zip(xs, ys):
+            x, y = int(tx * xp), h - int(ty * yp)
             
             # perform rotation
-            if x in plot.rotations:
-                t, cx, cy = plot.rotations[x]
+            if (xp, yp) in plot.rotations:
+                t, cx, cy = plot.rotations[(xp, yp)]
+                cx, cy = int(tx * cx), h - int(ty * cy)
                 cos_t = math.cos(t)
                 sin_t = math.sin(t)
                 x, y = x - cx, y - cy
