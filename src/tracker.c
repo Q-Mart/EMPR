@@ -2,7 +2,6 @@
 
 int tracker_upper_bound = 0;
 int tracker_lower_bound = 0;
-int tracker_travelling_direction = 1;
 int tracker_current_center = 0;
 const int averaged_values_bearings[] = {-25, -15, -5, 5, 15, 25};
 
@@ -76,32 +75,17 @@ void tracker_narrow_sweep()
     timer_delay(100);
 
     //Set boundaries for sweep.
-    //if (abs(tracker_lower_bound - servo_get_pos()) < abs(tracker_upper_bound - servo_get_pos()))
-    //{
-        scan_start = tracker_lower_bound;
-        scan_end = tracker_upper_bound;
-    //}
-    //else {
-    //    scan_start = tracker_upper_bound;
-    //    scan_end = tracker_lower_bound;
-    //}
+    scan_start = tracker_lower_bound;
+    scan_end = tracker_upper_bound;
 
 
     //Perform narrow sweep.
     debug_sendf("Starting at %d, Finishing at %d \r\n", scan_start, scan_end);
     range_index = 0;
-    //if (scan_start <= scan_end) {
-        for (sensor_position = scan_start; sensor_position <= scan_end; sensor_position += 10) {
-            tracker_narrow_sweep_scan(range_index, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
-            range_index++;
-        }
-    //}
-    //else {
-    //  for (sensor_position = scan_start; sensor_position >= scan_end; sensor_position -= 10) {
-    //        tracker_narrow_sweep_scan(range_index, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
-    //        range_index++;
-    //    }
-    //}
+    for (sensor_position = scan_start; sensor_position <= scan_end; sensor_position += 10) {
+        tracker_narrow_sweep_scan(range_index, sensor_position, tracker_ultrasound_range_table, tracker_ir_range_table);
+        range_index++;
+    }
     
     //Find the angle with the smallest distance.
     new_index = tracker_compare_indices(
