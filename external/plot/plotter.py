@@ -19,6 +19,10 @@ class Plotter:
         self.dimensions = dimensions
         self.label_x = x_label
         self.label_y = y_label
+        self.rotations = {}
+
+    def rotate(self, x, theta, centre_x, centre_y):
+        self.rotations[x] = (theta, centre_x, centre_y)
 
     def update(self, *data):
         '''Update the Plotter with some new data
@@ -121,18 +125,7 @@ class MultiPlotter(Plotter):
 
     def _append(self, x, y):
         t = (self._current) * self._angle
-        cos_t = math.cos(t)
-        sin_t = math.sin(t)
-
-        # rotate
-        print('----')
-        print(x, y)
-        x, y = x - self.centre_x, y - self.centre_y
-        print(x, y)
-        x, y = (x*cos_t) - (y*sin_t), (x*sin_t) + (y*cos_t)
-        print(x, y)
-        x, y = x + self.centre_x, y + self.centre_y
-        print(x, y)
+        self.rotate(x, t, self.centre_x, self.centre_y)
         self.x.append(x)
         self.y.append(y)
 
