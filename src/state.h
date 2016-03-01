@@ -29,6 +29,7 @@ typedef enum {
 
     PLATFORM_DONE, /* Finished Scan so, idle */
 
+    MULTI,
     MULTI_SWEEP,
     MULTI_WAIT,
     MULTI_SWEEP_NUMBER,

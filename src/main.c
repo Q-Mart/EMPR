@@ -15,6 +15,7 @@
 #include "servo.h"
 #include "ultrasound.h"
 #include "network.h"
+#include "stepper.h"
 
 int key_to_int(char key){
     //This was written to allow for numbers to be converted from
@@ -55,6 +56,7 @@ int main(void)
     ir_sensor_init();
     ultrasound_initialise_timer_measurement();
     servo_init();
+    stepper_init();
     any_to_calib();
 
     while (1)
