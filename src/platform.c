@@ -22,10 +22,9 @@ void platform_to_platform_sweep() {
 }
 
 void platform_scan_loop() {
-    /* int i; */
-    /* lcd_send_line(LINE1, "Sweep %d of %d", current_sweep+1, number_of_sweeps); */
-    /* uint32_t raw = utils_get_ir_and_ultrasound_distance(); */
-    /* lcd_send_line(LINE2, "%d", raw); */
+    lcd_send_line(LINE1, "Sweep %d of %d", current_sweep+1, number_of_sweeps);
+    uint32_t raw = utils_get_ir_and_ultrasound_distance();
+    lcd_send_line(LINE2, "%d", raw);
     //***DATA SHOULD BE SENT HERE***
 
     stepper_step_clockwise();
