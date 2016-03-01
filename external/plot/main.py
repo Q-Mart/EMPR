@@ -15,6 +15,9 @@ Options:
 BASE_DIR = '../../'
 RECORD_FILE = BASE_DIR + 'records/record'
 
+FRAME_WIDTH  = 4*200
+FRAME_HEIGHT = 3*200
+
 CANVAS_WIDTH  = 4*150
 CANVAS_HEIGHT = 3*150
 
@@ -44,9 +47,24 @@ import lcd
 
 class PlotCanvas(tkinter.Canvas):
     def __init__(self, parent, width, height):
-        tkinter.Canvas.__init__(self, parent, width=width, height=height)
+        tkinter.Canvas.__init__(self, parent)
         self.lines = []
         self.parent = parent
+
+        self.graph = tkinter.Canvas(self, width=width, height=height)
+        self.graph.grid(row=0, column=1, rowspan=10, columnspan=10)
+
+        self.x_labels = []
+        self.y_labels = []
+        for i in range(10):
+            var = tkinter.StringVar()
+            vary = tkinter.StringVar()
+            var.set('!')
+            vary.set('&')
+            self.x_labels.append(var)
+            self.y_labels.append(vary)
+            tkinter.Label(self, textvariable=var).grid(row=10, column=i+1)
+            tkinter.Label(self, textvariable=vary).grid(row=i, column=0)
 
     def plot(self, xs, ys):
         '''Plot some graph
@@ -54,8 +72,8 @@ class PlotCanvas(tkinter.Canvas):
         if len(xs) != len(ys):
             raise ValueError('Mismatch of argc')
 
-        w = self.winfo_width()
-        h = self.winfo_height()
+        w = self.graph.winfo_width()
+        h = self.graph.winfo_height()
 
         self.draw_border(w, h)
 
@@ -63,7 +81,7 @@ class PlotCanvas(tkinter.Canvas):
             self.draw_graph(w, h, xs, ys)
 
     def line(self, *args, **kwargs):
-        self.lines.append(self.create_line(*args, **kwargs))
+        self.lines.append(self.graph.create_line(*args, **kwargs))
 
     def draw_graph(self, w, h, xs, ys):
         plot = self.parent.plotter
@@ -75,6 +93,10 @@ class PlotCanvas(tkinter.Canvas):
         ty = float(h) / float(max_y)
 
         s = 3
+
+        for i in range(10):
+            self.x_labels[i].set(str((i+1)*max_x // 10))
+            self.y_labels[9-i].set(str((i+1)*max_y // 10))
 
         x0, y0 = 0, h
         for xp, yp in zip(xs, ys):
@@ -101,11 +123,12 @@ class PlotCanvas(tkinter.Canvas):
         self.line(1, h-1, w, h-1, fill='black', width=3)
         self.line(0, 0, 0, h, fill='black', width=3)
 
+
     def re_draw(self, xs, ys):
         self.old_lines = self.lines
         self.lines = []
         self.plot(xs, ys)
-        self.delete(*self.old_lines)
+        self.graph.delete(*self.old_lines)
 
     def on_resize(self, event):
         '''TODO: This
@@ -268,7 +291,7 @@ class AppFrame(tkinter.Frame):
             self.lcd_canvas = lcd.LcdCanvas(self, CANVAS_WIDTH, 75)
             self.lcd_canvas.grid(row=3, column=1, rowspan=2)
 
-        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH-50, CANVAS_HEIGHT-75)
+        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH, CANVAS_HEIGHT)
         left = tkinter.StringVar()
         bot = tkinter.StringVar()
         left.set('Left!')
@@ -314,8 +337,8 @@ if __name__ == '__main__':
             DEBUG = True
 
         tk = tkinter.Tk()
-        tk.minsize(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
-        tk.maxsize(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
+        tk.minsize(width=FRAME_WIDTH, height=FRAME_HEIGHT)
+        tk.maxsize(width=FRAME_WIDTH, height=FRAME_HEIGHT)
         tk.resizable(width=tkinter.FALSE, height=tkinter.FALSE)
 
         app = AppFrame(parent=tk)
