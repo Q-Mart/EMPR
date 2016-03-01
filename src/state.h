@@ -28,6 +28,13 @@ typedef enum {
     PLATFORM_WAIT, /* wait for user to turn object */
 
     PLATFORM_DONE, /* Finished Scan so, idle */
+
+    MULTI_SWEEP,
+    MULTI_WAIT,
+    MULTI_SWEEP_NUMBER,
+    MULTI_MIN_ANGLE,
+    MULTI_MAX_ANGLE,
+    MULTI_DONE,
     /* Special Ignore State */ ANY
 } state_t;
 
