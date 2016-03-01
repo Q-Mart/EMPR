@@ -5,7 +5,7 @@
 #include "test.h"
 #include "calibration_mode.h"
 #include "multi.h"
-#include "scan.h"
+//#include "scan.h"
 #include "measure.h"
 #include "adc.h"
 #include "state.h"
