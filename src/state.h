@@ -36,6 +36,7 @@ typedef enum {
     MULTI_MIN_ANGLE,
     MULTI_MAX_ANGLE,
     MULTI_DONE,
+    MULTI_PARAMETERS,
     /* Special Ignore State */ ANY
 } state_t;
 

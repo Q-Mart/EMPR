@@ -8,6 +8,7 @@
 #include "scan.h"
 #include "measure.h"
 #include "platform.h"
+#include "multi.h"
 #include "adc.h"
 #include "state.h"
 #include "ir_sensor.h"
