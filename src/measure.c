@@ -15,7 +15,7 @@ static enum _measure_state{DISTANCE, AVG_DISTANCE} measure_state = DISTANCE;
 static uint64_t measure_total_distance = 0;
 static uint16_t measure_count = 0;
 
-static uint16_t measure_point = 0; //The desired measure point
+static uint32_t measure_point = 0; //The desired measure point
 static uint8_t measure_alarm_enabled = 0; //0: Alarm off, 1: Alarm on
 void any_to_measure() {
     lcd_send_line(LINE1, "Measure Mode # to start");
@@ -100,8 +100,12 @@ void measure_loop(int last_key_press) {
         } else {
             diff = measure_point - dist;
         }
-        uint16_t count_val = (diff/measure_point) * 255;
-        sound_change_count_rate(count_val);
+        //debug_sendf("%u\n\r", diff);
+        if(diff < 100000){
+            uint32_t count_val = (diff/100000.0f) * sound_get_tone0_window_size();
+            sound_change_tone0_window_size(count_val);
+            debug_sendf("%u\n\r", count_val);
+        }
 
     }
 }

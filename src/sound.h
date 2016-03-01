@@ -3,5 +3,8 @@ void sound_init(void);
 void sound_tick(void);
 void sound_change_count_rate(uint16_t);
 uint16_t sound_get_count_rate(void);
+void sound_change_tone(int);
+void sound_change_tone0_window_size(uint32_t);
+uint32_t sound_get_tone0_window_size();
 void sound_enable();
 void sound_disable();
