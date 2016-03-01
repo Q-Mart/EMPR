@@ -65,8 +65,10 @@ class PlotCanvas(tkinter.Canvas):
         self.lines.append(self.create_line(*args, **kwargs))
 
     def draw_graph(self, w, h, xs, ys):
-        max_x = self.parent.plotter.max_x or max(xs)
-        max_y = self.parent.plotter.max_y or max(ys)
+        plot = self.parent.plotter
+
+        max_x = plot.max_x or max(xs)
+        max_y = plot.max_y or max(ys)
 
         tx = float(w) / float(max_x)
         ty = float(h) / float(max_y)
@@ -76,7 +78,9 @@ class PlotCanvas(tkinter.Canvas):
         x0, y0 = 0, h
         for x, y in zip(xs, ys):
             x, y = int(tx * x), h - int(ty * y)
-            self.line(x0, y0, x, y)
+
+            if plot.mode & plotter.Plotter.NOLINE == 0:
+                self.line(x0, y0, x, y)
 
             self.line(x-s, y-s, x+s, y+s, fill='red')
             self.line(x+s, y-s, x-s, y+s, fill='red')

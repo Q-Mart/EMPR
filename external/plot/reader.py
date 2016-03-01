@@ -100,7 +100,7 @@ def process(reader):
     while True:
         v = yield
         reader.Q.extend(v)
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 class UnixReader(Reader):
     def __init__(self, app):

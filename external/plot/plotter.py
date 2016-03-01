@@ -7,9 +7,15 @@ class Plotter:
     '''Uses Tkinter to plot incoming data
     to a tkinter board thingy
     '''
-    def __init__(self, x_label, y_label, *dimensions):
+
+    NONE = 0b000
+    NOLINE = 0b001
+    POLAR = 0b010
+
+    def __init__(self, flags, x_label, y_label, *dimensions):
         self.max_x = None
         self.max_y = None
+        self.mode = flags
         self.dimensions = dimensions
         self.label_x = x_label
         self.label_y = y_label
@@ -21,7 +27,7 @@ class Plotter:
 
 class DefaultPlotter(Plotter):
     def __init__(self, *dimensions):
-        Plotter.__init__(self, 'Default', 'Default', *dimensions)
+        Plotter.__init__(self, Plotter.NONE, 'Default', 'Default', *dimensions)
         self.xs = []
         self.ys = []
 
@@ -41,7 +47,7 @@ class DefaultPlotter(Plotter):
 
 class MeasurePlotter(Plotter):
     def __init__(self, w, h):
-        Plotter.__init__(self, 'Time', 'Distance', w, h)
+        Plotter.__init__(self, Plotter.NONE, 'Time', 'Distance', w, h)
         self.max_x = w
         self.max_y = MAX
         self.xs = []
@@ -77,7 +83,7 @@ class MeasurePlotter(Plotter):
 
 class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
-        Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
+        Plotter.__init__(self, Plotter.NONE, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
         self.max_y = MAX
         self.values = {}
@@ -104,7 +110,7 @@ class MultiPlotter(Plotter):
     PARAMS = 3
 
     def __init__(self, *dimensions):
-        Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
+        Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
         self.max_y = MAX
         self.x = []
