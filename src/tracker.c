@@ -2,6 +2,7 @@
 
 int tracker_upper_bound = 0;
 int tracker_lower_bound = 0;
+int tracker_travelling_direction = 1;
 int tracker_current_center = 0;
 const int averaged_values_bearings[] = {-25, -15, -5, 5, 15, 25};
 
