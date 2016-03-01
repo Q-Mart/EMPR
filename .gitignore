@@ -1,6 +1,5 @@
 # Object files
-*.o
-*.ko
+*.o *.ko
 *.obj
 *.elf
 
@@ -33,3 +32,6 @@
 
 #Entire bin directory
 bin/*
+
+#Records binary file
+records/record

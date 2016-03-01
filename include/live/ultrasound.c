@@ -177,6 +177,6 @@ uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offs
      different from 340m/s. Unit is microsecond/s with offset. */
     uint32_t distance = (microseconds * calibration_gradient + calibration_offset);
 
-    record(ULTRASOUND_HEADER, distance, sizeof(uint32_t), NULL);
+    record(ULTRASOUND_HEADER, &distance, sizeof(uint32_t), NULL);
     return distance;
 }
