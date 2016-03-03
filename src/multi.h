@@ -4,6 +4,7 @@ void multi_sweep_number_to_multi_min_angle();
 void multi_min_angle_to_multi_max_angle();
 void multi_max_angle_to_multi_sweep();
 void multi_wait_to_multi_sweep();
+void multi_sweep();
 
 void multi_loop();
 void multi_sweep_loop();

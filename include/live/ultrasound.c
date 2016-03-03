@@ -3,6 +3,7 @@
 
 #include "ultrasound.h"
 #include "network.h"
+#include "utils.h"
 
 #define SAMPLE_COUNT 10 //The number of samples to use for calibration.
 
@@ -99,22 +100,12 @@ uint32_t ultrasound_get_sample_median(uint32_t * samples){
         }
     }
 
-    qsort(non_zeros, non_zero_count, sizeof(uint32_t), ultrasound_compare_values);
+    qsort(non_zeros, non_zero_count, sizeof(uint32_t), utils_compare_values);
         
     return non_zeros[non_zero_count/2];
 }
 
 /* Compare function for two values */
-int ultrasound_compare_values(const void * elem1, const void * elem2) {
-
-    int a = *((uint32_t*)elem1);
-    int b = *((uint32_t*)elem2);
-    
-    if (a > b) return 1;
-    if (b < a) return -1;
-
-    return 0;
-}
 
 /* Send a pulse to trigger the sensor to measure, on Pin 8 */
 void ultrasound_send_test_pulse(void){
@@ -177,6 +168,6 @@ uint32_t ultrasound_process_value(int calibration_gradient, int calibration_offs
      different from 340m/s. Unit is microsecond/s with offset. */
     uint32_t distance = (microseconds * calibration_gradient + calibration_offset);
 
-    record(ULTRASOUND_HEADER, distance, sizeof(uint32_t), NULL);
+    record(ULTRASOUND_HEADER, &distance, sizeof(uint32_t), NULL);
     return distance;
 }

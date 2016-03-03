@@ -72,7 +72,7 @@ void measure_loop(int last_key_press) {
     if(last_key_press == 1)
         measure_state = (measure_state - 1 + NO_OF_STATES) % NO_OF_STATES;
 
-    uint32_t dist = utils_get_ir_and_ultrasound_distance();
+    uint32_t dist = utils_get_ir_and_ultrasound_median_distance();
     network_send(MEASURE_DO, (uint8_t *)&dist, 4, NULL);
 
     //Calculate the running mean. If the mean is 0 then we set the

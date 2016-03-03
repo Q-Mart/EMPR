@@ -65,10 +65,21 @@ int timer_get_rit_status(void)
 
 /* wait for `n` ms before returning control */
 void timer_delay(int n)
-{
+{ 
     unsigned long SysTick_count;
     SysTick_count = SysTick_on;
     while((SysTick_on - SysTick_count) < n);
+}
+void timer_delayc(int n, timer_callback callback){
+     unsigned long SysTick_count;
+    SysTick_count = SysTick_on;
+    if(callback == NULL){
+        while((SysTick_on - SysTick_count) < n);
+    } else {
+        while((SysTick_on - SysTick_count) < n){
+            callback();
+        }
+    }
 }
 
 /* Initialise general purpose timer 2 (TIM2). */

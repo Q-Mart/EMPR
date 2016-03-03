@@ -172,7 +172,7 @@ const transition_t lut[] = {
     {MULTI, '#', MULTI_SWEEP_NUMBER, &multi_to_multi_sweep_number},
     {MULTI_SWEEP_NUMBER, '#', MULTI_MIN_ANGLE, &multi_sweep_number_to_multi_min_angle},
     {MULTI_MIN_ANGLE, '#', MULTI_MAX_ANGLE, &multi_min_angle_to_multi_max_angle},
-    {MULTI_MAX_ANGLE, '#', MULTI_SWEEP, NULL},
+    {MULTI_MAX_ANGLE, '#', MULTI_SWEEP, &multi_max_angle_to_multi_sweep},
     {MULTI_WAIT, '#', MULTI_SWEEP, NULL},
     {MULTI_DONE, '#', CALIBRATE, NULL},
 

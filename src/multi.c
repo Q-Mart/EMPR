@@ -7,10 +7,10 @@
 #include "state.h"
 #include "servo.h"
 
-static uint16_t max_angle = 270;
-static uint16_t min_angle = 0;
-static uint16_t number_of_sweeps = 4;
-static uint16_t current_sweep;
+static uint32_t max_angle = 270;
+static uint32_t min_angle = 0;
+static uint32_t number_of_sweeps = 4;
+static uint32_t current_sweep;
 static int scan_direction;
 
 void any_to_multi() {
@@ -26,16 +26,22 @@ void multi_to_multi_sweep_number() {
 void multi_sweep_number_to_multi_min_angle() {
     lcd_send_line(LINE1, "Minimum angle");
 }
-
-void multi_min_angle_to_multi_max_angle() {
+void multi_min_angle_to_multi_max_angle() { 
     lcd_send_line(LINE1, "Maximum angle");
 }
 
-void multi_sweep() {
+void multi_max_angle_to_multi_sweep() {
     //Clamp the angles if they are out of range
     if (max_angle>270) max_angle = 270;
     if (min_angle>270) min_angle = 0;
     servo_set_pos(min_angle);
+
+    network_send(MULTI_PARAMETERS, 
+            &number_of_sweeps, 4, 
+            &min_angle, 4,
+            &max_angle, 4,
+            NULL);
+
     //Wait to move
     timer_delay(500);
 }
@@ -69,7 +75,7 @@ void multi_sweep_loop() {
         pos = pos + scan_direction;
         servo_set_pos(pos);
         timer_delay(35);
-        uint32_t raw = utils_get_ir_and_ultrasound_distance();
+        uint32_t raw = utils_get_ir_and_ultrasound_median_distance();
         network_send(MULTI_SWEEP, &pos, 4, &raw, 4, NULL);     
     }
 
@@ -77,8 +83,10 @@ void multi_sweep_loop() {
 
     if (current_sweep < number_of_sweeps) {
         change_state(MULTI_WAIT);
+        network_send(MULTI_WAIT, NULL);
     } else {
         change_state(MULTI_DONE);
+        network_send(MULTI_DONE, NULL);
     }
 }
 

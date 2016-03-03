@@ -1,4 +1,12 @@
 import struct
+import os
+import collections
+import time
+
+from socket import AF_UNIX, SOCK_DGRAM, socket
+from contextlib import closing
+
+SOCK_ADDR = '/tmp/empr_ipc_socket_network'
 
 class Reader:
     def __iter__(self):
@@ -27,18 +35,19 @@ class Reader:
 
     def read_int(self):
         i = self.read(4)
-        return struct.unpack('i', i)[0]
+        return struct.unpack('I', i)[0]
 
     def read_byte(self):
         b = self.read(1)
-        return struct.unpack('b', b)[0]
+        return struct.unpack('B', b)[0]
 
     def close(self):
         raise NotImplementedError
-    
+
 # b-mode i-angle i-value 
-MODE = lambda x, y, z: struct.pack('b', x) + struct.pack('i', y) + struct.pack('i', z)
-BYTE_STR = MODE(1, 5, 10) + MODE(1, 10, 15) + MODE(1, 15, 20)
+SCAN_DO = 10
+MODE = lambda x, y, z: struct.pack('B', x) + struct.pack('I', y) + struct.pack('I', z)
+BYTE_STR = MODE(SCAN_DO, 5, 10) + MODE(SCAN_DO, 10, 15) + MODE(SCAN_DO, 15, 20)
 
 class MockReader(Reader):
     def __init__(self, data=None):
@@ -54,10 +63,65 @@ class MockReader(Reader):
                 self._data_iter = iter(self._data)
                 b = next(self._data_iter)
             l.append(b)
-        return bytes(l)
+
+        return bytearray(l)
 
     def close(self):
         pass
 
     def __iter__(self):
         return iter(self._data)
+
+def monitor(unix_reader):
+    '''Monitors a UNIX Socket
+    for IPC with debug build
+    '''
+
+    if os.path.exists(SOCK_ADDR):
+        os.remove(SOCK_ADDR)
+
+    processor = process(unix_reader)
+    next(processor)
+
+    with closing(socket(AF_UNIX, SOCK_DGRAM)) as sock:
+        sock.bind(SOCK_ADDR)
+
+        while True:
+            v = sock.recv(1024)
+
+            if not v:
+                break
+
+            processor.send(v)
+
+    os.remove(SOCK_ADDR)
+
+def process(reader):
+    while True:
+        v = yield
+        reader.Q.extend(v)
+        time.sleep(0.01)
+
+class UnixReader(Reader):
+    def __init__(self, app):
+        self.app = app
+        self.Q = collections.deque()
+
+    def read(self, n):
+        i = n
+        L = []
+
+        while i > 0:
+            while not self.Q:
+                pass
+
+            L.append(self.Q.popleft())
+            i -= 1
+        
+        return bytearray(L)
+
+    def close(self):
+        pass
+
+    def __iter__(self):
+        return self

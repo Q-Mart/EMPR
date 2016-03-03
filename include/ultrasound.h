@@ -5,7 +5,6 @@
 #include "debug.h"
 #include "gpio.h"
 
-
 #define HCSR_TIMER_PORT 0
 #define HCSR_TIMER_PIN 5
 #define HCSR_TIMER_FUNC 3
