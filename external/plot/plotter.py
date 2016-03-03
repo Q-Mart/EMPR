@@ -125,7 +125,7 @@ class MultiPlotter(Plotter):
 
     def _append(self, x, y):
         t = (self._current) * self._angle
-        self.rotate((x, y), math.pi, self.centre_x, self.centre_y)
+        self.rotate((x, y), t, self.centre_x, self.centre_y)
         self.x.append(x)
         self.y.append(y)
 
