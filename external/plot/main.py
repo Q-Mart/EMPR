@@ -15,6 +15,9 @@ Options:
 BASE_DIR = '../../'
 RECORD_FILE = BASE_DIR + 'records/record'
 
+FRAME_WIDTH  = 4*200
+FRAME_HEIGHT = 3*200
+
 CANVAS_WIDTH  = 4*150
 CANVAS_HEIGHT = 3*150
 
@@ -29,6 +32,7 @@ except ImportError:
 
 import time
 import threading
+import math
 import functools
 import plotter
 
@@ -43,9 +47,24 @@ import lcd
 
 class PlotCanvas(tkinter.Canvas):
     def __init__(self, parent, width, height):
-        tkinter.Canvas.__init__(self, parent, width=width, height=height)
+        tkinter.Canvas.__init__(self, parent)
         self.lines = []
         self.parent = parent
+
+        self.graph = tkinter.Canvas(self, width=width, height=height)
+        self.graph.grid(row=0, column=1, rowspan=10, columnspan=10)
+
+        self.x_labels = []
+        self.y_labels = []
+        for i in range(10):
+            var = tkinter.StringVar()
+            vary = tkinter.StringVar()
+            var.set('!')
+            vary.set('&')
+            self.x_labels.append(var)
+            self.y_labels.append(vary)
+            tkinter.Label(self, textvariable=var).grid(row=10, column=i+1)
+            tkinter.Label(self, textvariable=vary).grid(row=i, column=0)
 
     def plot(self, xs, ys):
         '''Plot some graph
@@ -53,8 +72,8 @@ class PlotCanvas(tkinter.Canvas):
         if len(xs) != len(ys):
             raise ValueError('Mismatch of argc')
 
-        w = self.winfo_width()
-        h = self.winfo_height()
+        w = self.graph.winfo_width()
+        h = self.graph.winfo_height()
 
         self.draw_border(w, h)
 
@@ -62,21 +81,39 @@ class PlotCanvas(tkinter.Canvas):
             self.draw_graph(w, h, xs, ys)
 
     def line(self, *args, **kwargs):
-        self.lines.append(self.create_line(*args, **kwargs))
+        self.lines.append(self.graph.create_line(*args, **kwargs))
 
     def draw_graph(self, w, h, xs, ys):
-        max_x = self.parent.plotter.max_x or max(xs)
-        max_y = self.parent.plotter.max_y or max(ys)
+        plot = self.parent.plotter
+
+        max_x = plot.max_x or max(xs)
+        max_y = plot.max_y or max(ys)
 
         tx = float(w) / float(max_x)
         ty = float(h) / float(max_y)
 
         s = 3
 
+        for i in range(10):
+            self.x_labels[i].set(str((i+1)*max_x // 10))
+            self.y_labels[9-i].set(str((i+1)*max_y // 10))
+
         x0, y0 = 0, h
-        for x, y in zip(xs, ys):
-            x, y = int(tx * x), h - int(ty * y)
-            self.line(x0, y0, x, y)
+        for xp, yp in zip(xs, ys):
+            x, y = int(tx * xp), h - int(ty * yp)
+            
+            # perform rotation
+            if (xp, yp) in plot.rotations:
+                t, cx, cy = plot.rotations[(xp, yp)]
+                cx, cy = int(tx * cx), h - int(ty * cy)
+                cos_t = math.cos(t)
+                sin_t = math.sin(t)
+                x, y = x - cx, y - cy
+                x, y = (x*cos_t) - (y*sin_t), (x*sin_t) + (y*cos_t)
+                x, y = x + cx, y + cy
+
+            if plot.mode & plotter.Plotter.NOLINE == 0:
+                self.line(x0, y0, x, y)
 
             self.line(x-s, y-s, x+s, y+s, fill='red')
             self.line(x+s, y-s, x-s, y+s, fill='red')
@@ -86,9 +123,12 @@ class PlotCanvas(tkinter.Canvas):
         self.line(1, h-1, w, h-1, fill='black', width=3)
         self.line(0, 0, 0, h, fill='black', width=3)
 
-    def clear(self):
-        self.delete(*self.lines)
+
+    def re_draw(self, xs, ys):
+        self.old_lines = self.lines
         self.lines = []
+        self.plot(xs, ys)
+        self.graph.delete(*self.old_lines)
 
     def on_resize(self, event):
         '''TODO: This
@@ -134,6 +174,15 @@ class Mode:
     ANY = 21
 
 def monitor(frame, r):
+    def _update():
+        while True:
+            time.sleep(1.0 / 10.0)
+            frame.draw()
+
+    t1 = threading.Thread(target=_update)
+    t1.daemon = True
+    t1.start()
+
     t = 0
     while True:
         mode = r.read_byte()
@@ -143,40 +192,29 @@ def monitor(frame, r):
             value = r.read_int()
     
             frame.plotter.update(angle, value)
-            frame.draw()
         elif mode == Mode.MEASURE_DO:
             value = r.read_int()
             t += 1
             frame.plotter.update(t, value)
-            frame.draw()
         elif mode == Mode.MULTI_SWEEP:
             angle = r.read_int()
             value = r.read_int()
 
             frame.plotter.update(plotter.MultiPlotter.SWEEP, (angle, value))
-            frame.draw()
         elif mode == Mode.MULTI_WAIT:
             frame.plotter.update(plotter.MultiPlotter.NEXT, None)
-            frame.draw()
         elif mode == Mode.MULTI_PARAMETERS:
             scan_number = r.read_int()
             min_angle = r.read_int()
             max_angle = r.read_int()
             frame.plotter.update(plotter.MultiPlotter.PARAMS, (scan_number, min_angle, max_angle))
-            frame.draw()
         elif mode == Mode.MEASURE:
             t = 1
-            frame.graph_canvas.clear()
             frame.plotter = plotter.MeasurePlotter(*frame.dimensions)
-            frame.draw()
         elif mode == Mode.SCAN:
-            frame.graph_canvas.clear()
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
-            frame.draw()
         elif mode == Mode.MULTI:
-            frame.graph_canvas.clear()
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
-            frame.draw()
 
 def append_record(b):
     with open(RECORD_FILE, 'ab') as f:
@@ -253,7 +291,7 @@ class AppFrame(tkinter.Frame):
             self.lcd_canvas = lcd.LcdCanvas(self, CANVAS_WIDTH, 75)
             self.lcd_canvas.grid(row=3, column=1, rowspan=2)
 
-        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH-50, CANVAS_HEIGHT-75)
+        self.graph_canvas = PlotCanvas(self, CANVAS_WIDTH, CANVAS_HEIGHT)
         left = tkinter.StringVar()
         bot = tkinter.StringVar()
         left.set('Left!')
@@ -270,12 +308,12 @@ class AppFrame(tkinter.Frame):
         t_bot.grid(row=1, columnspan=2)
         quit.grid(row=2, columnspan=2)
         self.pack() 
+
     def draw(self):
         xs, ys = self.plotter.x, self.plotter.y
         left, bot = self.axes_labels
 
-        self.graph_canvas.clear()
-        self.graph_canvas.plot(xs, ys)
+        self.graph_canvas.re_draw(xs, ys)
 
         left.set(self.plotter.label_y)
         bot.set(self.plotter.label_x)
@@ -299,8 +337,8 @@ if __name__ == '__main__':
             DEBUG = True
 
         tk = tkinter.Tk()
-        tk.minsize(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
-        tk.maxsize(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
+        tk.minsize(width=FRAME_WIDTH, height=FRAME_HEIGHT)
+        tk.maxsize(width=FRAME_WIDTH, height=FRAME_HEIGHT)
         tk.resizable(width=tkinter.FALSE, height=tkinter.FALSE)
 
         app = AppFrame(parent=tk)
