@@ -23,12 +23,6 @@ typedef enum {
 
     MEASURE_DO,
 
-    PLATFORM,
-    PLATFORM_SCAN, /* sweeping and scanning */
-    PLATFORM_WAIT, /* wait for user to turn object */
-
-    PLATFORM_DONE, /* Finished Scan so, idle */
-
     MULTI,
     MULTI_SWEEP,
     MULTI_WAIT,
@@ -37,6 +31,12 @@ typedef enum {
     MULTI_MAX_ANGLE,
     MULTI_DONE,
     MULTI_PARAMETERS,
+
+    PLATFORM,
+    PLATFORM_SCAN, /* sweeping and scanning */
+    PLATFORM_WAIT, /* wait for user to turn object */
+    PLATFORM_DONE, /* Finished Scan so, idle */
+
     /* Special Ignore State */ ANY
 } state_t;
 

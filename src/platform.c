@@ -9,7 +9,6 @@
 
 static uint16_t number_of_sweeps = 50;
 static uint16_t current_sweep;
-static int scan_direction;
 
 void any_to_platform() {
     lcd_send_line(LINE1, "Platform mode");
@@ -31,12 +30,11 @@ void platform_scan_loop() {
     network_send(PLATFORM_SCAN, &current_sweep, 4, &raw, 4, NULL);
 
     stepper_step_clockwise();
-    timer_delay(35);
     current_sweep++;
 
     if (current_sweep == number_of_sweeps) {
         change_state(PLATFORM_DONE);
-        network_send(PLATFROM_DONE, NULL);
+        network_send(PLATFORM_DONE, NULL);
     }
 }
 

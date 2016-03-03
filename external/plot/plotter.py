@@ -143,3 +143,29 @@ class MultiPlotter(Plotter):
             self._number = scan_number
             self._angle = 2*math.pi / float(scan_number)
             print "Parameters: ", self._number, self._angle
+
+class PlatformPlotter(Plotter):
+
+    def __init__(self, *dimensions):
+        Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Shape', *dimensions)
+        self.max_x = 360
+        self.max_y = MAX
+        self.x = []
+        self.y = []
+        self.centre_x = 180
+        self.centre_y = int(150000)
+        self._current = 0
+        self._angle = 2*math.pi / 50.0
+
+    def _append(self, x, y):
+        t = (self._current) * self._angle
+        self.rotate((x, y), t, self.centre_x, self.centre_y)
+        self.x.append(x)
+        self.y.append(y)
+
+    def update(self, *data):
+        msg, value = data
+        if msg == PlatformPlotter.SCAN:
+            x, y = value
+            self._append(x, y)
+            self._current += 1

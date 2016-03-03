@@ -171,7 +171,13 @@ class Mode:
     MULTI_MIN_ANGLE = 18
     MULTI_MAX_ANGLE = 19
     MULTI_DONE = 20
-    ANY = 21
+
+    PLATFORM = 21
+    PLATFROM_SCAN = 22
+    PLATFORM_WAIT = 23
+    PLATFORM_DONE = 24
+
+    ANY = 25
 
 def monitor(frame, r):
     def _update():
@@ -215,6 +221,8 @@ def monitor(frame, r):
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
         elif mode == Mode.MULTI:
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
+        elif mode == Mode.PLATFORM:
+            frame.plotter = plotter.PlatformPlotter(*frame.dimensions)
 
 def append_record(b):
     with open(RECORD_FILE, 'ab') as f:
