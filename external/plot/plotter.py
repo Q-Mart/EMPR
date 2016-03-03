@@ -7,12 +7,22 @@ class Plotter:
     '''Uses Tkinter to plot incoming data
     to a tkinter board thingy
     '''
-    def __init__(self, x_label, y_label, *dimensions):
+
+    NONE = 0b000
+    NOLINE = 0b001
+    POLAR = 0b010
+
+    def __init__(self, flags, x_label, y_label, *dimensions):
         self.max_x = None
         self.max_y = None
+        self.mode = flags
         self.dimensions = dimensions
         self.label_x = x_label
         self.label_y = y_label
+        self.rotations = {}
+
+    def rotate(self, x, theta, centre_x, centre_y):
+        self.rotations[x] = (theta, centre_x, centre_y)
 
     def update(self, *data):
         '''Update the Plotter with some new data
@@ -21,7 +31,7 @@ class Plotter:
 
 class DefaultPlotter(Plotter):
     def __init__(self, *dimensions):
-        Plotter.__init__(self, 'Default', 'Default', *dimensions)
+        Plotter.__init__(self, Plotter.NONE, 'Default', 'Default', *dimensions)
         self.xs = []
         self.ys = []
 
@@ -41,7 +51,7 @@ class DefaultPlotter(Plotter):
 
 class MeasurePlotter(Plotter):
     def __init__(self, w, h):
-        Plotter.__init__(self, 'Time', 'Distance', w, h)
+        Plotter.__init__(self, Plotter.NONE, 'Time', 'Distance', w, h)
         self.max_x = w
         self.max_y = MAX
         self.xs = []
@@ -77,7 +87,7 @@ class MeasurePlotter(Plotter):
 
 class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
-        Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
+        Plotter.__init__(self, Plotter.NONE, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
         self.max_y = MAX
         self.values = {}
@@ -104,37 +114,20 @@ class MultiPlotter(Plotter):
     PARAMS = 3
 
     def __init__(self, *dimensions):
-        Plotter.__init__(self, 'Angle', 'Distance', *dimensions)
+        Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Shape', *dimensions)
         self.max_x = 270
         self.max_y = MAX
-        self.xs = []
-        self.ys = []
-        self.centre_x = 180
-        self.centre_y = int(15e5)
+        self.x = []
+        self.y = []
+        self.centre_x = 160
+        self.centre_y = int(150000)
         self._current = 0
 
-    @property
-    def x(self):
-        return self.xs
-
-    @property
-    def y(self):
-        return self.ys
-
     def _append(self, x, y):
-        t = (self._number - self._current - 1) * self._angle
-        t = 0
-        cos_t = math.cos(t)
-        sin_t = math.sin(t)
-
-        # rotate
-        x, y = x - self.centre_x, y - self.centre_y
-        x, y = x*cos_t - y*sin_t, x*sin_t + y*cos_t
-        x, y = x + self.centre_x, y + self.centre_y
-        print(x, y)
-
-        self.xs.append(x)
-        self.ys.append(y)
+        t = (self._current) * self._angle
+        self.rotate((x, y), t, self.centre_x, self.centre_y)
+        self.x.append(x)
+        self.y.append(y)
 
     def update(self, *data):
         msg, value = data
@@ -142,9 +135,11 @@ class MultiPlotter(Plotter):
             x, y = value
             self._append(x, y)
         elif msg == MultiPlotter.NEXT:
+            print "Next"
             # rotate
-            self._current += 0
+            self._current += 1
         elif msg == MultiPlotter.PARAMS:
             scan_number, _, _ = value
             self._number = scan_number
-            self._angle = math.pi / float(scan_number)
+            self._angle = 2*math.pi / float(scan_number)
+            print "Parameters: ", self._number, self._angle
