@@ -104,6 +104,8 @@ void measure_loop(int last_key_press) {
         //debug_sendf("%u\n\r", diff);
         if(diff < 100000){
             uint32_t count_val = (diff/100000.0f) * sound_get_tone0_window_size();
+            if(diff < 5000)//If 0.5 cm out then play constantly
+                count_val = sound_get_tone0_window_size();
             sound_change_tone0_window_size(count_val);
             debug_sendf("%u\n\r", count_val);
         }

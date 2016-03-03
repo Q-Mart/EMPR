@@ -45,6 +45,8 @@ void sound_tick(void){
         int val = (sin((((double)sound_count)/((double)sound_max))*PI*2) * sound_max_amplitude) + sound_amplitude_offset;
         dac_update(val);
         sound_count = (sound_count + sound_count_rate) % sound_max;
+
+        //Flash the lights at the same rate as the beeping.
         if(sound_count >= (sound_max - sound_count_rate)){
             set_gpio(LED1 | LED2 | LED3 | LED4, 1);
         }else{
