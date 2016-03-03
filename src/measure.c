@@ -25,6 +25,7 @@ void any_to_measure() {
 
 void any_to_measure_parameters(){
     lcd_send_line(LINE1, "Measure Parameters");
+    lcd_send_line(LINE2, "Use 1, 2");
 }
 void measure_parameters_to_1(){
     lcd_send_line(LINE1, "Point %d", measure_point);
