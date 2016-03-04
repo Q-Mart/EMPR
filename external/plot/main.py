@@ -37,6 +37,7 @@ import threading
 import math
 import functools
 import plotter
+import struct
 
 try:
     import tkinter
@@ -141,11 +142,16 @@ class PlotCanvas(tkinter.Canvas):
             x0, y0 = x, y
 
     def draw_border(self, w, h):
-        self.line(1, h-1, w, h-1, fill='black', width=3)
-        self.line(0, 0, 0, h, fill='black', width=3)
-
         if self.parent.plotter.mode & plotter.Plotter.POLAR != 0:
-            pass
+            # centre at w/2, h
+            for i in range(1, 10):
+                # try find x in [0, w] along top of canvas
+                # where i`th quadrant line intersects at x
+                x, y = int(500*math.cos(math.pi / i)), 0
+                self.line(w // 2, h, w, h-1, fill='black', width=3)
+        else:
+            self.line(1, h-1, w, h-1, fill='black', width=3)
+            self.line(0, 0, 0, h, fill='black', width=3)
 
     def re_draw(self, xs, ys):
         self.old_lines = self.lines
@@ -254,7 +260,7 @@ def read_record(r):
             append_record(bytearray(map(lambda x: 0 if x < 0 else x, vals)))
         elif header == 0x04:
             val = r.read(4)  
-            print('ir:', val)
+            print('ir:', val, struct.unpack('<I',val)[0])
             append_record(bytearray([header]))
             append_record(bytearray(val))
         elif header == 0x06:

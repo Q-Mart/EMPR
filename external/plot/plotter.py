@@ -140,7 +140,8 @@ class MultiPlotter(Plotter):
             # rotate
             self._current += 1
         elif msg == MultiPlotter.PARAMS:
-            scan_number, _, _ = value
+            scan_number, amin, amax = value
             self._number = scan_number
             self._angle = 2*math.pi / float(scan_number)
+            self._limits = (amin, amax)
             print "Parameters: ", self._number, self._angle

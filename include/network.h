@@ -3,6 +3,7 @@
  */
 
 #include "state.h"
+#define RECORD
 
 /* Header for recording */
 #define ADC_HEADER 0x01
