@@ -21,6 +21,8 @@ FRAME_HEIGHT = 3*200
 CANVAS_WIDTH  = 4*150
 CANVAS_HEIGHT = 3*150
 
+COL = 'blue'
+
 import reader
 
 try:
@@ -79,6 +81,12 @@ class PlotCanvas(tkinter.Canvas):
 
         if len(xs) != 0:
             self.draw_graph(w, h, xs, ys)
+        else:
+            for i in range(10):
+                plot = self.parent.plotter
+                if plot.mode & plotter.Plotter.NOLABELS == 0:
+                    self.x_labels[i].set(' ')
+                    self.y_labels[9-i].set(' ')
 
     def line(self, *args, **kwargs):
         self.lines.append(self.graph.create_line(*args, **kwargs))
@@ -92,11 +100,15 @@ class PlotCanvas(tkinter.Canvas):
         tx = float(w) / float(max_x)
         ty = float(h) / float(max_y)
 
-        s = 3
+        s = 2
 
         for i in range(10):
-            self.x_labels[i].set(str((i+1)*max_x // 10))
-            self.y_labels[9-i].set(str((i+1)*max_y // 10))
+            if plot.mode & plotter.Plotter.NOLABELS != 0:
+                self.x_labels[i].set(' ')
+                self.y_labels[9-i].set(' ')
+            else:
+                self.x_labels[i].set(str((i+1)*max_x // 10))
+                self.y_labels[9-i].set(str((i+1)*max_y // 10))
 
         x0, y0 = 0, h
         for xp, yp in zip(xs, ys):
@@ -112,17 +124,28 @@ class PlotCanvas(tkinter.Canvas):
                 x, y = (x*cos_t) - (y*sin_t), (x*sin_t) + (y*cos_t)
                 x, y = x + cx, y + cy
 
+            if plot.mode & plotter.Plotter.POLAR != 0:
+                # x is angle between 90-270
+                # so flatten it to between 0-180(?)
+                # y is euclidian distance
+                cos_x = math.cos(x)
+                sin_x = math.sin(x)
+                x, y = y*cos_x, y*sin_x
+                x, y = x + (max_x / 2.0), y
+
             if plot.mode & plotter.Plotter.NOLINE == 0:
                 self.line(x0, y0, x, y)
 
-            self.line(x-s, y-s, x+s, y+s, fill='red')
-            self.line(x+s, y-s, x-s, y+s, fill='red')
+            self.line(x-s, y-s, x+s, y+s, fill=COL)
+            self.line(x+s, y-s, x-s, y+s, fill=COL)
             x0, y0 = x, y
 
     def draw_border(self, w, h):
         self.line(1, h-1, w, h-1, fill='black', width=3)
         self.line(0, 0, 0, h, fill='black', width=3)
 
+        if self.parent.plotter.mode & plotter.Plotter.POLAR != 0:
+            pass
 
     def re_draw(self, xs, ys):
         self.old_lines = self.lines

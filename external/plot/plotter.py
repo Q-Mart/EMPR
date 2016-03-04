@@ -11,6 +11,7 @@ class Plotter:
     NONE = 0b000
     NOLINE = 0b001
     POLAR = 0b010
+    NOLABELS = 0b100
 
     def __init__(self, flags, x_label, y_label, *dimensions):
         self.max_x = None
@@ -87,7 +88,7 @@ class MeasurePlotter(Plotter):
 
 class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
-        Plotter.__init__(self, Plotter.NONE, 'Angle', 'Distance', *dimensions)
+        Plotter.__init__(self, Plotter.NONE | Plotter.POLAR, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
         self.max_y = MAX
         self.values = {}
@@ -114,7 +115,7 @@ class MultiPlotter(Plotter):
     PARAMS = 3
 
     def __init__(self, *dimensions):
-        Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Shape', *dimensions)
+        Plotter.__init__(self, Plotter.NOLINE | Plotter.NOLABELS, 'Angle', 'Shape', *dimensions)
         self.max_x = 270
         self.max_y = MAX
         self.x = []

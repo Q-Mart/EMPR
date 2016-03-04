@@ -10,8 +10,7 @@ cp $1 records/record
 make clean
 make debug
 
-./external/build.sh
-(./external/plot/main.py --debug)&
+(./external/run_main.sh)&
 pid=$!
 sleep 1
 ./bin/main&

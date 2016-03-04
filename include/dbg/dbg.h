@@ -1,6 +1,6 @@
 #include "queue.h"
 
-#define REPLAY_SAMPLES 3000
+#define REPLAY_SAMPLES 10000
 #define RECORD_FILE "records/record"
 
 extern QUEUE* IR_QUEUE;
