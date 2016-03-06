@@ -8,10 +8,12 @@ class Plotter:
     to a tkinter board thingy
     '''
 
-    NONE = 0b000
-    NOLINE = 0b001
-    POLAR = 0b010
-    NOLABELS = 0b100
+    NONE = 0b0000
+    NOLINE = 0b0001
+    POLAR = 0b0010
+    NOXLABELS = 0b0100
+    NOYLABELS = 0b1000
+    NOLABELS = 0b1100
 
     def __init__(self, flags, x_label, y_label, *dimensions):
         self.max_x = None
@@ -88,7 +90,7 @@ class MeasurePlotter(Plotter):
 
 class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
-        Plotter.__init__(self, Plotter.NONE | Plotter.POLAR, 'Angle', 'Distance', *dimensions)
+        Plotter.__init__(self, Plotter.NOLABELS | Plotter.POLAR, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
         self.max_y = MAX
         self.values = {}

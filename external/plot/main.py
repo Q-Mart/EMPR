@@ -85,8 +85,10 @@ class PlotCanvas(tkinter.Canvas):
         else:
             for i in range(10):
                 plot = self.parent.plotter
-                if plot.mode & plotter.Plotter.NOLABELS == 0:
+                if plot.mode & plotter.Plotter.NOXLABELS == 0:
                     self.x_labels[i].set(' ')
+
+                if plot.mode & plotter.Plotter.NOYLABELS == 0:
                     self.y_labels[9-i].set(' ')
 
     def line(self, *args, **kwargs):
@@ -104,17 +106,28 @@ class PlotCanvas(tkinter.Canvas):
         s = 2
 
         for i in range(10):
-            if plot.mode & plotter.Plotter.NOLABELS != 0:
+            if plot.mode & plotter.Plotter.NOXLABELS == 0:
                 self.x_labels[i].set(' ')
-                self.y_labels[9-i].set(' ')
             else:
                 self.x_labels[i].set(str((i+1)*max_x // 10))
+
+            if plot.mode & plotter.Plotter.NOYLABELS == 0:
+                self.y_labels[9-i].set(' ')
+            else:
                 self.y_labels[9-i].set(str((i+1)*max_y // 10))
 
         x0, y0 = 0, h
         for xp, yp in zip(xs, ys):
             x, y = int(tx * xp), h - int(ty * yp)
             
+            if plot.mode & plotter.Plotter.POLAR != 0:
+                # x is angle between 90-270
+                # so flatten it to between 0-180(?)
+                # y is euclidian distance
+                t = math.pi / 180.0 * (w - x)
+                x = y*math.cos(t) + w / 2.0
+                y = h - y*math.sin(t)
+
             # perform rotation
             if (xp, yp) in plot.rotations:
                 t, cx, cy = plot.rotations[(xp, yp)]
@@ -125,15 +138,6 @@ class PlotCanvas(tkinter.Canvas):
                 x, y = (x*cos_t) - (y*sin_t), (x*sin_t) + (y*cos_t)
                 x, y = x + cx, y + cy
 
-            if plot.mode & plotter.Plotter.POLAR != 0:
-                # x is angle between 90-270
-                # so flatten it to between 0-180(?)
-                # y is euclidian distance
-                cos_x = math.cos(x)
-                sin_x = math.sin(x)
-                x, y = y*cos_x, y*sin_x
-                x, y = x + (max_x / 2.0), y
-
             if plot.mode & plotter.Plotter.NOLINE == 0:
                 self.line(x0, y0, x, y)
 
@@ -141,14 +145,19 @@ class PlotCanvas(tkinter.Canvas):
             self.line(x+s, y-s, x-s, y+s, fill=COL)
             x0, y0 = x, y
 
+
     def draw_border(self, w, h):
         if self.parent.plotter.mode & plotter.Plotter.POLAR != 0:
             # centre at w/2, h
+            x0, y0 = None, None
             for i in range(1, 10):
-                # try find x in [0, w] along top of canvas
-                # where i`th quadrant line intersects at x
-                x, y = int(500*math.cos(math.pi / i)), 0
-                self.line(w // 2, h, w, h-1, fill='black', width=3)
+                t = i*(math.pi / 10.0)
+                x = h*math.cos(t) + w / 2.0
+                y = h - h*math.sin(t)
+                self.line(w // 2, h, x, y, fill='grey', width=1)
+                if x0:
+                    self.line(x0, y0, x, y, fill='grey', width=1)
+                x0, y0 = x, y
         else:
             self.line(1, h-1, w, h-1, fill='black', width=3)
             self.line(0, 0, 0, h, fill='black', width=3)
@@ -217,32 +226,40 @@ def monitor(frame, r):
         mode = r.read_byte()
 
         if mode == Mode.SCAN_DO:
+            print('SCAN_DO')
             angle = r.read_int()
             value = r.read_int()
     
             frame.plotter.update(angle, value)
         elif mode == Mode.MEASURE_DO:
+            print('MEASURE_DO')
             value = r.read_int()
             t += 1
             frame.plotter.update(t, value)
         elif mode == Mode.MULTI_SWEEP:
+            print('MULTI_SWEEP')
             angle = r.read_int()
             value = r.read_int()
 
             frame.plotter.update(plotter.MultiPlotter.SWEEP, (angle, value))
         elif mode == Mode.MULTI_WAIT:
+            print('MULTI_WAIT MODE')
             frame.plotter.update(plotter.MultiPlotter.NEXT, None)
         elif mode == Mode.MULTI_PARAMETERS:
+            print('MULTI_PARAMETERS MODE')
             scan_number = r.read_int()
             min_angle = r.read_int()
             max_angle = r.read_int()
             frame.plotter.update(plotter.MultiPlotter.PARAMS, (scan_number, min_angle, max_angle))
         elif mode == Mode.MEASURE:
+            print('MEASURE MODE')
             t = 1
             frame.plotter = plotter.MeasurePlotter(*frame.dimensions)
         elif mode == Mode.SCAN:
+            print('SCAN MODE')
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
         elif mode == Mode.MULTI:
+            print('MULTI MODE')
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
 
 def append_record(b):
