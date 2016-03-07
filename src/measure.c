@@ -6,6 +6,7 @@
 #include "state.h"
 #include "network.h"
 #include "ultrasound.h"
+#include "utils.h"
 //These keep track of what data the measure mode will
 //display on the IO board lcd.
 #define NO_OF_STATES 2
@@ -16,12 +17,14 @@ static uint32_t measure_count = 0;
 
 
 void any_to_measure() {
+    servo_set_pos(160);
     lcd_send_line(LINE1, "Measure Mode");
     lcd_send_line(LINE2, "# to start");
     network_send(MEASURE, NULL);
 }
 
 void measure_to_measure_do() {
+    servo_set_pos(160);
     lcd_send_line(LINE1, "Distance");
     measure_count = 0;
     measure_total_distance = 0;
@@ -39,7 +42,7 @@ void measure_loop(int last_key_press) {
     if(last_key_press == 1)
         measure_state = (measure_state - 1 + NO_OF_STATES) % NO_OF_STATES;
 
-    uint32_t dist = utils_get_ir_and_ultrasound_distance();
+    uint32_t dist = utils_get_ir_and_ultrasound_median_distance();
     network_send(MEASURE_DO, (uint8_t *)&dist, 4, NULL);
 
     //Calculate the running mean. If the mean is 0 then we set the
