@@ -185,9 +185,7 @@ class PlatformPlotter(Plotter):
 
     def _append(self, x, y):
         t = (self._current) * self._angle
-        self.rotate((180, y), t, self.centre_x, self.centre_y)
-        self.x.append(180)
-        self.y.append(y)
+        self.plot(180, y, rot_theta=t, rot_x=self.centre_x, rot_y=self.centre_y)
 
     def update(self, *data):
         msg, value = data

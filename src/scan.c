@@ -93,10 +93,10 @@ void scan_loop(int last_key_press){
         scan_state = (scan_state + 1) % NO_OF_STATES;
     if(last_key_press == 1)
         scan_state = (scan_state - 1 + NO_OF_STATES) % NO_OF_STATES;
-    //int pos = servo_get_pos();
+    int pos = servo_get_pos();
     if(scan_servo_pos <= scan_lower_bound) scan_direction = 1;
     if(scan_servo_pos >= scan_upper_bound) scan_direction = -1;
-    scan_servo_pos = pos + (scan_direction * scan_speed);
+    scan_servo_pos = scan_servo_pos + (scan_direction * scan_speed);
     servo_set_pos(scan_servo_pos);
     timer_delayc(1, &input_poll);//Time for it to physically move
     uint32_t raw = utils_get_ir_and_ultrasound_median_distance();
