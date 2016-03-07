@@ -64,7 +64,7 @@ int main(void)
         switch (current_state) {
             case CALIBRATE:
                 break;
-            /*
+            /* //Overwritten with Track mode.
             case SCAN_DO:
                 scan_loop(last_key_press);
                 break;
@@ -103,7 +103,6 @@ int main(void)
                 multi_done_loop();
                 break;
             default:
-                //have a break, have a kit kat
                 break;
         }
     }
@@ -143,7 +142,7 @@ const transition_t lut[] = {
     {CALIBRATE_DONE, '#', CALIBRATE, NULL},
     {CALIBRATE, '#', CALIBRATE_NEAR_DONE, &calib_to_near_calib},
     {CALIBRATE_NEAR_DONE, '#', CALIBRATE_DONE, &near_calib_to_done},
-/*
+/*  //Overwritten with Track mode.
     {SCAN, '#', SCAN_DO, &scan_to_scan_do},
     {SCAN_DO, '*', SCAN, &any_to_scan},
     {SCAN, '*', SCAN_PARAMETERS, &any_to_scan_parameters},
@@ -169,7 +168,8 @@ const transition_t lut[] = {
     {MULTI_DONE, '#', CALIBRATE, NULL},
 
     {ANY, 'A', CALIBRATE, &any_to_calib},
-    /*{ANY, 'B', SCAN, &any_to_scan},*/
+    /* //Overwritten with Track mode.
+    {ANY, 'B', SCAN, &any_to_scan},*/
     {ANY, 'B', TRACK, &any_to_track},
     {ANY, 'C', MEASURE, &any_to_measure},
     {ANY, 'D', MULTI, &any_to_multi},

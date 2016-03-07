@@ -3,7 +3,7 @@
 
 typedef enum {
     CALIBRATE,
-    //SCAN,
+    //SCAN, //Overwritten with Track mode.
     MEASURE,
     MULTI,
     TRACK,
@@ -16,6 +16,7 @@ typedef enum {
      *  sent when going between SCAN and selecting
      *  which paramater to be chosen
      */
+    //Overwritten with Track mode.
     //SCAN_PARAMETERS,
     //SCAN_PARAMETER_1, /* sweep 'speed' */
     //SCAN_PARAMETER_2, /* start position */
