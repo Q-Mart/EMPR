@@ -14,7 +14,7 @@ class Plotter:
     '''
 
     NONE = 0b0000
-    NOLINE = 0b0001
+    NOLINE = 0b0001 
     POLAR = 0b0010
     NOXLABELS = 0b0100
     NOYLABELS = 0b1000
@@ -119,6 +119,7 @@ class ScanPlotter2(Plotter):
     def update(self, *data):
         x, y = data
         
+        print(x, y, len(self.values[x]), len(COLORS))
         if len(self.values[x]) >= len(COLORS):
             p = self.values[x][0]
             self.values[x] = self.values[x][1:]

@@ -10,9 +10,9 @@ cp $1 records/record
 make clean
 make debug
 
-(./external/run_main.sh -d)&
+(./external/run_main.sh -bd)&
 pid=$!
-sleep 1
+sleep 2
 ./bin/main&
 main_pid=$!
 wait $pid

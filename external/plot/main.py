@@ -62,8 +62,8 @@ class PlotCanvas(tkinter.Canvas):
         for i in range(10):
             var = tkinter.StringVar()
             vary = tkinter.StringVar()
-            var.set('!')
-            vary.set('&')
+            var.set(' ')
+            vary.set(' ')
             self.x_labels.append(var)
             self.y_labels.append(vary)
             tkinter.Label(self, textvariable=var).grid(row=10, column=i+1)
@@ -82,10 +82,10 @@ class PlotCanvas(tkinter.Canvas):
         else:
             for i in range(10):
                 plot = self.parent.plotter
-                if plot.mode & plotter.Plotter.NOXLABELS == 0:
+                if plot.mode & plotter.Plotter.NOXLABELS != 0:
                     self.x_labels[i].set(' ')
 
-                if plot.mode & plotter.Plotter.NOYLABELS == 0:
+                if plot.mode & plotter.Plotter.NOYLABELS != 0:
                     self.y_labels[9-i].set(' ')
 
     def line(self, *args, **kwargs):
@@ -103,12 +103,12 @@ class PlotCanvas(tkinter.Canvas):
         s = 2
 
         for i in range(10):
-            if plot.mode & plotter.Plotter.NOXLABELS == 0:
+            if plot.mode & plotter.Plotter.NOXLABELS != 0:
                 self.x_labels[i].set(' ')
             else:
                 self.x_labels[i].set(str((i+1)*max_x // 10))
 
-            if plot.mode & plotter.Plotter.NOYLABELS == 0:
+            if plot.mode & plotter.Plotter.NOYLABELS != 0:
                 self.y_labels[9-i].set(' ')
             else:
                 self.y_labels[9-i].set(str((i+1)*max_y // 10))
@@ -119,12 +119,11 @@ class PlotCanvas(tkinter.Canvas):
             
             # need to rotate around (w / 2, h)
             if plot.mode & plotter.Plotter.POLAR != 0:
-                # x is angle between 90-270
-                # so flatten it to between 0-180(?)
                 # y is euclidian distance
                 t = math.pi / 180.0 * (w - x)
+                y = y / 2.0
                 x = y*math.cos(t) + w / 2.0
-                y = h - y*math.sin(t)
+                y = (h / 2) - y*math.sin(t)
 
             # perform rotation
             if p.rot_theta:
@@ -149,16 +148,20 @@ class PlotCanvas(tkinter.Canvas):
             # centre at w/2, h
             x0, y0 = None, None
             for i in range(1, 10):
-                t = i*(math.pi / 10.0)
+                t = i*(2*math.pi / 10.0)
                 x = h*math.cos(t) + w / 2.0
-                y = h - h*math.sin(t)
-                self.line(w // 2, h, x, y, fill='grey', width=1)
+                y = (h / 2.0) - (h / 2.0) * math.sin(t)
+                self.line(w / 2, h / 2, x, y, fill='grey', width=1)
                 if x0:
                     self.line(x0, y0, x, y, fill='grey', width=1)
                 x0, y0 = x, y
+
+            self.line(1, h-1, w, h-1, fill='grey', width=2)
+            self.line(w/2, 0, w/2, h, fill='grey', width=2)
+            self.line(0, 0, 0, h, fill='grey', width=2)
         else:
-            self.line(1, h-1, w, h-1, fill='black', width=3)
-            self.line(0, 0, 0, h, fill='black', width=3)
+            self.line(1, h-1, w, h-1, fill='grey', width=2)
+            self.line(0, 0, 0, h, fill='grey', width=2)
 
     def re_draw(self, points):
         self.old_lines = self.lines
