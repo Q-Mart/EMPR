@@ -17,12 +17,14 @@ static uint32_t measure_count = 0;
 
 
 void any_to_measure() {
+    servo_set_pos(160);
     lcd_send_line(LINE1, "Measure Mode");
     lcd_send_line(LINE2, "# to start");
     network_send(MEASURE, NULL);
 }
 
 void measure_to_measure_do() {
+    servo_set_pos(160);
     lcd_send_line(LINE1, "Distance");
     measure_count = 0;
     measure_total_distance = 0;
