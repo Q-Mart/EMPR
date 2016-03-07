@@ -2,14 +2,14 @@
 '''Main program
 
 Usage:
-    main
-    main -d | --debug
-    main -r | --record
-    main -h | --help
+    main.py [-hbd]
+    main.py --record
 
 Options:
-    -d --debug  Debug Mode
-    -h --help   Show this text
+    -d --debug      Debug Mode
+    -h --help       Show this text
+    -r --record     Record into records
+    -b              with Ben's Personal Project
 '''
 
 BASE_DIR = '../../'
@@ -117,6 +117,7 @@ class PlotCanvas(tkinter.Canvas):
         for p in points:
             x, y = int(tx * p.x), h - int(ty * p.y)
             
+            # need to rotate around (w / 2, h)
             if plot.mode & plotter.Plotter.POLAR != 0:
                 # x is angle between 90-270
                 # so flatten it to between 0-180(?)
@@ -247,7 +248,10 @@ def monitor(frame, r):
             t = 1
             frame.plotter = plotter.MeasurePlotter(*frame.dimensions)
         elif mode == Mode.SCAN:
-            frame.plotter = plotter.ScanPlotter(*frame.dimensions)
+            if BPP:
+                frame.plotter = plotter.ScanPlotter2(*frame.dimensions)
+            else:
+                frame.plotter = plotter.ScanPlotter(*frame.dimensions)
         elif mode == Mode.MULTI:
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
 
@@ -364,8 +368,12 @@ class AppFrame(tkinter.Frame):
             self.lcd_canvas.draw()
 
 if __name__ == '__main__':
-    global DEBUG
+    global DEBUG, BPP
     args = docopt(__doc__)
+
+    BPP = False
+    if args['-b']:
+        BPP = True
 
     if args['--record']:
         with open(RECORD_FILE, 'wb') as f:

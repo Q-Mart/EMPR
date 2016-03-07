@@ -81,6 +81,36 @@ class MeasurePlotter(Plotter):
 
 class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
+        Plotter.__init__(self, Plotter.NONE, 'Angle', 'Distance', *dimensions)
+        self.max_x = 270
+        self.max_y = MAX
+        self.values = {}
+        self.xs = []
+        self.ys = []
+
+    @property
+    def x(self):
+        vals = self.values.items()
+        in_order = sorted(vals, key=lambda x: x[0])
+        return list(map(lambda x: x[0], in_order))
+
+    @property
+    def y(self):
+        vals = self.values.items()
+        in_order = sorted(vals, key=lambda x: x[0])
+        return list(map(lambda x: x[1], in_order))
+
+    def update(self, *data):
+        x, y = data
+        self.values[x] = y
+
+class ScanPlotter2(Plotter):
+    '''Written as a part of Ben's Personal Project
+    Now fades away older plots
+
+    also see main.py POLAR plot
+    '''
+    def __init__(self, *dimensions):
         Plotter.__init__(self, Plotter.NOLABELS | Plotter.POLAR, 'Angle', 'Distance', *dimensions)
         self.max_x = 270
         self.max_y = MAX

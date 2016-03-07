@@ -10,7 +10,7 @@ cp $1 records/record
 make clean
 make debug
 
-(./external/run_main.sh)&
+(./external/run_main.sh -d)&
 pid=$!
 sleep 1
 ./bin/main&
