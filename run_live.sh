@@ -3,4 +3,4 @@ make clean
 make
 
 make install
-./external/run_main.sh -b
+./external/run_main.sh $1
