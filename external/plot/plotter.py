@@ -1,5 +1,6 @@
 import collections
 import math
+from time import sleep
 
 MAX = int(6e5)
 
@@ -167,7 +168,8 @@ class PlatformPlotter(Plotter):
     def update(self, *data):
         msg, value = data
         if msg == PlatformPlotter.SCAN:
-            x, y = value
+            self._current, y = value
+            x=180
             print('Scanning. angle='+str(x)+' distance='+str(y))
             self._append(x, y)
-            self._current += 1
+            sleep(0.5)
