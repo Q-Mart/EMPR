@@ -6,7 +6,7 @@ MAX = int(6e5)
 Point = collections.namedtuple('Point', ['x', 'y', 'col', 'rot_x', 'rot_y', 'rot_theta'])
 
 DEFAULT_COLOR = 'blue'
-COLORS = ['blue', 'gray62', 'gray87'] # show 3 sweeps (current and 2 history)
+COLORS = ['blue', 'gray51', 'gray72'] # show 3 sweeps (current and 2 history)
 
 class Plotter:
     '''Uses Tkinter to plot incoming data
@@ -64,7 +64,6 @@ class MeasurePlotter(Plotter):
         self.n = 30
 
     def update(self, *data):
-        print('MeasurePlotter, update(x={}, y={})'.format(*data))
         _, y = data
         x = self.max_x - 1
 
@@ -119,11 +118,10 @@ class ScanPlotter2(Plotter):
     def update(self, *data):
         x, y = data
         
-        print(x, y, len(self.values[x]), len(COLORS))
         if len(self.values[x]) >= len(COLORS):
             p = self.values[x][0]
             self.values[x] = self.values[x][1:]
-            self.points = self.points[1:]
+            self.points.remove(p)
 
         for i, p in enumerate(self.values[x]):
             j = COLORS.index(p.col)

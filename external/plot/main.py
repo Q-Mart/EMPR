@@ -94,8 +94,8 @@ class PlotCanvas(tkinter.Canvas):
     def draw_graph(self, w, h, points):
         plot = self.parent.plotter
 
-        max_x = plot.max_x or max(xs)
-        max_y = plot.max_y or max(ys)
+        max_x = plot.max_x or max(map(lambda p: p.x, points))
+        max_y = plot.max_y or max(map(lambda p: p.y, points))
 
         tx = float(w) / float(max_x)
         ty = float(h) / float(max_y)
@@ -113,17 +113,17 @@ class PlotCanvas(tkinter.Canvas):
             else:
                 self.y_labels[9-i].set(str((i+1)*max_y // 10))
 
-        x0, y0 = 0, h
+        x0, y0 = None, None
         for p in points:
             x, y = int(tx * p.x), h - int(ty * p.y)
             
-            # need to rotate around (w / 2, h)
+            # need to wrap around (w / 2, h / 2)
             if plot.mode & plotter.Plotter.POLAR != 0:
                 # y is euclidian distance
-                t = math.pi / 180.0 * (w - x)
+                t = (math.pi / 180.0) * (270 - p.x)
                 y = y / 2.0
                 x = y*math.cos(t) + w / 2.0
-                y = (h / 2) - y*math.sin(t)
+                y = (h / 2.0) - y*math.sin(t)
 
             # perform rotation
             if p.rot_theta:
@@ -135,7 +135,7 @@ class PlotCanvas(tkinter.Canvas):
                 x, y = (x*cos_t) - (y*sin_t), (x*sin_t) + (y*cos_t)
                 x, y = x + cx, y + cy
 
-            if plot.mode & plotter.Plotter.NOLINE == 0:
+            if plot.mode & plotter.Plotter.NOLINE == 0 and x0:
                 self.line(x0, y0, x, y, fill=p.col)
 
             self.line(x-s, y-s, x+s, y+s, fill=p.col)
