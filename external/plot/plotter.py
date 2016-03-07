@@ -118,6 +118,7 @@ class ScanPlotter2(Plotter):
     def update(self, *data):
         x, y = data
         
+        print(x, y, self.values[x])
         if len(self.values[x]) >= len(COLORS):
             p = self.values[x][0]
             self.values[x] = self.values[x][1:]
