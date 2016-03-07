@@ -1,6 +1,7 @@
 #include "empr.h"
 #include "dbg.h"
 
+#include <stdio.h>
 #include "keypad.h"
 
 
