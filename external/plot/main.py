@@ -69,19 +69,16 @@ class PlotCanvas(tkinter.Canvas):
             tkinter.Label(self, textvariable=var).grid(row=10, column=i+1)
             tkinter.Label(self, textvariable=vary).grid(row=i, column=0)
 
-    def plot(self, xs, ys):
+    def plot(self, points):
         '''Plot some graph
         '''
-        if len(xs) != len(ys):
-            raise ValueError('Mismatch of argc')
-
         w = self.graph.winfo_width()
         h = self.graph.winfo_height()
 
         self.draw_border(w, h)
 
-        if len(xs) != 0:
-            self.draw_graph(w, h, xs, ys)
+        if len(points) != 0:
+            self.draw_graph(w, h, points)
         else:
             for i in range(10):
                 plot = self.parent.plotter
@@ -94,7 +91,7 @@ class PlotCanvas(tkinter.Canvas):
     def line(self, *args, **kwargs):
         self.lines.append(self.graph.create_line(*args, **kwargs))
 
-    def draw_graph(self, w, h, xs, ys):
+    def draw_graph(self, w, h, points):
         plot = self.parent.plotter
 
         max_x = plot.max_x or max(xs)
@@ -117,8 +114,8 @@ class PlotCanvas(tkinter.Canvas):
                 self.y_labels[9-i].set(str((i+1)*max_y // 10))
 
         x0, y0 = 0, h
-        for xp, yp in zip(xs, ys):
-            x, y = int(tx * xp), h - int(ty * yp)
+        for p in points:
+            x, y = int(tx * p.x), h - int(ty * p.y)
             
             if plot.mode & plotter.Plotter.POLAR != 0:
                 # x is angle between 90-270
@@ -129,8 +126,8 @@ class PlotCanvas(tkinter.Canvas):
                 y = h - y*math.sin(t)
 
             # perform rotation
-            if (xp, yp) in plot.rotations:
-                t, cx, cy = plot.rotations[(xp, yp)]
+            if p.rot_theta:
+                t, cx, cy = p.rot_theta, p.rot_x, p.rot_y
                 cx, cy = int(tx * cx), h - int(ty * cy)
                 cos_t = math.cos(t)
                 sin_t = math.sin(t)
@@ -139,10 +136,10 @@ class PlotCanvas(tkinter.Canvas):
                 x, y = x + cx, y + cy
 
             if plot.mode & plotter.Plotter.NOLINE == 0:
-                self.line(x0, y0, x, y)
+                self.line(x0, y0, x, y, fill=p.col)
 
-            self.line(x-s, y-s, x+s, y+s, fill=COL)
-            self.line(x+s, y-s, x-s, y+s, fill=COL)
+            self.line(x-s, y-s, x+s, y+s, fill=p.col)
+            self.line(x+s, y-s, x-s, y+s, fill=p.col)
             x0, y0 = x, y
 
 
@@ -162,10 +159,10 @@ class PlotCanvas(tkinter.Canvas):
             self.line(1, h-1, w, h-1, fill='black', width=3)
             self.line(0, 0, 0, h, fill='black', width=3)
 
-    def re_draw(self, xs, ys):
+    def re_draw(self, points):
         self.old_lines = self.lines
         self.lines = []
-        self.plot(xs, ys)
+        self.plot(points)
         self.graph.delete(*self.old_lines)
 
     def on_resize(self, event):
@@ -226,40 +223,32 @@ def monitor(frame, r):
         mode = r.read_byte()
 
         if mode == Mode.SCAN_DO:
-            print('SCAN_DO')
             angle = r.read_int()
             value = r.read_int()
     
             frame.plotter.update(angle, value)
         elif mode == Mode.MEASURE_DO:
-            print('MEASURE_DO')
             value = r.read_int()
             t += 1
             frame.plotter.update(t, value)
         elif mode == Mode.MULTI_SWEEP:
-            print('MULTI_SWEEP')
             angle = r.read_int()
             value = r.read_int()
 
             frame.plotter.update(plotter.MultiPlotter.SWEEP, (angle, value))
         elif mode == Mode.MULTI_WAIT:
-            print('MULTI_WAIT MODE')
             frame.plotter.update(plotter.MultiPlotter.NEXT, None)
         elif mode == Mode.MULTI_PARAMETERS:
-            print('MULTI_PARAMETERS MODE')
             scan_number = r.read_int()
             min_angle = r.read_int()
             max_angle = r.read_int()
             frame.plotter.update(plotter.MultiPlotter.PARAMS, (scan_number, min_angle, max_angle))
         elif mode == Mode.MEASURE:
-            print('MEASURE MODE')
             t = 1
             frame.plotter = plotter.MeasurePlotter(*frame.dimensions)
         elif mode == Mode.SCAN:
-            print('SCAN MODE')
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
         elif mode == Mode.MULTI:
-            print('MULTI MODE')
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
 
 def append_record(b):
@@ -356,10 +345,17 @@ class AppFrame(tkinter.Frame):
         self.pack() 
 
     def draw(self):
-        xs, ys = self.plotter.x, self.plotter.y
+        plot = self.plotter
         left, bot = self.axes_labels
 
-        self.graph_canvas.re_draw(xs, ys)
+        points = plot.points
+
+        # for backwards-compatability
+        if len(plot.points) == 0:
+            xs, ys = self.plotter.x, self.plotter.y
+            points = map(lambda x, y: plotter.Point(x, y, COL, 0, 0, 0), xs, ys)
+
+        self.graph_canvas.re_draw(points)
 
         left.set(self.plotter.label_y)
         bot.set(self.plotter.label_x)
