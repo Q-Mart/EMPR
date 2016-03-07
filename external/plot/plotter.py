@@ -145,6 +145,7 @@ class MultiPlotter(Plotter):
             print "Parameters: ", self._number, self._angle
 
 class PlatformPlotter(Plotter):
+    SCAN = 1
 
     def __init__(self, *dimensions):
         Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Shape', *dimensions)
@@ -155,7 +156,7 @@ class PlatformPlotter(Plotter):
         self.centre_x = 180
         self.centre_y = int(150000)
         self._current = 0
-        self._angle = 2*math.pi / 50.0
+        self._angle = 7.2
 
     def _append(self, x, y):
         t = (self._current) * self._angle
@@ -167,5 +168,6 @@ class PlatformPlotter(Plotter):
         msg, value = data
         if msg == PlatformPlotter.SCAN:
             x, y = value
+            print('Scanning. angle='+str(x)+' distance='+str(y))
             self._append(x, y)
             self._current += 1

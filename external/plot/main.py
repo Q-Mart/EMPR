@@ -173,7 +173,7 @@ class Mode:
     MULTI_DONE = 20
 
     PLATFORM = 21
-    PLATFROM_SCAN = 22
+    PLATFORM_SCAN = 22
     PLATFORM_WAIT = 23
     PLATFORM_DONE = 24
 
@@ -221,6 +221,11 @@ def monitor(frame, r):
             frame.plotter = plotter.ScanPlotter(*frame.dimensions)
         elif mode == Mode.MULTI:
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
+        elif mode == Mode.PLATFORM_SCAN:
+           angle = r.read_int()
+           value = r.read_int()
+
+           frame.plotter.update(plotter.PlatformPlotter.SCAN, (angle, value))
         elif mode == Mode.PLATFORM:
             frame.plotter = plotter.PlatformPlotter(*frame.dimensions)
 
