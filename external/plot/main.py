@@ -115,13 +115,18 @@ class PlotCanvas(tkinter.Canvas):
 
         x0, y0 = None, None
         for p in points:
-            x, y = int(tx * p.x), h - int(ty * p.y)
+            x, y = tx * p.x, h - ty * p.y
+            _x, _y = x, y
+
+            # ignore out-of-bounds points
+            if x > w or y > h or x < 0 or y < 0:
+                continue
             
             # need to wrap around (w / 2, h / 2)
             if plot.mode & plotter.Plotter.POLAR != 0:
                 # y is euclidian distance
                 t = (math.pi / 180.0) * (270 - p.x)
-                y = y / 2.0
+                y = (h - y) / 2.0
                 x = y*math.cos(t) + w / 2.0
                 y = (h / 2.0) - y*math.sin(t)
 
@@ -142,20 +147,33 @@ class PlotCanvas(tkinter.Canvas):
             self.line(x+s, y-s, x-s, y+s, fill=p.col)
             x0, y0 = x, y
 
+        #  
+        if points and plot.mode & plotter.Plotter.POLAR != 0:
+            t = (math.pi / 180.0) * (270 - p.x)
+            x = (h / 2.0)*math.cos(t) + w / 2.0
+            y = (h / 2.0) - (h / 2.0)*math.sin(t)
+            self.line(w / 2.0, h / 2.0, x, y, fill='green', width=2)
+
 
     def draw_border(self, w, h):
         if self.parent.plotter.mode & plotter.Plotter.POLAR != 0:
             # centre at w/2, h
             x0, y0 = None, None
-            for i in range(1, 10):
-                t = i*(2*math.pi / 10.0)
-                x = h*math.cos(t) + w / 2.0
+            xf, yf = None, None
+            N = 30
+            for i in range(1, N):
+                t = (i+1)*(2.0*math.pi / float(N))
+                x = (h / 2.0)*math.cos(t) + w / 2.0
                 y = (h / 2.0) - (h / 2.0) * math.sin(t)
                 self.line(w / 2, h / 2, x, y, fill='grey', width=1)
                 if x0:
                     self.line(x0, y0, x, y, fill='grey', width=1)
+                else:
+                    xf, yf = x, y
+
                 x0, y0 = x, y
 
+            self.line(x0, y0, xf, yf, fill='grey', width=1)
             self.line(1, h-1, w, h-1, fill='grey', width=2)
             self.line(w/2, 0, w/2, h, fill='grey', width=2)
             self.line(0, 0, 0, h, fill='grey', width=2)
