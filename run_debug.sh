@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
     echo "Invalid Number of Arguments"
     echo "Correct usage: ''./run_debug.sh records/RECORD_NAME''"
     exit
@@ -10,10 +10,9 @@ cp $1 records/record
 make clean
 make debug
 
-./external/build.sh
-(./external/plot/main.py --debug)&
+(./external/run_main.sh $2 --debug)&
 pid=$!
-sleep 1
+sleep 2
 ./bin/main&
 main_pid=$!
 wait $pid

@@ -19,6 +19,7 @@ static uint32_t scan_tentative_upper_bound = 270;
 static uint32_t scan_tentative_lower_bound = 0;
 static uint64_t scan_total_distance = 0;
 static uint32_t scan_count = 0;
+static uint32_t scan_servo_pos = 0;
 /*
  * Parameter Loops:
  * Each parameter state has a loop function that runs during the
@@ -38,7 +39,8 @@ void any_to_scan(){
 }
 void scan_to_scan_do(){
     lcd_send_line(LINE1, "Scanning...");
-    servo_set_pos(0);
+    servo_set_pos(scan_lower_bound);
+    scan_servo_pos = scan_lower_bound;
 }
 void scan_parameters_to_1(){
     scan_tentative_speed = scan_speed;
@@ -91,10 +93,11 @@ void scan_loop(int last_key_press){
         scan_state = (scan_state + 1) % NO_OF_STATES;
     if(last_key_press == 1)
         scan_state = (scan_state - 1 + NO_OF_STATES) % NO_OF_STATES;
-    int pos = servo_get_pos();
-    if(pos <= scan_lower_bound) scan_direction = 1;
-    if(pos >= scan_upper_bound) scan_direction = -1;
-    servo_set_pos(pos + (scan_direction * scan_speed));
+    //int pos = servo_get_pos();
+    if(scan_servo_pos <= scan_lower_bound) scan_direction = 1;
+    if(scan_servo_pos >= scan_upper_bound) scan_direction = -1;
+    scan_servo_pos = pos + (scan_direction * scan_speed);
+    servo_set_pos(scan_servo_pos);
     timer_delayc(1, &input_poll);//Time for it to physically move
     uint32_t raw = utils_get_ir_and_ultrasound_median_distance();
     network_send(SCAN_DO, (uint8_t *)&pos, 4, (uint8_t* )&raw, 4, NULL);

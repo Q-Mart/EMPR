@@ -6,5 +6,5 @@ if [ ! -d $DIR/venv/ ]; then
   virtualenv $DIR/venv/
 fi
 
-source $DIR/venv/bin/activate
+. $DIR/venv/bin/activate
 pip install -r $DIR/requirements.txt
