@@ -33,11 +33,12 @@ static uint32_t scan_count = 0;
 void any_to_scan(){
     lcd_send_line(LINE1, "Scan, # to start");
     lcd_send_line(LINE2, "* for options");
-    servo_set_pos(160);
+    servo_set_pos(0);
     network_send(SCAN, NULL);
 }
 void scan_to_scan_do(){
     lcd_send_line(LINE1, "Scanning...");
+    servo_set_pos(0);
 }
 void scan_parameters_to_1(){
     scan_tentative_speed = scan_speed;
