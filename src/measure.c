@@ -42,7 +42,7 @@ const char* measure_get_alarm_status_string(){
         return "No";
 }
 void measure_parameters_to_2(){
-    lcd_send_line(LINE1, "Alarm Enabled %s", measure_get_alarm_status_string());
+    lcd_send_line(LINE1, "Alarm?  %s", measure_get_alarm_status_string());
     lcd_send_line(LINE2, "# to confirm");
 }
 void measure_parameter_2_loop(int last_key_press){
