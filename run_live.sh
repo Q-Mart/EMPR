@@ -3,5 +3,4 @@ make clean
 make
 
 make install
-./external/build.sh
-./external/plot/main.py
+./external/run_main.sh $1
