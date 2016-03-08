@@ -50,7 +50,7 @@ void measure_parameter_2_loop(int last_key_press){
     if(last_key_press == 1 || last_key_press == 3){
         measure_alarm_enabled = (measure_alarm_enabled + 1) % 2;
     }
-    lcd_send_line(LINE1, "Alarm Enabled %s", measure_get_alarm_status_string());
+    lcd_send_line(LINE1, "Alarm?  %s", measure_get_alarm_status_string());
 }
 void measure_to_measure_do() {
     servo_set_pos(160);
