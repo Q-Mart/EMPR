@@ -10,7 +10,7 @@
 
 #define NUMBER_OF_NIBBLE_STEPS 4
 
-#define NUMBER_OF_STEPS 50
+#define NUMBER_OF_STEPS 200
 
 #define MIN_DELAY 3
 

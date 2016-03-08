@@ -7,7 +7,7 @@
 #include "stepper.h"
 #include "network.h"
 
-static uint16_t number_of_sweeps = 50;
+static uint16_t number_of_sweeps = 200;
 static uint16_t current_sweep;
 
 void any_to_platform() {

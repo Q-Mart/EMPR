@@ -5,6 +5,8 @@
 #include "debug.h"
 #include "lpc17xx_pinsel.h"
 
+static int step_number = 0;
+
 void stepper_init() {
     pinsel_enable_pin(PINSEL_PORT_2, PINSEL_PIN_5, PINSEL_FUNC_0);
     pinsel_enable_pin(PINSEL_PORT_2, PINSEL_PIN_4, PINSEL_FUNC_0);
@@ -47,23 +49,27 @@ void stepper_send_nibble(int num) {
 void stepper_step_clockwise() {
     const int steps[NUMBER_OF_NIBBLE_STEPS] = {STEP_1, STEP_2,
                                                STEP_3, STEP_4};
-    int i;
 
-    for(i=0;i<NUMBER_OF_NIBBLE_STEPS;i++) {
-        stepper_send_nibble(steps[i]);
-        timer_delay(MIN_DELAY);
+    if (step_number>200) {
+        step_number = 0;
     }
+
+    stepper_send_nibble(steps[step_number%NUMBER_OF_NIBBLE_STEPS]);
+    step_number++;
+    timer_delay(MIN_DELAY);
 }
 
 void stepper_step_anticlockwise() {
     const int steps[NUMBER_OF_NIBBLE_STEPS] = {STEP_1, STEP_2,
                                                STEP_3, STEP_4};
-    int i;
 
-    for(i=NUMBER_OF_NIBBLE_STEPS - 1;i>=0;i--) {
-        stepper_send_nibble(steps[i]);
-        timer_delay(MIN_DELAY);
+    if (step_number<0) {
+        step_number = 200;
     }
+
+    stepper_send_nibble(steps[step_number%NUMBER_OF_NIBBLE_STEPS]);
+    step_number--;
+    timer_delay(MIN_DELAY);
 }
 
 void stepper_full_clockwise(int delay) {

@@ -181,7 +181,7 @@ class PlatformPlotter(Plotter):
         self.centre_x = 180
         self.centre_y = int(150000)
         self._current = 0
-        self._angle = 7.2
+        self._angle = 1.8
 
     def _append(self, x, y):
         t = (x) * self._angle
