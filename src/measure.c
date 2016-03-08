@@ -107,7 +107,6 @@ void measure_loop(int last_key_press) {
             if(diff < 5000)//If 0.5 cm out then play constantly
                 count_val = 0;
             sound_change_tone0_window_size(count_val);
-            debug_sendf("%u\n\r", count_val);
         } else {
             sound_change_tone0_window_size(sound_get_tone0_window_size());
         }
