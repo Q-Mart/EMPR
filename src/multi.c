@@ -74,7 +74,7 @@ void multi_sweep_loop() {
     for(i=0;i<angle_range;i++) {
         pos = pos + scan_direction;
         servo_set_pos(pos);
-        timer_delay(35);
+        timer_delay(60);
         uint32_t raw = utils_get_ir_and_ultrasound_median_distance();
         network_send(MULTI_SWEEP, &pos, 4, &raw, 4, NULL);     
     }
