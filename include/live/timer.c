@@ -12,7 +12,7 @@ static int RIT_dt = 0;
 
 void timer_enable_systick()
 {
-    SysTick_Config(SystemCoreClock/1000);
+    SysTick_Config(SystemCoreClock/10000);
 }
 
 /* Enable the RIT with some period `dt` */
@@ -59,12 +59,18 @@ int timer_get_rit_status(void)
 /* wait for `n` ms before returning control */
 void timer_delay(int n)
 { 
+    n = n*10; //Factor in the change to the systick period
+    //Maintains the time in ms semantics.
+
     unsigned long SysTick_count;
     SysTick_count = SysTick_on;
     while((SysTick_on - SysTick_count) < n);
 }
 void timer_delayc(int n, timer_callback callback){
-     unsigned long SysTick_count;
+    n = n*10; //Factor in change to systick period
+    //Maintains times in ms semantics.
+
+    unsigned long SysTick_count;
     SysTick_count = SysTick_on;
     if(callback == NULL){
         while((SysTick_on - SysTick_count) < n);

@@ -8,8 +8,8 @@
 #include "network.h"
 #include "utils.h"
 #include "empr.h"
-#define NO_OF_STATES 4
-static enum _scan_state{DISTANCE, ANGLE, AVG_DISTANCE, NO_SAMPLES} scan_state = DISTANCE;
+#define NO_OF_STATES 6
+static enum _scan_state{DISTANCE, ANGLE, AVG_DISTANCE, NO_SAMPLES, IR_DISTANCE, US_DISTANCE} scan_state = DISTANCE;
 signed int scan_direction = 1;
 static uint32_t scan_upper_bound = 270;
 static uint32_t scan_lower_bound = 0;
@@ -120,6 +120,14 @@ void scan_loop(int last_key_press){
             lcd_send_line(LINE1, "No of Samples");
             lcd_send_line(LINE2, "%u"
                     ,(scan_upper_bound - scan_lower_bound) / scan_speed);
+            break;
+        case IR_DISTANCE:
+            lcd_send_line(LINE1, "IR Distance");
+            lcd_send_line(LINE2, "%d", utils_get_last_ir_reading());
+            break;
+        case US_DISTANCE:
+            lcd_send_line(LINE1, "US Distance");
+            lcd_send_line(LINE2, "%d", utils_get_last_us_reading());
             break;
     }
 }
