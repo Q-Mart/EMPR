@@ -24,7 +24,7 @@ void platform_to_platform_sweep() {
 
 void platform_scan_loop() {
     lcd_send_line(LINE1, "Sweep %d of %d", current_sweep+1, number_of_sweeps);
-    uint32_t raw = utils_get_ir_and_ultrasound_distance();
+    uint32_t raw = utils_get_ir_and_ultrasound_median_distance();
     lcd_send_line(LINE2, "%d", raw);
     //***DATA SHOULD BE SENT HERE***
     network_send(PLATFORM_SCAN, &current_sweep, 4, &raw, 4, NULL);

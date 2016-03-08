@@ -173,25 +173,23 @@ class PlatformPlotter(Plotter):
     SCAN = 1
 
     def __init__(self, *dimensions):
-        Plotter.__init__(self, Plotter.NOLINE, 'Angle', 'Shape', *dimensions)
+        Plotter.__init__(self, Plotter.NOLABELS | Plotter.POLAR, 'Angle', 'Distance', *dimensions)
         self.max_x = 360
-        self.max_y = 6000000000
+        self.max_y = int(350000)
         self.x = []
         self.y = []
         self.centre_x = 180
-        self.centre_y = int(1500000000)
+        self.centre_y = int(150000)
         self._current = 0
         self._angle = 7.2
 
     def _append(self, x, y):
-        t = (self._current) * self._angle
-        self.plot(180, y, rot_theta=t, rot_x=self.centre_x, rot_y=self.centre_y)
+        t = (x) * self._angle
+        self.plot(t, y)
 
     def update(self, *data):
         msg, value = data
         if msg == PlatformPlotter.SCAN:
             self._current, y = value
-            x = 180
-            print('Scanning. angle='+str(x)+' distance='+str(y))
+            print('Scanning. angle='+str(self._current)+' distance='+str(y))
             self._append(self._current, y)
-            # self._current+=1
