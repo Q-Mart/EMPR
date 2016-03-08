@@ -9,8 +9,8 @@
 #include "utils.h"
 //These keep track of what data the measure mode will
 //display on the IO board lcd.
-#define NO_OF_STATES 2
-static enum _measure_state{DISTANCE, AVG_DISTANCE} measure_state = DISTANCE;
+#define NO_OF_STATES 4
+static enum _measure_state{DISTANCE, AVG_DISTANCE, IR_DISTANCE, US_DISTANCE} measure_state = DISTANCE;
 
 static uint64_t measure_total_distance = 0;
 static uint32_t measure_count = 0;
@@ -59,7 +59,15 @@ void measure_loop(int last_key_press) {
             lcd_send_line(LINE1, "Average Distance");
             lcd_send_line(LINE2, "%d", measure_total_distance/measure_count);
             break;
+        case IR_DISTANCE:
+            lcd_send_line(LINE1, "IR Distance");
+            lcd_send_line(LINE2, "%d", utils_get_last_ir_reading());
+            break;
+        case US_DISTANCE:
+            lcd_send_line(LINE1, "US Distance");
+            lcd_send_line(LINE2, "%d", utils_get_last_us_reading());
         default:
             break;
     }
 }
+
