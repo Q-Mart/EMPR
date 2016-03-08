@@ -2,14 +2,14 @@
 '''Main program
 
 Usage:
-    main
-    main -d | --debug
-    main -r | --record
-    main -h | --help
+    main.py [-hbd]
+    main.py --record
 
 Options:
-    -d --debug  Debug Mode
-    -h --help   Show this text
+    -d --debug      Debug Mode
+    -h --help       Show this text
+    -r --record     Record into records
+    -b              with Ben's Personal Project
 '''
 
 BASE_DIR = '../../'
@@ -20,6 +20,8 @@ FRAME_HEIGHT = 3*200
 
 CANVAS_WIDTH  = 4*150
 CANVAS_HEIGHT = 3*150
+
+COL = 'blue'
 
 import reader
 
@@ -35,6 +37,7 @@ import threading
 import math
 import functools
 import plotter
+import struct
 
 try:
     import tkinter
@@ -59,52 +62,82 @@ class PlotCanvas(tkinter.Canvas):
         for i in range(10):
             var = tkinter.StringVar()
             vary = tkinter.StringVar()
-            var.set('!')
-            vary.set('&')
+            var.set(' ')
+            vary.set(' ')
             self.x_labels.append(var)
             self.y_labels.append(vary)
             tkinter.Label(self, textvariable=var).grid(row=10, column=i+1)
             tkinter.Label(self, textvariable=vary).grid(row=i, column=0)
 
-    def plot(self, xs, ys):
+    def plot(self, points):
         '''Plot some graph
         '''
-        if len(xs) != len(ys):
-            raise ValueError('Mismatch of argc')
-
         w = self.graph.winfo_width()
         h = self.graph.winfo_height()
 
         self.draw_border(w, h)
 
-        if len(xs) != 0:
-            self.draw_graph(w, h, xs, ys)
+        if len(points) != 0:
+            self.draw_graph(w, h, points)
+        else:
+            for i in range(10):
+                plot = self.parent.plotter
+                if plot.mode & plotter.Plotter.NOXLABELS != 0:
+                    self.x_labels[i].set(' ')
+
+                if plot.mode & plotter.Plotter.NOYLABELS != 0:
+                    self.y_labels[9-i].set(' ')
 
     def line(self, *args, **kwargs):
         self.lines.append(self.graph.create_line(*args, **kwargs))
 
-    def draw_graph(self, w, h, xs, ys):
+    def draw_graph(self, w, h, points):
         plot = self.parent.plotter
 
-        max_x = plot.max_x or max(xs)
-        max_y = plot.max_y or max(ys)
+        max_x = plot.max_x or max(map(lambda p: p.x, points))
+        max_y = plot.max_y or max(map(lambda p: p.y, points))
 
         tx = float(w) / float(max_x)
         ty = float(h) / float(max_y)
 
-        s = 3
+        s = 2
 
         for i in range(10):
-            self.x_labels[i].set(str((i+1)*max_x // 10))
-            self.y_labels[9-i].set(str((i+1)*max_y // 10))
+            if plot.mode & plotter.Plotter.NOXLABELS != 0:
+                self.x_labels[i].set(' ')
+            else:
+                self.x_labels[i].set(str((i+1)*max_x // 10))
 
-        x0, y0 = 0, h
-        for xp, yp in zip(xs, ys):
-            x, y = int(tx * xp), h - int(ty * yp)
+            if plot.mode & plotter.Plotter.NOYLABELS != 0:
+                self.y_labels[9-i].set(' ')
+            else:
+                self.y_labels[9-i].set(str((i+1)*max_y // 10))
+
+        x0, y0 = None, None
+        cp = points
+        if type(cp) is not list:
+            cp = cp.__copy__()
+
+        for p in cp:
+            x, y = tx * p.x, h - ty * p.y
+            _x, _y = x, y
+
+            # ignore out-of-bounds points
+            if x > w or y > h or x < 0 or y < 0:
+                x0, y0 = None, None
+                continue
             
+            # need to wrap around (w / 2, h / 2)
+            if plot.mode & plotter.Plotter.POLAR != 0:
+                # y is euclidian distance
+                t = (math.pi / 180.0) * (270 - p.x)
+                y = (h - y) / 2.0
+                x = y*math.cos(t) + w / 2.0
+                y = (h / 2.0) - y*math.sin(t)
+
             # perform rotation
-            if (xp, yp) in plot.rotations:
-                t, cx, cy = plot.rotations[(xp, yp)]
+            if p.rot_theta:
+                t, cx, cy = p.rot_theta, p.rot_x, p.rot_y
                 cx, cy = int(tx * cx), h - int(ty * cy)
                 cos_t = math.cos(t)
                 sin_t = math.sin(t)
@@ -112,22 +145,51 @@ class PlotCanvas(tkinter.Canvas):
                 x, y = (x*cos_t) - (y*sin_t), (x*sin_t) + (y*cos_t)
                 x, y = x + cx, y + cy
 
-            if plot.mode & plotter.Plotter.NOLINE == 0:
-                self.line(x0, y0, x, y)
+            if plot.mode & plotter.Plotter.NOLINE == 0 and x0:
+                self.line(x0, y0, x, y, fill=p.col)
 
-            self.line(x-s, y-s, x+s, y+s, fill='red')
-            self.line(x+s, y-s, x-s, y+s, fill='red')
+            self.line(x-s, y-s, x+s, y+s, fill=p.col)
+            self.line(x+s, y-s, x-s, y+s, fill=p.col)
             x0, y0 = x, y
 
+        #  
+        if points and plot.mode & plotter.Plotter.POLAR != 0:
+            t = (math.pi / 180.0) * (270 - p.x)
+            x = (h / 2.0)*math.cos(t) + w / 2.0
+            y = (h / 2.0) - (h / 2.0)*math.sin(t)
+            self.line(w / 2.0, h / 2.0, x, y, fill='green', width=2)
+
+
     def draw_border(self, w, h):
-        self.line(1, h-1, w, h-1, fill='black', width=3)
-        self.line(0, 0, 0, h, fill='black', width=3)
+        if self.parent.plotter.mode & plotter.Plotter.POLAR != 0:
+            # centre at w/2, h
+            x0, y0 = None, None
+            xf, yf = None, None
+            N = 30
+            for i in range(1, N):
+                t = (i+1)*(2.0*math.pi / float(N))
+                x = (h / 2.0)*math.cos(t) + w / 2.0
+                y = (h / 2.0) - (h / 2.0) * math.sin(t)
+                self.line(w / 2, h / 2, x, y, fill='grey', width=1)
+                if x0:
+                    self.line(x0, y0, x, y, fill='grey', width=1)
+                else:
+                    xf, yf = x, y
 
+                x0, y0 = x, y
 
-    def re_draw(self, xs, ys):
+            self.line(x0, y0, xf, yf, fill='grey', width=1)
+            self.line(1, h-1, w, h-1, fill='grey', width=2)
+            self.line(w/2, 0, w/2, h, fill='grey', width=2)
+            self.line(0, 0, 0, h, fill='grey', width=2)
+        else:
+            self.line(1, h-1, w, h-1, fill='grey', width=2)
+            self.line(0, 0, 0, h, fill='grey', width=2)
+
+    def re_draw(self, points):
         self.old_lines = self.lines
         self.lines = []
-        self.plot(xs, ys)
+        self.plot(points)
         self.graph.delete(*self.old_lines)
 
     def on_resize(self, event):
@@ -212,7 +274,10 @@ def monitor(frame, r):
             t = 1
             frame.plotter = plotter.MeasurePlotter(*frame.dimensions)
         elif mode == Mode.SCAN:
-            frame.plotter = plotter.ScanPlotter(*frame.dimensions)
+            if BPP:
+                frame.plotter = plotter.ScanPlotter2(*frame.dimensions)
+            else:
+                frame.plotter = plotter.ScanPlotter(*frame.dimensions)
         elif mode == Mode.MULTI:
             frame.plotter = plotter.MultiPlotter(*frame.dimensions)
 
@@ -231,7 +296,7 @@ def read_record(r):
             append_record(bytearray(map(lambda x: 0 if x < 0 else x, vals)))
         elif header == 0x04:
             val = r.read(4)  
-            print('ir:', val)
+            print('ir:', val, struct.unpack('<I',val)[0])
             append_record(bytearray([header]))
             append_record(bytearray(val))
         elif header == 0x06:
@@ -310,10 +375,17 @@ class AppFrame(tkinter.Frame):
         self.pack() 
 
     def draw(self):
-        xs, ys = self.plotter.x, self.plotter.y
+        plot = self.plotter
         left, bot = self.axes_labels
 
-        self.graph_canvas.re_draw(xs, ys)
+        points = plot.points
+
+        # for backwards-compatability
+        if len(plot.points) == 0:
+            xs, ys = self.plotter.x, self.plotter.y
+            points = map(lambda x, y: plotter.Point(x, y, COL, 0, 0, 0), xs, ys)
+
+        self.graph_canvas.re_draw(points)
 
         left.set(self.plotter.label_y)
         bot.set(self.plotter.label_x)
@@ -322,8 +394,12 @@ class AppFrame(tkinter.Frame):
             self.lcd_canvas.draw()
 
 if __name__ == '__main__':
-    global DEBUG
+    global DEBUG, BPP
     args = docopt(__doc__)
+
+    BPP = False
+    if args['-b']:
+        BPP = True
 
     if args['--record']:
         with open(RECORD_FILE, 'wb') as f:

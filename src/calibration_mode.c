@@ -4,6 +4,7 @@
 #include "lcd.h"
 #include "ir_sensor.h"
 #include "ultrasound.h"
+#include "servo.h"
 
 
 void calib_to_near_calib(){
@@ -27,6 +28,7 @@ void near_calib_to_done(){
     lcd_send_line(LINE2, "Complete");
 }
 void any_to_calib(){
+    servo_set_pos(160);
     lcd_send_line(LINE1,"Calibration Mode");
     lcd_send_line(LINE2, "Place at 15cm");
     network_send(CALIBRATE, NULL);

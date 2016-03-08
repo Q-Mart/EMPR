@@ -34,6 +34,8 @@ class Reader:
         raise NotImplementedError
 
     def read_int(self):
+        ''' Read a 32bit Integer
+        '''
         i = self.read(4)
         return struct.unpack('I', i)[0]
 

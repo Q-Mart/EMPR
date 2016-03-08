@@ -1,4 +1,5 @@
 #include "timer.h"
+#include <unistd.h>
 
 void timer_enable_systick() {}
 void timer_enable_rit(int dt) {}
@@ -13,8 +14,12 @@ int timer_get_rit_status(void)
     return 0;
 }
 
-void timer_delay(int n) {}
-void timer_delayc(int n, timer_callback callback){}
+void timer_delay(int n) {
+}
+
+void timer_delayc(int n, timer_callback callback){
+    callback();
+}
 
 /* Initialise general purpose timer 2 (TIM2). */
 void timer_initialise_tim(void) {}

@@ -9,8 +9,8 @@
 #include "utils.h"
 //These keep track of what data the measure mode will
 //display on the IO board lcd.
-#define NO_OF_STATES 2
-static enum _measure_state{DISTANCE, AVG_DISTANCE} measure_state = DISTANCE;
+#define NO_OF_STATES 4
+static enum _measure_state{DISTANCE, AVG_DISTANCE, IR_DISTANCE, US_DISTANCE} measure_state = DISTANCE;
 
 static uint64_t measure_total_distance = 0;
 static uint16_t measure_count = 0;
@@ -18,6 +18,7 @@ static uint16_t measure_count = 0;
 static uint32_t measure_point = 0; //The desired measure point
 static uint8_t measure_alarm_enabled = 0; //0: Alarm off, 1: Alarm on
 void any_to_measure() {
+    servo_set_pos(160);
     lcd_send_line(LINE1, "Measure Mode # to start");
     lcd_send_line(LINE2, "* for options");
     network_send(MEASURE, NULL);
@@ -52,6 +53,7 @@ void measure_parameter_2_loop(int last_key_press){
     lcd_send_line(LINE1, "Alarm Enabled %s", measure_get_alarm_status_string());
 }
 void measure_to_measure_do() {
+    servo_set_pos(160);
     lcd_send_line(LINE1, "Distance");
     measure_count = 0;
     measure_total_distance = 0;
@@ -90,6 +92,13 @@ void measure_loop(int last_key_press) {
             lcd_send_line(LINE1, "Average Distance");
             lcd_send_line(LINE2, "%d", measure_total_distance/measure_count);
             break;
+        case IR_DISTANCE:
+            lcd_send_line(LINE1, "IR Distance");
+            lcd_send_line(LINE2, "%d", utils_get_last_ir_reading());
+            break;
+        case US_DISTANCE:
+            lcd_send_line(LINE1, "US Distance");
+            lcd_send_line(LINE2, "%d", utils_get_last_us_reading());
         default:
             break;
     }
@@ -113,3 +122,4 @@ void measure_loop(int last_key_press) {
 
     }
 }
+

@@ -58,7 +58,7 @@ void adc_enable(void) {
                 case ULTRASOUND_HEADER:
                     ptr = malloc(sizeof(uint32_t));
                     fread(ptr, sizeof(uint32_t), 1, f);
-                    enqueue(KEYPAD_QUEUE, ptr);
+                    enqueue(ULTRASOUND_QUEUE, ptr);
                     break;
                 case SERVO_HEADER:
                     ptr = malloc(sizeof(uint32_t));
