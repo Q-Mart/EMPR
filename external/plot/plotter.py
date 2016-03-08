@@ -27,11 +27,14 @@ class Plotter:
         self.dimensions = dimensions
         self.label_x = x_label
         self.label_y = y_label
-        self.points = []
+        self.points = collections.deque()
 
-    def plot(self, x, y, col=DEFAULT_COLOR, rot_theta=0, rot_x=0, rot_y=0):
+    def plot(self, x, y, col=DEFAULT_COLOR, rot_theta=0, rot_x=0, rot_y=0, reverse=False):
         p = Point(x, y, col, rot_x, rot_y, rot_theta)
-        self.points.append(p)
+        if reverse:
+            self.points.pushleft(p)
+        else:
+            self.points.append(p)
         return p
 
     def update(self, *data):
@@ -76,7 +79,7 @@ class MeasurePlotter(Plotter):
         self.plot(x, y)
 
         while self.points[0].x < 0:
-            self.points = self.points[1:]
+            self.points.popleft()
 
 class ScanPlotter(Plotter):
     def __init__(self, *dimensions):
@@ -114,6 +117,7 @@ class ScanPlotter2(Plotter):
         self.max_x = 270
         self.max_y = MAX
         self.values = collections.defaultdict(list)
+        self.x0, self.y0 = None, None
 
     def update(self, *data):
         x, y = data
@@ -126,12 +130,19 @@ class ScanPlotter2(Plotter):
         for i, p in enumerate(self.values[x]):
             j = COLORS.index(p.col)
             p2 = p._replace(col=COLORS[j+1])
-            k = self.points.index(p)
+            for j, v in enumerate(self.points):
+                if v == p:
+                    k = j
+                    break
 
             self.values[x][i] = p2
             self.points[k] = p2
             
-        p = self.plot(x, y, col=COLORS[0])
+        rev = False
+        if self.x0 and self.x0 > x:
+            rev = True
+
+        p = self.plot(x, y, col=COLORS[0], reverse=rev)
         self.values[x].append(p)
 
 class MultiPlotter(Plotter):
