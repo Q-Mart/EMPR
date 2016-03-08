@@ -114,12 +114,17 @@ class PlotCanvas(tkinter.Canvas):
                 self.y_labels[9-i].set(str((i+1)*max_y // 10))
 
         x0, y0 = None, None
-        for p in points:
+        cp = points
+        if type(cp) is not list:
+            cp = cp.__copy__()
+
+        for p in cp:
             x, y = tx * p.x, h - ty * p.y
             _x, _y = x, y
 
             # ignore out-of-bounds points
             if x > w or y > h or x < 0 or y < 0:
+                x0, y0 = None, None
                 continue
             
             # need to wrap around (w / 2, h / 2)
